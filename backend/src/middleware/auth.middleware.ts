@@ -1,0 +1,102 @@
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { JWT_CONFIG } from "../config/jwt.js";
+
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    roles: string[];
+  };
+}
+
+interface JWTPayload {
+  id: string;
+  email: string;
+  roles: string[];
+}
+
+export const authenticate = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    console.log(
+      "🔐 Auth middleware - Header:",
+      authHeader?.substring(0, 30) + "..."
+    );
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log("❌ No token provided or invalid format");
+      res.status(401).json({
+        success: false,
+        error: "No token provided",
+      });
+      return;
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = jwt.verify(token, JWT_CONFIG.SECRET) as JWTPayload;
+
+    console.log("✅ Token verified for user:", decoded.email);
+
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      roles: decoded.roles,
+    };
+
+    next();
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      console.log("❌ Token expired");
+      res.status(401).json({
+        success: false,
+        error: "Token expired",
+      });
+      return;
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      console.log("❌ Invalid token:", error.message);
+      res.status(401).json({
+        success: false,
+        error: "Invalid token",
+      });
+      return;
+    }
+
+    console.log("❌ Authentication failed:", error);
+    res.status(500).json({
+      success: false,
+      error: "Authentication failed",
+    });
+  }
+};
+
+export const requireRole = (...roles: string[]) => {
+  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        error: "Unauthorized",
+      });
+      return;
+    }
+
+    const hasRole = roles.some((role) => req.user?.roles.includes(role));
+
+    if (!hasRole) {
+      res.status(403).json({
+        success: false,
+        error: "Insufficient permissions",
+      });
+      return;
+    }
+
+    next();
+  };
+};
