@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { TargetingController } from "../controllers/targeting.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { TargetingController } from "../controllers/targeting.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 

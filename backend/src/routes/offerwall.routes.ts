@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { offerWallController } from "../controllers/offerwall.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { offerWallController } from "../controllers/offerwall.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 

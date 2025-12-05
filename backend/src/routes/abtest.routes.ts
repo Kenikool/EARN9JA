@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { ABTestController } from "../controllers/abtest.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { ABTestController } from "../controllers/abtest.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 

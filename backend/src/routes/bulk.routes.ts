@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { BulkController } from "../controllers/bulk.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { BulkController } from "../controllers/bulk.controller.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 

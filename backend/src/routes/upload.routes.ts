@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { UploadController } from "../controllers/upload.controller";
+import { UploadController } from "../controllers/upload.controller.js";
 import {
   upload,
   validateImageSize,
-} from "../middleware/imageUpload.middleware";
-import { authenticate } from "../middleware/auth.middleware";
+} from "../middleware/imageUpload.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
