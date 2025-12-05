@@ -8,7 +8,7 @@ export class DraftController {
    */
   static async saveDraft(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { formData } = req.body;
 
       if (!userId) {
@@ -60,7 +60,7 @@ export class DraftController {
    */
   static async getDraft(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
 
       if (!userId) {
         return res.status(401).json({
@@ -106,7 +106,7 @@ export class DraftController {
    */
   static async deleteDraft(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
 
       if (!userId) {
         return res.status(401).json({

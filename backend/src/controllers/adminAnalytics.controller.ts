@@ -1,16 +1,8 @@
 import { Request, Response } from "express";
 import { adminAnalyticsService } from "../services/AdminAnalyticsService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class AdminAnalyticsController {
-  async getAdMobAnalytics(req: AuthRequest, res: Response): Promise<void> {
+  async getAdMobAnalytics(req: Request, res: Response): Promise<void> {
     try {
       // Check if user is admin
       if (!req.user?.roles.includes("admin")) {
@@ -43,7 +35,7 @@ class AdminAnalyticsController {
     }
   }
 
-  async exportAnalytics(req: AuthRequest, res: Response): Promise<void> {
+  async exportAnalytics(req: Request, res: Response): Promise<void> {
     try {
       // Check if user is admin
       if (!req.user?.roles.includes("admin")) {

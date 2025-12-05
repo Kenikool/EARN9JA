@@ -1,14 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_CONFIG } from "../config/jwt.js";
-
-export interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
+import { User } from "../models/User.js";
 
 interface JWTPayload {
   id: string;
@@ -16,11 +9,11 @@ interface JWTPayload {
   roles: string[];
 }
 
-export const authenticate = (
-  req: AuthRequest,
+export const authenticate = async (
+  req: Request,
   res: Response,
   next: NextFunction
-): void => {
+): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -43,11 +36,18 @@ export const authenticate = (
 
     console.log("✅ Token verified for user:", decoded.email);
 
-    req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      roles: decoded.roles,
-    };
+    // Fetch full user document
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      console.log("❌ User not found");
+      res.status(401).json({
+        success: false,
+        error: "User not found",
+      });
+      return;
+    }
+
+    req.user = user;
 
     next();
   } catch (error) {
@@ -78,7 +78,7 @@ export const authenticate = (
 };
 
 export const requireRole = (...roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
         success: false,
@@ -87,7 +87,7 @@ export const requireRole = (...roles: string[]) => {
       return;
     }
 
-    const hasRole = roles.some((role) => req.user?.roles.includes(role));
+    const hasRole = roles.some((role) => req.user?.roles.includes(role as any));
 
     if (!hasRole) {
       res.status(403).json({
@@ -102,7 +102,7 @@ export const requireRole = (...roles: string[]) => {
 };
 
 export const requireAdmin = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): void => {

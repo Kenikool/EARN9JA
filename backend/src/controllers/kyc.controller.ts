@@ -1,18 +1,10 @@
 import { Request, Response } from "express";
 import { kycService } from "../services/KYCService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class KYCController {
-  async submitKYC(req: AuthRequest, res: Response): Promise<void> {
+  async submitKYC(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -33,9 +25,9 @@ class KYCController {
     }
   }
 
-  async getKYCStatus(req: AuthRequest, res: Response): Promise<void> {
+  async getKYCStatus(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -56,9 +48,9 @@ class KYCController {
     }
   }
 
-  async approveKYC(req: AuthRequest, res: Response): Promise<void> {
+  async approveKYC(req: Request, res: Response): Promise<void> {
     try {
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
       if (!adminId) {
         res.status(401).json({
           success: false,
@@ -80,9 +72,9 @@ class KYCController {
     }
   }
 
-  async rejectKYC(req: AuthRequest, res: Response): Promise<void> {
+  async rejectKYC(req: Request, res: Response): Promise<void> {
     try {
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
       if (!adminId) {
         res.status(401).json({
           success: false,
@@ -114,7 +106,7 @@ class KYCController {
     }
   }
 
-  async getPendingKYCs(req: AuthRequest, res: Response): Promise<void> {
+  async getPendingKYCs(req: Request, res: Response): Promise<void> {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;

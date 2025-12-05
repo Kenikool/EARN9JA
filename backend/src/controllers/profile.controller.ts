@@ -1,18 +1,10 @@
 import { Request, Response } from "express";
 import { profileService } from "../services/ProfileService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class ProfileController {
-  async getProfile(req: AuthRequest, res: Response): Promise<void> {
+  async getProfile(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id;
       if (!userId) {
         res.status(401).json({
           success: false,

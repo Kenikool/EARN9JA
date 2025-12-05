@@ -1,20 +1,12 @@
 import { Request, Response } from "express";
 import { financialSummaryService } from "../services/FinancialSummaryService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class FinancialController {
   /**
    * Get financial summary for today/week/month
    * GET /api/admin/financial-summary?period=today|week|month
    */
-  async getFinancialSummary(req: AuthRequest, res: Response): Promise<void> {
+  async getFinancialSummary(req: Request, res: Response): Promise<void> {
     try {
       // Verify admin role
       if (!req.user?.roles.includes("admin")) {
@@ -56,7 +48,7 @@ class FinancialController {
    * Get profit/loss trend data
    * GET /api/admin/profit-loss?period=daily|weekly|monthly&limit=30
    */
-  async getProfitLoss(req: AuthRequest, res: Response): Promise<void> {
+  async getProfitLoss(req: Request, res: Response): Promise<void> {
     try {
       // Verify admin role
       if (!req.user?.roles.includes("admin")) {
@@ -103,7 +95,7 @@ class FinancialController {
    * Check current profitability status
    * GET /api/admin/profitability-check
    */
-  async checkProfitability(req: AuthRequest, res: Response): Promise<void> {
+  async checkProfitability(req: Request, res: Response): Promise<void> {
     try {
       // Verify admin role
       if (!req.user?.roles.includes("admin")) {
@@ -133,10 +125,7 @@ class FinancialController {
    * Get consecutive profitable days
    * GET /api/admin/consecutive-profit-days
    */
-  async getConsecutiveProfitDays(
-    req: AuthRequest,
-    res: Response
-  ): Promise<void> {
+  async getConsecutiveProfitDays(req: Request, res: Response): Promise<void> {
     try {
       // Verify admin role
       if (!req.user?.roles.includes("admin")) {
@@ -168,7 +157,7 @@ class FinancialController {
    * Manually trigger daily summary calculation
    * POST /api/admin/calculate-daily-summary
    */
-  async calculateDailySummary(req: AuthRequest, res: Response): Promise<void> {
+  async calculateDailySummary(req: Request, res: Response): Promise<void> {
     try {
       // Verify admin role
       if (!req.user?.roles.includes("admin")) {

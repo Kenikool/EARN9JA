@@ -8,7 +8,7 @@ export class ScheduleController {
    */
   static async createSchedule(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { taskId, ...scheduleData } = req.body;
 
       if (!userId) {
@@ -83,7 +83,7 @@ export class ScheduleController {
    */
   static async getSponsorSchedules(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { status, scheduleType } = req.query;
 
       if (!userId) {
@@ -182,7 +182,7 @@ export class ScheduleController {
    */
   static async checkConflicts(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { scheduledFor } = req.body;
 
       if (!userId) {
@@ -227,7 +227,7 @@ export class ScheduleController {
    */
   static async getStats(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
 
       if (!userId) {
         return res.status(401).json({

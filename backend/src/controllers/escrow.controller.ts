@@ -1,20 +1,12 @@
 import { Request, Response } from "express";
 import { escrowService } from "../services/EscrowService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class EscrowController {
   /**
    * Initiate escrow deposit
    * POST /api/sponsors/deposit
    */
-  async initiateDeposit(req: AuthRequest, res: Response): Promise<void> {
+  async initiateDeposit(req: Request, res: Response): Promise<void> {
     try {
       const sponsorId = req.user?.id;
       if (!sponsorId) {
@@ -99,7 +91,7 @@ class EscrowController {
    * Get escrow balance
    * GET /api/sponsors/escrow-balance
    */
-  async getBalance(req: AuthRequest, res: Response): Promise<void> {
+  async getBalance(req: Request, res: Response): Promise<void> {
     try {
       const sponsorId = req.user?.id;
       if (!sponsorId) {

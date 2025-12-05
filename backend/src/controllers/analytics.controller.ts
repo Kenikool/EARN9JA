@@ -1,21 +1,13 @@
 import { Request, Response } from "express";
 import { AnalyticsService } from "../services/AnalyticsService.js";
 
-// Extend Request type to include user
-interface AuthRequest extends Request {
-  user: {
-    id: string;
-    role: string;
-  };
-}
-
 export class AnalyticsController {
   /**
    * Get worker analytics
    */
   static async getWorkerAnalytics(req: Request, res: Response) {
     try {
-      const userId = (req as AuthRequest).user.id;
+      const userId = req.user?._id.toString();
       const { period = "month" } = req.query;
 
       const analytics = await AnalyticsService.getWorkerAnalytics(
@@ -37,7 +29,7 @@ export class AnalyticsController {
    */
   static async getSponsorOverview(req: Request, res: Response) {
     try {
-      const userId = (req as AuthRequest).user.id;
+      const userId = req.user?._id.toString();
       const { period = "month" } = req.query;
 
       const analytics = await AnalyticsService.getSponsorOverview(
@@ -59,7 +51,7 @@ export class AnalyticsController {
    */
   static async getCampaignAnalytics(req: Request, res: Response) {
     try {
-      const userId = (req as AuthRequest).user.id;
+      const userId = req.user?._id.toString();
       const { campaignId } = req.params;
 
       const analytics = await AnalyticsService.getCampaignAnalytics(

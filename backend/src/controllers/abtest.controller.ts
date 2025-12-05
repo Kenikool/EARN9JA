@@ -8,7 +8,7 @@ export class ABTestController {
    */
   static async createABTest(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const testData = req.body;
 
       if (!userId) {
@@ -72,7 +72,7 @@ export class ABTestController {
    */
   static async getSponsorABTests(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { status } = req.query;
 
       if (!userId) {

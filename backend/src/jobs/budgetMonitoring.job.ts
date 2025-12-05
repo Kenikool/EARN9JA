@@ -43,10 +43,10 @@ export const startBudgetMonitoringJob = () => {
 
           // Send notification
           await notificationService.createNotification({
-            userId: budget.sponsorId,
+            userId: budget.sponsorId.toString(),
             type: "task_paused",
             title: "Task Auto-Paused",
-            message: `Your task has been automatically paused because the budget threshold (${budget.autoPauseThreshold}%) was reached.`,
+            body: `Your task has been automatically paused because the budget threshold (${budget.autoPauseThreshold}%) was reached.`,
             data: {
               taskId: budget.taskId.toString(),
               spentBudget: budget.spentBudget,
@@ -72,10 +72,10 @@ export const startBudgetMonitoringJob = () => {
 
             // Send notification
             await notificationService.createNotification({
-              userId: budget.sponsorId,
+              userId: budget.sponsorId.toString(),
               type: "budget_alert",
               title: "Budget Alert",
-              message: `Your task budget has reached ${
+              body: `Your task budget has reached ${
                 threshold.percentage
               }% (₦${budget.spentBudget.toLocaleString()} of ₦${budget.totalBudget.toLocaleString()})`,
               data: {
@@ -99,15 +99,15 @@ export const startBudgetMonitoringJob = () => {
         }
 
         // Check daily limit
-        if (budget.dailyLimit && budget.isDailyLimitReached()) {
+        if (budget.dailyLimit && (budget as any).isDailyLimitReached?.()) {
           console.log(`📊 Daily limit reached for task ${budget.taskId}`);
 
           // Send notification
           await notificationService.createNotification({
-            userId: budget.sponsorId,
+            userId: budget.sponsorId.toString(),
             type: "budget_alert",
             title: "Daily Budget Limit Reached",
-            message: `Your task has reached its daily spending limit of ₦${budget.dailyLimit.toLocaleString()}`,
+            body: `Your task has reached its daily spending limit of ₦${budget.dailyLimit.toLocaleString()}`,
             data: {
               taskId: budget.taskId.toString(),
               dailyLimit: budget.dailyLimit,

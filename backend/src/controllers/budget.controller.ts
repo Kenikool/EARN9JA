@@ -8,7 +8,7 @@ export class BudgetController {
    */
   static async createBudget(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { taskId } = req.params;
       const budgetData = req.body;
 
@@ -77,7 +77,7 @@ export class BudgetController {
    */
   static async getSponsorBudgets(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
       const { isPaused, isExhausted } = req.query;
 
       if (!userId) {
@@ -206,7 +206,7 @@ export class BudgetController {
    */
   static async getSponsorBudgetSummary(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
+      const userId = req.user?._id.toString();
 
       if (!userId) {
         return res.status(401).json({

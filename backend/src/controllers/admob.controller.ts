@@ -1,16 +1,8 @@
 import { Request, Response } from "express";
 import { adMobService } from "../services/AdMobService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class AdMobController {
-  async watchAd(req: AuthRequest, res: Response): Promise<void> {
+  async watchAd(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -78,7 +70,7 @@ class AdMobController {
     }
   }
 
-  async getStats(req: AuthRequest, res: Response): Promise<void> {
+  async getStats(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
       if (!userId) {

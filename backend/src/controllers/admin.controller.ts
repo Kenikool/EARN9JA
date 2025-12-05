@@ -1,17 +1,9 @@
 import { Request, Response } from "express";
 import { adminService } from "../services/AdminService.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    roles: string[];
-  };
-}
-
 class AdminController {
   // User Management
-  async getAllUsers(req: AuthRequest, res: Response): Promise<void> {
+  async getAllUsers(req: Request, res: Response): Promise<void> {
     try {
       const {
         status,
@@ -50,7 +42,7 @@ class AdminController {
     }
   }
 
-  async getUserDetails(req: AuthRequest, res: Response): Promise<void> {
+  async getUserDetails(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
 
@@ -66,7 +58,7 @@ class AdminController {
     }
   }
 
-  async suspendUser(req: AuthRequest, res: Response): Promise<void> {
+  async suspendUser(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
@@ -92,7 +84,7 @@ class AdminController {
     }
   }
 
-  async banUser(req: AuthRequest, res: Response): Promise<void> {
+  async banUser(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
@@ -118,7 +110,7 @@ class AdminController {
     }
   }
 
-  async reactivateUser(req: AuthRequest, res: Response): Promise<void> {
+  async reactivateUser(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
       const adminId = req.user?.id;
@@ -144,7 +136,7 @@ class AdminController {
   }
 
   // Task Moderation
-  async getPendingTasks(req: AuthRequest, res: Response): Promise<void> {
+  async getPendingTasks(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 20 } = req.query;
 
@@ -163,7 +155,7 @@ class AdminController {
     }
   }
 
-  async approveTask(req: AuthRequest, res: Response): Promise<void> {
+  async approveTask(req: Request, res: Response): Promise<void> {
     try {
       const { taskId } = req.params;
       const adminId = req.user?.id;
@@ -188,7 +180,7 @@ class AdminController {
     }
   }
 
-  async rejectTask(req: AuthRequest, res: Response): Promise<void> {
+  async rejectTask(req: Request, res: Response): Promise<void> {
     try {
       const { taskId } = req.params;
       const { reason } = req.body;
@@ -215,7 +207,7 @@ class AdminController {
   }
 
   // Withdrawal Management
-  async getPendingWithdrawals(req: AuthRequest, res: Response): Promise<void> {
+  async getPendingWithdrawals(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 20 } = req.query;
 
@@ -234,7 +226,7 @@ class AdminController {
     }
   }
 
-  async approveWithdrawal(req: AuthRequest, res: Response): Promise<void> {
+  async approveWithdrawal(req: Request, res: Response): Promise<void> {
     try {
       const { withdrawalId } = req.params;
       const adminId = req.user?.id;
@@ -262,7 +254,7 @@ class AdminController {
     }
   }
 
-  async rejectWithdrawal(req: AuthRequest, res: Response): Promise<void> {
+  async rejectWithdrawal(req: Request, res: Response): Promise<void> {
     try {
       const { withdrawalId } = req.params;
       const { reason } = req.body;
@@ -293,7 +285,7 @@ class AdminController {
   }
 
   // Platform Analytics
-  async getPlatformStats(req: AuthRequest, res: Response): Promise<void> {
+  async getPlatformStats(req: Request, res: Response): Promise<void> {
     try {
       const result = await adminService.getPlatformStats();
 
@@ -307,7 +299,7 @@ class AdminController {
     }
   }
 
-  async getRevenueReport(req: AuthRequest, res: Response): Promise<void> {
+  async getRevenueReport(req: Request, res: Response): Promise<void> {
     try {
       const { startDate, endDate } = req.query;
 
@@ -335,7 +327,7 @@ class AdminController {
   }
 
   // Dispute Resolution
-  async getPendingDisputes(req: AuthRequest, res: Response): Promise<void> {
+  async getPendingDisputes(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 20 } = req.query;
 
@@ -354,7 +346,7 @@ class AdminController {
     }
   }
 
-  async getDisputeDetails(req: AuthRequest, res: Response): Promise<void> {
+  async getDisputeDetails(req: Request, res: Response): Promise<void> {
     try {
       const { disputeId } = req.params;
 
@@ -370,7 +362,7 @@ class AdminController {
     }
   }
 
-  async resolveDispute(req: AuthRequest, res: Response): Promise<void> {
+  async resolveDispute(req: Request, res: Response): Promise<void> {
     try {
       const { disputeId } = req.params;
       const { decision, action, notes } = req.body;
@@ -400,7 +392,7 @@ class AdminController {
     }
   }
 
-  async updateDisputeStatus(req: AuthRequest, res: Response): Promise<void> {
+  async updateDisputeStatus(req: Request, res: Response): Promise<void> {
     try {
       const { disputeId } = req.params;
       const { status } = req.body;
