@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SupportService } from "../services/SupportService";
+import { SupportService } from "../services/SupportService.js";
 import { validationResult } from "express-validator";
 
 export class SupportController {
