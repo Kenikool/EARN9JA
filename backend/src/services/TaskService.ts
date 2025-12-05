@@ -163,7 +163,7 @@ class TaskService {
       ]);
 
       return {
-        tasks: tasks as ITask[],
+        tasks: tasks as any as ITask[],
         total,
         pages: Math.ceil(total / limit),
       };
@@ -185,7 +185,7 @@ class TaskService {
         )
         .lean();
 
-      return task as ITask | null;
+      return task as any as ITask | null;
     } catch (error) {
       console.error("❌ Get task error:", error);
       throw new Error("Failed to get task");
@@ -674,7 +674,7 @@ class TaskService {
       ]);
 
       return {
-        submissions: submissions as ITaskSubmission[],
+        submissions: submissions as any as ITaskSubmission[],
         total,
         pages: Math.ceil(total / limit),
       };
@@ -707,7 +707,7 @@ class TaskService {
       ]);
 
       return {
-        tasks: tasks as ITask[],
+        tasks: tasks as any as ITask[],
         total,
         pages: Math.ceil(total / limit),
       };
@@ -759,7 +759,7 @@ class TaskService {
       ]);
 
       return {
-        submissions: submissions as ITaskSubmission[],
+        submissions: submissions as any as ITaskSubmission[],
         total,
         pages: Math.ceil(total / limit),
       };
@@ -1331,7 +1331,7 @@ class TaskService {
         pendingSubmissions,
         totalEscrow,
         approvalRate,
-        recentActivity: recentActivity as ITaskSubmission[],
+        recentActivity: recentActivity as any as ITaskSubmission[],
       };
     } catch (error) {
       console.error("❌ Get dashboard stats error:", error);

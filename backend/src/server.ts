@@ -90,14 +90,10 @@ const PORT = process.env.PORT || 5000;
 const API_VERSION = process.env.API_VERSION || "v1";
 
 // Middleware
-if (process.env.SENTRY_DSN) {
-  // Sentry request handler (if available in this version)
-  try {
-    app.use(Sentry.setupExpressErrorHandler(app));
-  } catch (e) {
-    console.log("Sentry Express integration not available");
-  }
-}
+// Sentry integration (optional - configure if needed)
+// if (process.env.SENTRY_DSN) {
+//   app.use(Sentry.Handlers.requestHandler());
+// }
 app.use(helmet());
 app.use(cors());
 app.use(express.json());

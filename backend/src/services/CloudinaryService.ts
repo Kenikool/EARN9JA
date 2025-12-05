@@ -1,3 +1,4 @@
+// @ts-ignore - cloudinary types may not be installed
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 
 class CloudinaryService {

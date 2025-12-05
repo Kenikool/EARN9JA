@@ -17,7 +17,7 @@ router.use(authenticate);
  */
 router.get(
   "/admob",
-  validateRequest(analyticsQuerySchema, "query"),
+  validateRequest(analyticsQuerySchema),
   adminAnalyticsController.getAdMobAnalytics
 );
 
@@ -29,7 +29,7 @@ router.get(
  */
 router.get(
   "/admob/export",
-  validateRequest(analyticsQuerySchema, "query"),
+  validateRequest(analyticsQuerySchema),
   adminAnalyticsController.exportAnalytics
 );
 

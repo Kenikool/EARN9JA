@@ -62,7 +62,7 @@ export class TemplateService {
       TaskTemplate.countDocuments(query),
     ]);
 
-    return { templates, total };
+    return { templates: templates as any, total };
   }
 
   /**
@@ -156,6 +156,6 @@ export class TemplateService {
     return TaskTemplate.find({ isOfficial: true })
       .sort({ usageCount: -1 })
       .limit(limit)
-      .lean();
+      .lean() as any;
   }
 }
