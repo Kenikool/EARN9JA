@@ -51,14 +51,14 @@ export class AuthService {
 
   generateAccessToken(userId: string, email: string, roles: string[]): string {
     return jwt.sign({ id: userId, email, roles }, this.JWT_SECRET, {
-      expiresIn: this.JWT_EXPIRES_IN,
-    });
+      expiresIn: this.JWT_EXPIRES_IN as string,
+    } as any);
   }
 
   generateRefreshToken(userId: string): string {
     return jwt.sign({ id: userId }, this.JWT_REFRESH_SECRET, {
-      expiresIn: this.JWT_REFRESH_EXPIRES_IN,
-    });
+      expiresIn: this.JWT_REFRESH_EXPIRES_IN as string,
+    } as any);
   }
 
   verifyAccessToken(token: string): any {

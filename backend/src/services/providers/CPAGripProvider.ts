@@ -28,8 +28,8 @@ export class CPAGripProvider {
       }
 
       this.config = {
-        offerWallUrl: provider.config.offerWallUrl,
-        publisherId: provider.config.publisherId,
+        offerWallUrl: (provider.config as any).offerWallUrl,
+        publisherId: (provider.config as any).publisherId,
         secretKey: provider.apiKey,
         commissionRate: provider.commissionRate || 0.2, // Default 20%
       };

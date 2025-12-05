@@ -183,27 +183,19 @@ export class BulkTaskService {
           }
 
           // Create task using TaskService
-          const task = await taskService.createTask(
-            {
-              title: taskData.title,
-              description: taskData.description,
-              category: taskData.category,
-              platform: taskData.platform,
-              taskType: taskData.taskType,
-              reward: taskData.reward,
-              totalSlots: taskData.totalSlots,
-              estimatedTime: taskData.estimatedTime,
-              targetUrl: taskData.targetUrl,
-              requirements: taskData.requirements || [],
-              expiresAt: expiresAt.toISOString(),
-              pricing: {
-                minimumPrice: taskData.reward,
-                maximumPrice: taskData.reward,
-                currentPrice: taskData.reward,
-              },
-            },
-            sponsorId
-          );
+          const task = await taskService.createTask(sponsorId, {
+            title: taskData.title,
+            description: taskData.description,
+            category: taskData.category as any,
+            taskType: taskData.taskType as any,
+            reward: taskData.reward,
+            totalSlots: taskData.totalSlots,
+            estimatedTime: taskData.estimatedTime,
+            targetUrl: taskData.targetUrl,
+            requirements: taskData.requirements || [],
+            expiresAt: expiresAt as any,
+            proofRequirements: [],
+          } as any);
 
           result.createdTasks.push({
             row: rowNumber,

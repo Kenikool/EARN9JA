@@ -77,10 +77,10 @@ export class AlertService {
       // Send email alerts
       for (const admin of admins) {
         try {
-          await this.emailService.sendEmail({
-            to: admin.email,
-            subject: alert.title,
-            html: `
+          await this.emailService.sendEmail(
+            admin.email,
+            alert.title,
+            `
               <h2>${alert.title}</h2>
               <p>${alert.message}</p>
               <p><strong>Loss Amount:</strong> ₦${Math.abs(
@@ -88,8 +88,8 @@ export class AlertService {
               ).toLocaleString()}</p>
               <p><strong>Date:</strong> ${alert.date.toLocaleDateString()}</p>
               <p>Please review the financial dashboard for detailed breakdown.</p>
-            `,
-          });
+            `
+          );
         } catch (emailError) {
           console.error(`Failed to send email to ${admin.email}:`, emailError);
         }
@@ -98,16 +98,16 @@ export class AlertService {
       // Send push notifications
       for (const admin of admins) {
         try {
-          await notificationService.sendNotification(
-            admin._id.toString(),
-            alert.title,
-            alert.message,
-            {
-              type: "financial_alert",
+          await notificationService.createNotification({
+            userId: admin._id.toString(),
+            type: "budget_alert",
+            title: alert.title,
+            body: alert.message,
+            data: {
               severity: alert.severity,
               amount: lossAmount.toString(),
-            }
-          );
+            },
+          });
         } catch (notifError) {
           console.error(
             `Failed to send notification to ${admin._id}:`,
@@ -145,17 +145,17 @@ export class AlertService {
       // Send email alerts
       for (const admin of admins) {
         try {
-          await this.emailService.sendEmail({
-            to: admin.email,
-            subject: alert.title,
-            html: `
+          await this.emailService.sendEmail(
+            admin.email,
+            alert.title,
+            `
               <h2>${alert.title}</h2>
               <p>${alert.message}</p>
               <p><strong>Consecutive Profitable Days:</strong> ${consecutiveDays}</p>
               <p><strong>Today's Profit:</strong> ₦${profit.toLocaleString()}</p>
               <p>Great work! Keep it up!</p>
-            `,
-          });
+            `
+          );
         } catch (emailError) {
           console.error(`Failed to send email to ${admin.email}:`, emailError);
         }
@@ -164,16 +164,16 @@ export class AlertService {
       // Send push notifications
       for (const admin of admins) {
         try {
-          await notificationService.sendNotification(
-            admin._id.toString(),
-            alert.title,
-            alert.message,
-            {
-              type: "financial_milestone",
+          await notificationService.createNotification({
+            userId: admin._id.toString(),
+            type: "budget_alert",
+            title: alert.title,
+            body: alert.message,
+            data: {
               consecutiveDays: consecutiveDays.toString(),
               profit: profit.toString(),
-            }
-          );
+            },
+          });
         } catch (notifError) {
           console.error(
             `Failed to send notification to ${admin._id}:`,
@@ -216,16 +216,17 @@ export class AlertService {
       // Send push notifications
       for (const admin of admins) {
         try {
-          await notificationService.sendPushNotification(
-            admin._id.toString(),
-            alert.title,
-            alert.message,
-            {
-              type: alert.type,
+          await notificationService.createNotification({
+            userId: admin._id.toString(),
+            type: "budget_alert",
+            title: alert.title,
+            body: alert.message,
+            data: {
+              alertType: alert.type,
               severity: alert.severity,
               ...alert.metadata,
-            }
-          );
+            },
+          });
         } catch (notifError) {
           console.error(
             `Failed to send notification to ${admin._id}:`,

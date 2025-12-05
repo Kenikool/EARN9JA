@@ -205,10 +205,11 @@ export class FraudDetectionService {
     });
 
     if (submission && submission.proofs) {
+      const screenshots = (submission.proofs as any).screenshots || [];
       const duplicateProof = await TaskSubmission.countDocuments({
         workerId: { $ne: userId },
         taskId,
-        "proofs.screenshots": { $in: submission.proofs.screenshots || [] },
+        "proofs.screenshots": { $in: screenshots },
       });
 
       if (duplicateProof > 0) {

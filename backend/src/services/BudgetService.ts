@@ -173,8 +173,8 @@ export class BudgetService {
         threshold.triggeredAt = new Date();
 
         // Send notification
-        await notificationService.sendToUser({
-          userId: budget.sponsorId,
+        await notificationService.createNotification({
+          userId: budget.sponsorId.toString(),
           type: "budget_alert",
           title: "Budget Alert",
           body: `Your task budget has reached ${
@@ -214,8 +214,8 @@ export class BudgetService {
       });
 
       // Send notification
-      await notificationService.sendToUser({
-        userId: budget.sponsorId,
+      await notificationService.createNotification({
+        userId: budget.sponsorId.toString(),
         type: "task_paused",
         title: "Task Auto-Paused",
         body: `Your task has been automatically paused because the budget threshold (${budget.autoPauseThreshold}%) was reached.`,

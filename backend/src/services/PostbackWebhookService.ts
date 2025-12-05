@@ -441,16 +441,16 @@ export class PostbackWebhookService {
     offerName: string
   ): Promise<void> {
     try {
-      await notificationService.createNotification(
-        user._id.toString(),
-        "offer_completed",
-        "🎉 Offer Completed!",
-        `You earned ₦${amount.toFixed(2)} from "${offerName}"`,
-        {
+      await notificationService.createNotification({
+        userId: user._id.toString(),
+        type: "payment_received" as any,
+        title: "🎉 Offer Completed!",
+        body: `You earned ₦${amount.toFixed(2)} from "${offerName}"`,
+        data: {
           amount: amount.toString(),
           offerName,
-        }
-      );
+        },
+      });
     } catch (error) {
       logger.error("Error sending notification:", error);
     }

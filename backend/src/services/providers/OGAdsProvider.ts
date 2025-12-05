@@ -28,7 +28,7 @@ export class OGAdsProvider {
       }
 
       this.config = {
-        offerWallUrl: provider.config.offerWallUrl,
+        offerWallUrl: (provider.config as any).offerWallUrl,
         apiKey: provider.apiKey,
         secretKey: provider.apiSecret || provider.apiKey,
         commissionRate: provider.commissionRate || 0.18, // Default 18%

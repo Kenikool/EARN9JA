@@ -642,7 +642,7 @@ class AdminService {
         if (submission) {
           await Wallet.findOneAndUpdate(
             { userId: submission.workerId },
-            { $inc: { availableBalance: submission.reward } }
+            { $inc: { availableBalance: (submission as any).reward || 0 } }
           );
         }
       } else if (resolution.action === "refund_sponsor") {
