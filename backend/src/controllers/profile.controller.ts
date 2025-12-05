@@ -4,7 +4,7 @@ import { profileService } from "../services/ProfileService.js";
 class ProfileController {
   async getProfile(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -25,9 +25,9 @@ class ProfileController {
     }
   }
 
-  async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+  async updateProfile(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -48,9 +48,9 @@ class ProfileController {
     }
   }
 
-  async uploadAvatar(req: AuthRequest, res: Response): Promise<void> {
+  async uploadAvatar(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       console.log("📸 Avatar upload request for user:", userId);
 
       if (!userId) {
@@ -90,9 +90,9 @@ class ProfileController {
     }
   }
 
-  async updatePreferences(req: AuthRequest, res: Response): Promise<void> {
+  async updatePreferences(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -113,12 +113,9 @@ class ProfileController {
     }
   }
 
-  async getNotificationSettings(
-    req: AuthRequest,
-    res: Response
-  ): Promise<void> {
+  async getNotificationSettings(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -138,12 +135,9 @@ class ProfileController {
     }
   }
 
-  async updateNotificationSettings(
-    req: AuthRequest,
-    res: Response
-  ): Promise<void> {
+  async updateNotificationSettings(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,

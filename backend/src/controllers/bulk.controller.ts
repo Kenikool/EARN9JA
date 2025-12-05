@@ -49,7 +49,7 @@ export class BulkController {
    */
   static async createBulkTasks(req: Request, res: Response) {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id.toString();
       const { tasksData } = req.body;
 
       if (!userId) {

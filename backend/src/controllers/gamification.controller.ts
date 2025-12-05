@@ -1,5 +1,4 @@
-import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware";
+import { Request, Response } from "express";
 import { DailyBonusService } from "../services/DailyBonusService";
 import { SpinWheelService } from "../services/SpinWheelService";
 import { ChallengeService } from "../services/ChallengeService";
@@ -9,7 +8,7 @@ import { ReputationService } from "../services/ReputationService";
 
 class GamificationController {
   // Daily Bonus
-  async getDailyBonusStatus(req: AuthRequest, res: Response) {
+  async getDailyBonusStatus(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const status = await DailyBonusService.getDailyBonusStatus(userId);
@@ -19,7 +18,7 @@ class GamificationController {
     }
   }
 
-  async claimDailyBonus(req: AuthRequest, res: Response) {
+  async claimDailyBonus(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const result = await DailyBonusService.claimDailyBonus(userId);
@@ -29,7 +28,7 @@ class GamificationController {
     }
   }
 
-  async getStreakStats(req: AuthRequest, res: Response) {
+  async getStreakStats(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const stats = await DailyBonusService.getStreakStats(userId);
@@ -40,7 +39,7 @@ class GamificationController {
   }
 
   // Spin Wheel
-  async getSpinStatus(req: AuthRequest, res: Response) {
+  async getSpinStatus(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const status = await SpinWheelService.canSpin(userId);
@@ -50,7 +49,7 @@ class GamificationController {
     }
   }
 
-  async spin(req: AuthRequest, res: Response) {
+  async spin(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const result = await SpinWheelService.spin(userId);
@@ -60,7 +59,7 @@ class GamificationController {
     }
   }
 
-  async grantExtraSpin(req: AuthRequest, res: Response) {
+  async grantExtraSpin(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const result = await SpinWheelService.grantExtraSpin(userId);
@@ -70,7 +69,7 @@ class GamificationController {
     }
   }
 
-  async getSpinStats(req: AuthRequest, res: Response) {
+  async getSpinStats(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const stats = await SpinWheelService.getSpinStats(userId);
@@ -81,7 +80,7 @@ class GamificationController {
   }
 
   // Challenges
-  async getChallenges(req: AuthRequest, res: Response) {
+  async getChallenges(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const challenges = await ChallengeService.getActiveChallenges(userId);
@@ -91,7 +90,7 @@ class GamificationController {
     }
   }
 
-  async claimChallengeReward(req: AuthRequest, res: Response) {
+  async claimChallengeReward(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const { challengeId } = req.params;
@@ -103,7 +102,7 @@ class GamificationController {
   }
 
   // Leaderboard
-  async getLeaderboard(req: AuthRequest, res: Response) {
+  async getLeaderboard(req: Request, res: Response) {
     try {
       const { type = "earnings", period = "weekly", limit = 50 } = req.query;
       console.log(
@@ -123,7 +122,7 @@ class GamificationController {
   }
 
   // Achievements
-  async getAchievements(req: AuthRequest, res: Response) {
+  async getAchievements(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const badges = await AchievementService.getUserBadges(userId);
@@ -134,7 +133,7 @@ class GamificationController {
   }
 
   // Reputation
-  async getReputation(req: AuthRequest, res: Response) {
+  async getReputation(req: Request, res: Response) {
     try {
       const userId = req.user!.id;
       const reputation = await ReputationService.getUserReputation(userId);

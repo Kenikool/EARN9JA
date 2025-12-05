@@ -78,7 +78,7 @@ export class SupportController {
       const { ticketId } = req.params;
       const userId = req.user!.roles.includes("admin")
         ? undefined
-        : req.user!._id;
+        : req.user!._id.toString();
 
       const ticket = await SupportService.getTicketById(ticketId, userId);
 
@@ -111,7 +111,7 @@ export class SupportController {
 
       const { ticketId } = req.params;
       const { message } = req.body;
-      const userId = req.user!._id;
+      const userId = req.user!._id.toString();
       const isAdmin = req.user!.roles.includes("admin");
 
       const ticket = await SupportService.addResponse({

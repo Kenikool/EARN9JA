@@ -1,12 +1,11 @@
-import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware.js";
+import { Request, Response } from "express";
 import { taskService } from "../services/TaskService.js";
 
 class TaskController {
   /**
    * Browse tasks (Worker)
    */
-  async browseTasks(req: AuthRequest, res: Response): Promise<void> {
+  async browseTasks(req: Request, res: Response): Promise<void> {
     try {
       const {
         category,
@@ -52,7 +51,7 @@ class TaskController {
   /**
    * Get task by ID
    */
-  async getTask(req: AuthRequest, res: Response): Promise<void> {
+  async getTask(req: Request, res: Response): Promise<void> {
     try {
       const { taskId } = req.params;
 
@@ -82,9 +81,9 @@ class TaskController {
   /**
    * Create task (Sponsor)
    */
-  async createTask(req: AuthRequest, res: Response): Promise<void> {
+  async createTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -117,9 +116,9 @@ class TaskController {
   /**
    * Update task (Sponsor)
    */
-  async updateTask(req: AuthRequest, res: Response): Promise<void> {
+  async updateTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -154,9 +153,9 @@ class TaskController {
   /**
    * Duplicate task (Sponsor)
    */
-  async duplicateTask(req: AuthRequest, res: Response): Promise<void> {
+  async duplicateTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -186,9 +185,9 @@ class TaskController {
   /**
    * Extend task expiry (Sponsor)
    */
-  async extendExpiry(req: AuthRequest, res: Response): Promise<void> {
+  async extendExpiry(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -231,9 +230,9 @@ class TaskController {
   /**
    * Toggle task status (Sponsor)
    */
-  async toggleTaskStatus(req: AuthRequest, res: Response): Promise<void> {
+  async toggleTaskStatus(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -263,9 +262,9 @@ class TaskController {
   /**
    * Delete task (Sponsor)
    */
-  async deleteTask(req: AuthRequest, res: Response): Promise<void> {
+  async deleteTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -294,9 +293,9 @@ class TaskController {
   /**
    * Accept task (Worker)
    */
-  async acceptTask(req: AuthRequest, res: Response): Promise<void> {
+  async acceptTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -320,7 +319,7 @@ class TaskController {
     } catch (error: any) {
       console.error("[TaskController] Accept task error:", {
         taskId: req.params.taskId,
-        userId: req.user?.id,
+        userId: req.user?._id.toString(),
         error: error.message,
         stack: error.stack,
       });
@@ -334,9 +333,9 @@ class TaskController {
   /**
    * Submit task (Worker)
    */
-  async submitTask(req: AuthRequest, res: Response): Promise<void> {
+  async submitTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -371,9 +370,9 @@ class TaskController {
   /**
    * Get worker's tasks
    */
-  async getMyTasks(req: AuthRequest, res: Response): Promise<void> {
+  async getMyTasks(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -407,9 +406,9 @@ class TaskController {
   /**
    * Get sponsor's campaigns
    */
-  async getMyCampaigns(req: AuthRequest, res: Response): Promise<void> {
+  async getMyCampaigns(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -443,9 +442,9 @@ class TaskController {
   /**
    * Get task submissions (Sponsor)
    */
-  async getTaskSubmissions(req: AuthRequest, res: Response): Promise<void> {
+  async getTaskSubmissions(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -481,9 +480,9 @@ class TaskController {
   /**
    * Review submission (Sponsor)
    */
-  async reviewSubmission(req: AuthRequest, res: Response): Promise<void> {
+  async reviewSubmission(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -519,9 +518,9 @@ class TaskController {
   /**
    * Pause task (Sponsor)
    */
-  async pauseTask(req: AuthRequest, res: Response): Promise<void> {
+  async pauseTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -551,9 +550,9 @@ class TaskController {
   /**
    * Resume task (Sponsor)
    */
-  async resumeTask(req: AuthRequest, res: Response): Promise<void> {
+  async resumeTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -583,9 +582,9 @@ class TaskController {
   /**
    * Cancel task (Sponsor)
    */
-  async cancelTask(req: AuthRequest, res: Response): Promise<void> {
+  async cancelTask(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -615,9 +614,9 @@ class TaskController {
   /**
    * Get task details (Sponsor)
    */
-  async getTaskDetails(req: AuthRequest, res: Response): Promise<void> {
+  async getTaskDetails(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -646,9 +645,9 @@ class TaskController {
   /**
    * Get dashboard stats (Sponsor)
    */
-  async getDashboardStats(req: AuthRequest, res: Response): Promise<void> {
+  async getDashboardStats(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,

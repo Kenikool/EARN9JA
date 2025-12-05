@@ -8,7 +8,7 @@ export class TemplateController {
    */
   static async createTemplate(req: Request, res: Response) {
     try {
-      const userId = req.user?._id;
+      const userId = req.user?._id.toString();
       const templateData = req.body;
 
       const template = await TemplateService.createTemplate(

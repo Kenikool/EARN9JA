@@ -1,14 +1,13 @@
-import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware";
+import { Request, Response } from "express";
 import { ReferralService } from "../services/ReferralService";
 
 class ReferralController {
   /**
    * Get user's referral code and statistics
    */
-  async getReferralStats(req: AuthRequest, res: Response) {
+  async getReferralStats(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const stats = await ReferralService.getReferralStats(userId);
       res.json(stats);
     } catch (error: any) {
@@ -20,7 +19,7 @@ class ReferralController {
   /**
    * Validate a referral code
    */
-  async validateCode(req: AuthRequest, res: Response) {
+  async validateCode(req: Request, res: Response) {
     try {
       const { code } = req.params;
       const isValid = await ReferralService.validateReferralCode(code);
@@ -47,9 +46,9 @@ class ReferralController {
   /**
    * Apply referral code (during registration)
    */
-  async applyCode(req: AuthRequest, res: Response) {
+  async applyCode(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { code } = req.body;
 
       if (!code) {
@@ -71,9 +70,9 @@ class ReferralController {
   /**
    * Generate referral code for user
    */
-  async generateCode(req: AuthRequest, res: Response) {
+  async generateCode(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const code = await ReferralService.generateReferralCode(userId);
 
       res.json({

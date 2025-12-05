@@ -1,14 +1,13 @@
-import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware.js";
+import { Request, Response } from "express";
 import NotificationService from "../services/NotificationService.js";
 
 export class NotificationController {
   /**
    * Get user notifications
    */
-  async getNotifications(req: AuthRequest, res: Response) {
+  async getNotifications(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
 
@@ -35,9 +34,9 @@ export class NotificationController {
   /**
    * Get unread notification count
    */
-  async getUnreadCount(req: AuthRequest, res: Response) {
+  async getUnreadCount(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const count = await NotificationService.getUnreadCount(userId);
 
       res.json({
@@ -57,9 +56,9 @@ export class NotificationController {
   /**
    * Mark notification as read
    */
-  async markAsRead(req: AuthRequest, res: Response) {
+  async markAsRead(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { notificationId } = req.params;
 
       await NotificationService.markAsRead(notificationId, userId);
@@ -81,9 +80,9 @@ export class NotificationController {
   /**
    * Mark all notifications as read
    */
-  async markAllAsRead(req: AuthRequest, res: Response) {
+  async markAllAsRead(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
 
       await NotificationService.markAllAsRead(userId);
 
@@ -104,9 +103,9 @@ export class NotificationController {
   /**
    * Delete notification
    */
-  async deleteNotification(req: AuthRequest, res: Response) {
+  async deleteNotification(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { notificationId } = req.params;
 
       await NotificationService.deleteNotification(notificationId, userId);
@@ -128,9 +127,9 @@ export class NotificationController {
   /**
    * Register FCM token
    */
-  async registerToken(req: AuthRequest, res: Response) {
+  async registerToken(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { token } = req.body;
 
       if (!token) {
@@ -159,9 +158,9 @@ export class NotificationController {
   /**
    * Unregister FCM token
    */
-  async unregisterToken(req: AuthRequest, res: Response) {
+  async unregisterToken(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { token } = req.body;
 
       if (!token) {

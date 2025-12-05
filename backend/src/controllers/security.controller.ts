@@ -1,13 +1,12 @@
-import { Response } from "express";
-import { AuthRequest } from "../middleware/auth.middleware";
+import { Request, Response } from "express";
 import { TwoFactorAuthService } from "../services/TwoFactorAuthService.js";
 import { FraudDetectionService } from "../services/FraudDetectionService.js";
 
 class SecurityController {
   // 2FA Setup
-  async setup2FA(req: AuthRequest, res: Response) {
+  async setup2FA(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const userEmail = req.user!.email;
 
       const { secret, qrCode, backupCodes } =
@@ -32,9 +31,9 @@ class SecurityController {
   }
 
   // Verify and Enable 2FA
-  async verify2FA(req: AuthRequest, res: Response) {
+  async verify2FA(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { token } = req.body;
 
       if (!token) {
@@ -59,9 +58,9 @@ class SecurityController {
   }
 
   // Disable 2FA
-  async disable2FA(req: AuthRequest, res: Response) {
+  async disable2FA(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { token } = req.body;
 
       if (!token) {
@@ -96,9 +95,9 @@ class SecurityController {
   }
 
   // Get 2FA Status
-  async get2FAStatus(req: AuthRequest, res: Response) {
+  async get2FAStatus(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const status = await TwoFactorAuthService.getStatus(userId);
 
       res.json({
@@ -114,9 +113,9 @@ class SecurityController {
   }
 
   // Regenerate Backup Codes
-  async regenerateBackupCodes(req: AuthRequest, res: Response) {
+  async regenerateBackupCodes(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { token } = req.body;
 
       if (!token) {
@@ -154,9 +153,9 @@ class SecurityController {
   }
 
   // Check Fraud Risk
-  async checkFraudRisk(req: AuthRequest, res: Response) {
+  async checkFraudRisk(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
+      const userId = req.user!._id.toString();
       const { action, taskId, amount } = req.body;
       const deviceId = req.headers["x-device-id"] as string;
       const ipAddress =

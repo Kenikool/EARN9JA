@@ -1,9 +1,8 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { walletService } from "../services/WalletService.js";
 import { withdrawalService } from "../services/WithdrawalService.js";
 import { paystackService } from "../services/PaystackService.js";
 import { flutterwaveService } from "../services/FlutterwaveService.js";
-import { AuthRequest } from "../middleware/auth.middleware.js";
 import { User } from "../models/User.js";
 import { PendingTopup } from "../models/PendingTopup.js";
 import { cloudinaryService } from "../services/CloudinaryService.js";
@@ -14,9 +13,9 @@ class WalletController {
   /**
    * Get wallet balance
    */
-  async getBalance(req: AuthRequest, res: Response): Promise<void> {
+  async getBalance(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -43,9 +42,9 @@ class WalletController {
   /**
    * Get transaction history
    */
-  async getTransactions(req: AuthRequest, res: Response): Promise<void> {
+  async getTransactions(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -81,9 +80,9 @@ class WalletController {
   /**
    * Request withdrawal - REAL IMPLEMENTATION with 2FA and Fraud Detection
    */
-  async requestWithdrawal(req: AuthRequest, res: Response): Promise<void> {
+  async requestWithdrawal(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -229,9 +228,9 @@ class WalletController {
   /**
    * Get user's withdrawal history
    */
-  async getWithdrawals(req: AuthRequest, res: Response): Promise<void> {
+  async getWithdrawals(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -267,9 +266,9 @@ class WalletController {
   /**
    * Cancel withdrawal
    */
-  async cancelWithdrawal(req: AuthRequest, res: Response): Promise<void> {
+  async cancelWithdrawal(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -304,9 +303,9 @@ class WalletController {
    * Generates payment link for user to pay with real money
    * ONLY SPONSORS CAN TOP UP
    */
-  async topUp(req: AuthRequest, res: Response): Promise<void> {
+  async topUp(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -454,7 +453,7 @@ class WalletController {
   /**
    * Verify payment and credit wallet (called after payment)
    */
-  async verifyPayment(req: AuthRequest, res: Response): Promise<void> {
+  async verifyPayment(req: Request, res: Response): Promise<void> {
     try {
       const { reference, paymentMethod } = req.body;
 
@@ -545,9 +544,9 @@ class WalletController {
   /**
    * Upload payment receipt for pending topup
    */
-  async uploadReceipt(req: AuthRequest, res: Response): Promise<void> {
+  async uploadReceipt(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -650,9 +649,9 @@ class WalletController {
   /**
    * Get user's pending topups
    */
-  async getPendingTopups(req: AuthRequest, res: Response): Promise<void> {
+  async getPendingTopups(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -681,12 +680,9 @@ class WalletController {
   /**
    * Check withdrawal eligibility
    */
-  async checkWithdrawalEligibility(
-    req: AuthRequest,
-    res: Response
-  ): Promise<void> {
+  async checkWithdrawalEligibility(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -751,7 +747,7 @@ class WalletController {
   /**
    * Get withdrawal methods
    */
-  async getWithdrawalMethods(_req: AuthRequest, res: Response): Promise<void> {
+  async getWithdrawalMethods(_req: Request, res: Response): Promise<void> {
     try {
       const methods = [
         {
