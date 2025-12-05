@@ -6,7 +6,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
-    "build": "tsc --skipLibCheck || echo 'Build completed with warnings'",
+    "build": "tsc --skipLibCheck --noEmit false",
     "start": "node dist/server.js",
     "test": "jest",
     "test:integration": "tsx tests/offerwall-integration.test.ts",
