@@ -1,7 +1,7 @@
 import axios from "axios";
-import { logger } from "../config/logger";
-import { AlertService } from "./AlertService";
-import { ExchangeRate } from "../models/ExchangeRate";
+import { logger } from "../config/logger.js";
+import { AlertService } from "./AlertService.js";
+import { ExchangeRate } from "../models/ExchangeRate.js";
 
 interface ExchangeRates {
   USD_NGN: number;

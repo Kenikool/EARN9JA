@@ -1,9 +1,9 @@
-import Challenge, { IChallenge } from "../models/Challenge";
-import ChallengeProgress from "../models/ChallengeProgress";
-import { TaskSubmission } from "../models/TaskSubmission";
-import { Transaction } from "../models/Transaction";
-import { User } from "../models/User";
-import { walletService } from "./WalletService";
+import Challenge, { IChallenge } from "../models/Challenge.js";
+import ChallengeProgress from "../models/ChallengeProgress.js";
+import { TaskSubmission } from "../models/TaskSubmission.js";
+import { Transaction } from "../models/Transaction.js";
+import { User } from "../models/User.js";
+import { walletService } from "./WalletService.js";
 
 interface ChallengeWithProgress extends IChallenge {
   userProgress?: {

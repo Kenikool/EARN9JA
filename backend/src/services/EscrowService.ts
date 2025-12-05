@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { EscrowAccount, IEscrowAccount } from "../models/EscrowAccount";
-import { FinancialTransaction } from "../models/FinancialTransaction";
-import { Wallet } from "../models/Wallet";
-import { Transaction } from "../models/Transaction";
-import { User } from "../models/User";
+import { EscrowAccount, IEscrowAccount } from "../models/EscrowAccount.js";
+import { FinancialTransaction } from "../models/FinancialTransaction.js";
+import { Wallet } from "../models/Wallet.js";
+import { Transaction } from "../models/Transaction.js";
+import { User } from "../models/User.js";
 
 interface DepositResult {
   success: boolean;

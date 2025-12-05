@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BudgetService } from "../services/BudgetService";
+import { BudgetService } from "../services/BudgetService.js";
 
 export class BudgetController {
   /**

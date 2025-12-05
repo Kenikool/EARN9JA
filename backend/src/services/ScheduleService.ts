@@ -1,5 +1,5 @@
-import { TaskSchedule, ITaskSchedule } from "../models/TaskSchedule";
-import { Task } from "../models/Task";
+import { TaskSchedule, ITaskSchedule } from "../models/TaskSchedule.js";
+import { Task } from "../models/Task.js";
 import mongoose from "mongoose";
 
 export class ScheduleService {

@@ -1,4 +1,4 @@
-import { TaskTemplate, ITaskTemplate } from "../models/TaskTemplate";
+import { TaskTemplate, ITaskTemplate } from "../models/TaskTemplate.js";
 import mongoose from "mongoose";
 
 export class TemplateService {

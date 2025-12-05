@@ -1,7 +1,7 @@
 // @ts-ignore - cloudinary types may not be installed
 import { v2 as cloudinary } from "cloudinary";
 import sharp from "sharp";
-import TaskImage from "../models/TaskImage";
+import TaskImage from "../models/TaskImage.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -1,5 +1,5 @@
-import { TaskBudget, ITaskBudget } from "../models/TaskBudget";
-import { Task } from "../models/Task";
+import { TaskBudget, ITaskBudget } from "../models/TaskBudget.js";
+import { Task } from "../models/Task.js";
 import notificationService from "./NotificationService.js";
 import mongoose from "mongoose";
 

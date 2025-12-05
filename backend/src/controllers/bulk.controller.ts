@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BulkTaskService } from "../services/BulkTaskService";
+import { BulkTaskService } from "../services/BulkTaskService.js";
 
 export class BulkController {
   /**

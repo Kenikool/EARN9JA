@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { RequirementService } from "../services/RequirementService";
+import { RequirementService } from "../services/RequirementService.js";
 
 export class RequirementController {
   /**

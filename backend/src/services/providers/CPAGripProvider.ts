@@ -1,5 +1,5 @@
-import { ExternalProvider } from "../../models/ExternalProvider";
-import { logger } from "../../config/logger";
+import { ExternalProvider } from "../../models/ExternalProvider.js";
+import { logger } from "../../config/logger.js";
 
 export interface OfferWallConfig {
   offerWallUrl: string;

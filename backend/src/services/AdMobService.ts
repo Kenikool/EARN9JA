@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import { AdMobReward, IAdMobReward } from "../models/AdMobReward";
-import { User } from "../models/User";
-import { Wallet } from "../models/Wallet";
-import { Transaction } from "../models/Transaction";
-import { FinancialTransaction } from "../models/FinancialTransaction";
+import { AdMobReward, IAdMobReward } from "../models/AdMobReward.js";
+import { User } from "../models/User.js";
+import { Wallet } from "../models/Wallet.js";
+import { Transaction } from "../models/Transaction.js";
+import { FinancialTransaction } from "../models/FinancialTransaction.js";
 
 interface AdWatchRequest {
   userId: string;

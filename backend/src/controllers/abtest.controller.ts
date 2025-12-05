@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ABTestService } from "../services/ABTestService";
+import { ABTestService } from "../services/ABTestService.js";
 
 export class ABTestController {
   /**

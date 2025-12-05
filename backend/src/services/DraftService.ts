@@ -1,4 +1,4 @@
-import { TaskDraft, ITaskDraft } from "../models/TaskDraft";
+import { TaskDraft, ITaskDraft } from "../models/TaskDraft.js";
 import mongoose from "mongoose";
 
 export class DraftService {

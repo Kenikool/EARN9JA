@@ -1,6 +1,6 @@
-import DailyBonus, { IDailyBonus } from "../models/DailyBonus";
-import { walletService } from "./WalletService";
-import { financialSummaryService } from "./FinancialSummaryService";
+import DailyBonus, { IDailyBonus } from "../models/DailyBonus.js";
+import { walletService } from "./WalletService.js";
+import { financialSummaryService } from "./FinancialSummaryService.js";
 
 interface DailyBonusStatus {
   canClaim: boolean;

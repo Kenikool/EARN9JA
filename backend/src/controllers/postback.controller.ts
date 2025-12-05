@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { postbackWebhookService } from "../services/PostbackWebhookService";
-import { PostbackLog } from "../models/PostbackLog";
-import { logger } from "../config/logger";
+import { postbackWebhookService } from "../services/PostbackWebhookService.js";
+import { PostbackLog } from "../models/PostbackLog.js";
+import { logger } from "../config/logger.js";
 
 export class PostbackController {
   /**

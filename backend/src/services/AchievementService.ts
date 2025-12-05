@@ -1,8 +1,8 @@
-import Achievement from "../models/Achievement";
-import { User } from "../models/User";
-import { TaskSubmission } from "../models/TaskSubmission";
-import { Transaction } from "../models/Transaction";
-import { walletService } from "./WalletService";
+import Achievement from "../models/Achievement.js";
+import { User } from "../models/User.js";
+import { TaskSubmission } from "../models/TaskSubmission.js";
+import { Transaction } from "../models/Transaction.js";
+import { walletService } from "./WalletService.js";
 
 interface BadgeDefinition {
   id: string;

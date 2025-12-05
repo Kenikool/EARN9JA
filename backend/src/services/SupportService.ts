@@ -1,8 +1,8 @@
-import { SupportTicket } from "../models/SupportTicket";
-import { FAQ } from "../models/FAQ";
-import { User } from "../models/User";
-import NotificationService from "./NotificationService";
-import { getSocketService } from "../config/socket";
+import { SupportTicket } from "../models/SupportTicket.js";
+import { FAQ } from "../models/FAQ.js";
+import { User } from "../models/User.js";
+import NotificationService from "./NotificationService.js";
+import { getSocketService } from "../config/socket.js";
 
 export class SupportService {
   /**

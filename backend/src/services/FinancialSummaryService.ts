@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import {
   DailyFinancialSummary,
   IDailyFinancialSummary,
-} from "../models/DailyFinancialSummary";
-import { FinancialTransaction } from "../models/FinancialTransaction";
-import { User } from "../models/User";
+} from "../models/DailyFinancialSummary.js";
+import { FinancialTransaction } from "../models/FinancialTransaction.js";
+import { User } from "../models/User.js";
 
 interface FinancialMetrics {
   date: Date;

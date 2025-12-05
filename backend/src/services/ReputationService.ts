@@ -1,5 +1,5 @@
-import { User } from "../models/User";
-import { TaskSubmission } from "../models/TaskSubmission";
+import { User } from "../models/User.js";
+import { TaskSubmission } from "../models/TaskSubmission.js";
 
 interface ReputationUpdate {
   userId: string;

@@ -1,6 +1,6 @@
-import { User } from "../models/User";
-import { TaskSubmission } from "../models/TaskSubmission";
-import { Transaction } from "../models/Transaction";
+import { User } from "../models/User.js";
+import { TaskSubmission } from "../models/TaskSubmission.js";
+import { Transaction } from "../models/Transaction.js";
 
 interface LeaderboardEntry {
   userId: string;

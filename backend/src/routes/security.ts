@@ -1,7 +1,7 @@
 import express from "express";
-import { auth } from "../middleware/auth";
-import User from "../models/User";
-import { OTPService } from "../services/OTPService";
+import { auth } from "../middleware/auth.js";
+import User from "../models/User.js";
+import { OTPService } from "../services/OTPService.js";
 
 const router = express.Router();
 

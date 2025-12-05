@@ -1,7 +1,7 @@
 import {
   requirementTemplates,
   RequirementTemplate,
-} from "../data/requirementTemplates";
+} from "../data/requirementTemplates.js";
 
 export class RequirementService {
   /**

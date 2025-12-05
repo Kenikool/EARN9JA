@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PreviewService } from "../services/PreviewService";
+import { PreviewService } from "../services/PreviewService.js";
 
 export class PreviewController {
   /**

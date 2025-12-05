@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { currencyService } from "../services/CurrencyConversionService";
-import { ExchangeRate } from "../models/ExchangeRate";
-import { logger } from "../config/logger";
+import { currencyService } from "../services/CurrencyConversionService.js";
+import { ExchangeRate } from "../models/ExchangeRate.js";
+import { logger } from "../config/logger.js";
 
 export class CurrencyController {
   /**

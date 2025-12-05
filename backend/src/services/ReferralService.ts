@@ -1,6 +1,6 @@
-import { User } from "../models/User";
-import { Referral } from "../models/Referral";
-import { walletService } from "./WalletService";
+import { User } from "../models/User.js";
+import { Referral } from "../models/Referral.js";
+import { walletService } from "./WalletService.js";
 import crypto from "crypto";
 
 export class ReferralService {

@@ -1,7 +1,7 @@
-import { financialSummaryService } from "./FinancialSummaryService";
-import { EmailService } from "./EmailService";
-import notificationService from "./NotificationService";
-import { User } from "../models/User";
+import { financialSummaryService } from "./FinancialSummaryService.js";
+import { EmailService } from "./EmailService.js";
+import notificationService from "./NotificationService.js";
+import { User } from "../models/User.js";
 
 interface Alert {
   type: "loss" | "profit" | "milestone" | "exchange_rate_fluctuation" | string;

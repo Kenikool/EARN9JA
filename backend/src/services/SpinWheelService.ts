@@ -1,6 +1,6 @@
-import SpinReward, { ISpinReward } from "../models/SpinReward";
-import { User } from "../models/User";
-import { walletService } from "./WalletService";
+import SpinReward, { ISpinReward } from "../models/SpinReward.js";
+import { User } from "../models/User.js";
+import { walletService } from "./WalletService.js";
 
 interface WheelSegment {
   id: string;

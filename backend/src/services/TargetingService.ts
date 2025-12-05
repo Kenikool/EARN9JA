@@ -1,5 +1,5 @@
-import { TaskTargeting, ITaskTargeting } from "../models/TaskTargeting";
-import { User } from "../models/User";
+import { TaskTargeting, ITaskTargeting } from "../models/TaskTargeting.js";
+import { User } from "../models/User.js";
 import mongoose from "mongoose";
 
 export class TargetingService {

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { cpaGripProvider } from "../services/providers/CPAGripProvider";
-import { ogAdsProvider } from "../services/providers/OGAdsProvider";
-import { logger } from "../config/logger";
+import { cpaGripProvider } from "../services/providers/CPAGripProvider.js";
+import { ogAdsProvider } from "../services/providers/OGAdsProvider.js";
+import { logger } from "../config/logger.js";
 
 export class OfferWallController {
   /**

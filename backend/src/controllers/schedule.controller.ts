@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ScheduleService } from "../services/ScheduleService";
+import { ScheduleService } from "../services/ScheduleService.js";
 
 export class ScheduleController {
   /**

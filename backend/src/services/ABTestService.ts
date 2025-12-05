@@ -1,6 +1,6 @@
-import { TaskABTest, ITaskABTest } from "../models/TaskABTest";
-import { Task } from "../models/Task";
-import { TaskSubmission } from "../models/TaskSubmission";
+import { TaskABTest, ITaskABTest } from "../models/TaskABTest.js";
+import { Task } from "../models/Task.js";
+import { TaskSubmission } from "../models/TaskSubmission.js";
 import mongoose from "mongoose";
 
 export class ABTestService {
