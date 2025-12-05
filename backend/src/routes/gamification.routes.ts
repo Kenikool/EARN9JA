@@ -24,6 +24,7 @@ router.get(
 // Spin Wheel routes
 router.get("/spin/status", authenticate, gamificationController.getSpinStatus);
 router.post("/spin", authenticate, gamificationController.spin);
+router.post("/spin/extra", authenticate, gamificationController.grantExtraSpin);
 router.get("/spin/stats", authenticate, gamificationController.getSpinStats);
 
 // Challenges routes

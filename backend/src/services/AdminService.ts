@@ -547,9 +547,6 @@ class AdminService {
       };
     }
   }
-}
-
-export const adminService = new AdminService();
 
   // Dispute Resolution
   async getPendingDisputes(page: number = 1, limit: number = 20) {

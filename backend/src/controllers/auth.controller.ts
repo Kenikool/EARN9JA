@@ -3,6 +3,7 @@ import { authService } from "../services/AuthService.js";
 import { otpService } from "../services/OTPService.js";
 import { smsService } from "../services/SMSService.js";
 import { emailService } from "../services/EmailService.js";
+import LaunchController from "../services/LaunchController.js";
 
 class AuthController {
   async sendOTP(req: Request, res: Response): Promise<void> {
@@ -99,6 +100,24 @@ class AuthController {
 
       const { email, phoneNumber } = req.body;
 
+      // Check if new user registrations are allowed based on launch phase
+      const registrationCheck = await LaunchController.canRegisterNewUser();
+      if (!registrationCheck.allowed) {
+        console.log(
+          `❌ Registration blocked: ${registrationCheck.reason} (Phase ${registrationCheck.currentPhase}, ${registrationCheck.currentUserCount}/${registrationCheck.userLimit} users)`
+        );
+        res.status(403).json({
+          success: false,
+          message: registrationCheck.reason,
+          data: {
+            currentPhase: registrationCheck.currentPhase,
+            userLimit: registrationCheck.userLimit,
+            currentUserCount: registrationCheck.currentUserCount,
+          },
+        });
+        return;
+      }
+
       const emailVerified = await otpService.isOTPVerified(
         email,
         "registration"
@@ -161,7 +180,7 @@ class AuthController {
     }
   }
 
-  async logout(req: Request, res: Response): Promise<void> {
+  async logout(_req: Request, res: Response): Promise<void> {
     try {
       res.status(200).json({
         success: true,

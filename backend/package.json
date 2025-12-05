@@ -9,6 +9,10 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "jest",
+    "test:integration": "tsx tests/offerwall-integration.test.ts",
+    "test:system": "tsx scripts/test-system.ts",
+    "seed:providers": "tsx scripts/seedProviders.ts",
+    "seed:templates": "tsx src/scripts/seedTemplates.ts",
     "lint": "eslint src/**/*.ts"
   },
   "keywords": [
@@ -20,9 +24,12 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@sentry/node": "^8.55.0",
+    "@sentry/profiling-node": "^8.55.0",
     "axios": "^1.13.2",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
+    "csv-parse": "^6.1.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
@@ -32,9 +39,13 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.0",
     "morgan": "^1.10.0",
+    "node-cron": "^4.2.1",
     "nodemailer": "^6.9.7",
+    "qrcode": "^1.5.3",
     "redis": "^4.6.0",
+    "sharp": "^0.34.5",
     "socket.io": "^4.6.0",
+    "speakeasy": "^2.0.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
@@ -44,7 +55,10 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.10.0",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.14",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^6.13.2",
     "@typescript-eslint/parser": "^6.13.2",
     "eslint": "^8.55.0",

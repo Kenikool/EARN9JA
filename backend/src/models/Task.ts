@@ -45,6 +45,7 @@ export interface ITask extends Document {
     requirements?: string; // e.g., "Minimum 50 words", "Video (30s+)"
     [key: string]: any; // Allow additional metadata
   };
+  imageUrls: string[]; // Reference images for the task
   createdAt: Date;
   updatedAt: Date;
 }
@@ -55,7 +56,6 @@ const taskSchema = new Schema<ITask>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     title: {
       type: String,
@@ -72,19 +72,16 @@ const taskSchema = new Schema<ITask>(
       type: String,
       enum: ["social_media", "music", "survey", "review", "game", "ads"],
       required: true,
-      index: true,
     },
     platform: {
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
     taskType: {
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
     targetUrl: {
       type: String,
@@ -141,13 +138,11 @@ const taskSchema = new Schema<ITask>(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
     status: {
       type: String,
       enum: ["draft", "active", "paused", "completed", "expired", "cancelled"],
       default: "draft",
-      index: true,
     },
     pausedAt: {
       type: Date,
@@ -190,6 +185,16 @@ const taskSchema = new Schema<ITask>(
       color: String,
       estimatedDuration: String,
       requirements: String,
+    },
+    imageUrls: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: function (v: string[]) {
+          return v.length <= 5;
+        },
+        message: "Maximum 5 images allowed per task",
+      },
     },
   },
   {

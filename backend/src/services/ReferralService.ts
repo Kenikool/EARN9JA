@@ -115,6 +115,81 @@ export class ReferralService {
   }
 
   /**
+   * Track task completion and award conditional bonuses
+   * Awards ₦20 to both referrer and referee after 5 completed tasks
+   */
+  static async trackTaskCompletion(userId: string): Promise<void> {
+    const referral = await Referral.findOne({
+      referredUserId: userId,
+      status: "active",
+    });
+
+    if (!referral) {
+      return; // No active referral
+    }
+
+    // Import TaskSubmission model to count completed tasks
+    const { TaskSubmission } = await import("../models/TaskSubmission.js");
+
+    const completedTasksCount = await TaskSubmission.countDocuments({
+      workerId: userId,
+      status: "approved",
+    });
+
+    // Award bonuses after 5 completed tasks (one-time only)
+    if (completedTasksCount === 5 && referral.totalCommission === 0) {
+      const REFERRAL_BONUS = 20; // ₦20 for each party
+
+      // Award ₦20 to referrer
+      await walletService.credit(
+        referral.referrerId.toString(),
+        REFERRAL_BONUS,
+        "referral_bonus",
+        `Referral bonus: Your referee completed 5 tasks!`,
+        { referredUserId: userId, milestone: "5_tasks" }
+      );
+
+      // Award ₦20 to referee
+      await walletService.credit(
+        userId,
+        REFERRAL_BONUS,
+        "referral_bonus",
+        `Referral bonus: You completed 5 tasks!`,
+        { referrerId: referral.referrerId.toString(), milestone: "5_tasks" }
+      );
+
+      // Update referral record
+      referral.totalCommission = REFERRAL_BONUS * 2; // Track total bonuses awarded
+      await referral.save();
+
+      console.log(
+        `✅ Referral bonuses awarded: ₦${REFERRAL_BONUS} each to referrer and referee`
+      );
+
+      // Send notifications
+      try {
+        const { NotificationHelpers } = await import(
+          "./NotificationHelpers.js"
+        );
+        await NotificationHelpers.notifyReferralBonus(
+          referral.referrerId.toString(),
+          "Your referee",
+          REFERRAL_BONUS,
+          "completed 5 tasks"
+        );
+        await NotificationHelpers.notifyReferralBonus(
+          userId,
+          "You",
+          REFERRAL_BONUS,
+          "completed 5 tasks"
+        );
+      } catch (error) {
+        console.error("Failed to send referral bonus notifications:", error);
+      }
+    }
+  }
+
+  /**
    * Process commission when referred user earns
    */
   static async processCommission(
@@ -151,8 +226,26 @@ export class ReferralService {
       referral.referrerId.toString(),
       commission,
       "referral_bonus",
-      `Referral commission from user earnings`
+      `Referral commission from user earnings`,
+      { referredUserId: userId, earningAmount }
     );
+
+    // Notify referrer about bonus
+    try {
+      const { NotificationHelpers } = await import("./NotificationHelpers.js");
+      const { User } = await import("../models/User.js");
+      const referredUser = await User.findById(userId);
+      const referredName = referredUser?.profile?.firstName || "Your referral";
+
+      await NotificationHelpers.notifyReferralBonus(
+        referral.referrerId.toString(),
+        referredName,
+        commission,
+        "completed a task"
+      );
+    } catch (error) {
+      console.log("Failed to send referral bonus notification:", error);
+    }
 
     // Update referral stats
     referral.totalEarnings += earningAmount;

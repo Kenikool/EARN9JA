@@ -58,6 +58,16 @@ router.post("/topup", validateRequest(topUpSchema), walletController.topUp);
 router.get("/withdrawal-methods", walletController.getWithdrawalMethods);
 
 /**
+ * @route   GET /api/v1/wallet/withdrawal-eligibility
+ * @desc    Check if user is eligible for withdrawal
+ * @access  Private
+ */
+router.get(
+  "/withdrawal-eligibility",
+  walletController.checkWithdrawalEligibility
+);
+
+/**
  * @route   GET /api/v1/wallet/withdrawals
  * @desc    Get user's withdrawal history
  * @access  Private

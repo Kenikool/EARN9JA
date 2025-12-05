@@ -126,6 +126,32 @@ export class ChallengeService {
         $inc: { completions: 1 },
       });
     }
+
+    // Notify user about progress milestones (25%, 50%, 75%)
+    const percentage = (currentProgress / challenge.criteria.target) * 100;
+    const milestones = [25, 50, 75];
+    const previousPercentage =
+      ((currentProgress - 1) / challenge.criteria.target) * 100;
+
+    for (const milestone of milestones) {
+      if (percentage >= milestone && previousPercentage < milestone) {
+        try {
+          const { NotificationHelpers } = await import(
+            "./NotificationHelpers.js"
+          );
+          await NotificationHelpers.notifyChallengeProgress(
+            userId,
+            challengeId,
+            challenge.title,
+            currentProgress,
+            challenge.criteria.target
+          );
+        } catch (error) {
+          console.log("Failed to send challenge progress notification:", error);
+        }
+        break;
+      }
+    }
   }
 
   /**

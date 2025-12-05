@@ -6,14 +6,29 @@ export interface INotification extends Document {
   body: string;
   type:
     | "task_assigned"
+    | "task_accepted"
+    | "task_submission"
     | "task_approved"
     | "task_rejected"
+    | "task_revision"
+    | "task_completed"
+    | "task_expiring"
+    | "task_deadline"
+    | "task_paused"
+    | "task_cancelled"
     | "payment_received"
+    | "topup_confirmed"
     | "withdrawal_processed"
+    | "low_escrow_balance"
+    | "dispute_filed"
     | "referral_joined"
+    | "referral_bonus"
     | "achievement_unlocked"
     | "challenge_completed"
+    | "challenge_progress"
     | "daily_bonus"
+    | "daily_bonus_available"
+    | "new_task_available"
     | "system_announcement";
   data?: Record<string, any>;
   read: boolean;
@@ -45,14 +60,29 @@ const notificationSchema = new Schema<INotification>(
       required: true,
       enum: [
         "task_assigned",
+        "task_accepted",
+        "task_submission",
         "task_approved",
         "task_rejected",
+        "task_revision",
+        "task_completed",
+        "task_expiring",
+        "task_deadline",
+        "task_paused",
+        "task_cancelled",
         "payment_received",
+        "topup_confirmed",
         "withdrawal_processed",
+        "low_escrow_balance",
+        "dispute_filed",
         "referral_joined",
+        "referral_bonus",
         "achievement_unlocked",
         "challenge_completed",
+        "challenge_progress",
         "daily_bonus",
+        "daily_bonus_available",
+        "new_task_available",
         "system_announcement",
       ],
       index: true,

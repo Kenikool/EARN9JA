@@ -100,3 +100,27 @@ export const requireRole = (...roles: string[]) => {
     next();
   };
 };
+
+export const requireAdmin = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+): void => {
+  if (!req.user) {
+    res.status(401).json({
+      success: false,
+      error: "Unauthorized",
+    });
+    return;
+  }
+
+  if (!req.user.roles.includes("admin")) {
+    res.status(403).json({
+      success: false,
+      error: "Admin access required",
+    });
+    return;
+  }
+
+  next();
+};

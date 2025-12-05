@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Wallet, IWallet } from "../models/Wallet.js";
 import { Transaction, ITransaction } from "../models/Transaction.js";
 import { Escrow, IEscrow } from "../models/Escrow.js";
+import { getSocketService } from "../config/socket.js";
 
 class WalletService {
   /**
@@ -96,6 +97,36 @@ class WalletService {
 
       await session.commitTransaction();
       console.log(`✅ Credited ${amount} to user ${userId}`);
+
+      // Notify user about payment received (for certain types)
+      if (
+        [
+          "task_earning",
+          "referral_bonus",
+          "daily_bonus",
+          "admob_reward",
+        ].includes(type)
+      ) {
+        try {
+          const { NotificationHelpers } = await import(
+            "./NotificationHelpers.js"
+          );
+          const sourceMap: Record<string, string> = {
+            task_earning: "Task Completion",
+            referral_bonus: "Referral Bonus",
+            daily_bonus: "Daily Bonus",
+            admob_reward: "Ad Reward",
+          };
+          await NotificationHelpers.notifyPaymentReceived(
+            userId,
+            amount,
+            sourceMap[type] || description,
+            transaction[0]._id.toString()
+          );
+        } catch (error) {
+          console.log("Failed to send payment notification:", error);
+        }
+      }
 
       return { wallet, transaction: transaction[0] };
     } catch (error) {
@@ -576,6 +607,19 @@ class WalletService {
       );
 
       console.log(`✅ Released ${amount} from escrow to ${workerId}`);
+
+      // Emit real-time wallet update
+      try {
+        const socketService = getSocketService();
+        socketService.emitWalletUpdate(workerId, workerWallet.toObject());
+        socketService.emitPayment(workerId, {
+          amount,
+          type,
+          description,
+        });
+      } catch (error) {
+        console.log("Socket service not available");
+      }
     } catch (error) {
       console.error("❌ Release escrow error:", error);
       throw error;

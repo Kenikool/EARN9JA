@@ -40,6 +40,19 @@ class AdMobController {
       });
 
       if (result.success) {
+        // Additional validation: ensure reward doesn't exceed expected revenue
+        const EXPECTED_ADMOB_REVENUE = 0.8;
+        if (result.reward && result.reward > EXPECTED_ADMOB_REVENUE) {
+          console.error(
+            `Reward validation failed: ₦${result.reward} exceeds expected revenue ₦${EXPECTED_ADMOB_REVENUE}`
+          );
+          res.status(500).json({
+            success: false,
+            error: "Reward calculation error. Please contact support.",
+          });
+          return;
+        }
+
         res.status(200).json({
           success: true,
           data: {

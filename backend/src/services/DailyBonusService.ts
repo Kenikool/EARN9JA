@@ -1,5 +1,6 @@
 import DailyBonus, { IDailyBonus } from "../models/DailyBonus";
 import { walletService } from "./WalletService";
+import { financialSummaryService } from "./FinancialSummaryService";
 
 interface DailyBonusStatus {
   canClaim: boolean;
@@ -15,15 +16,40 @@ interface DailyBonusStatus {
 }
 
 export class DailyBonusService {
-  // Progressive daily rewards (₦)
+  // Progressive daily rewards (₦) - 30 days cycle
+  // REDUCED for profitability - Only funded from ad profits
   private static DAILY_REWARDS = [
-    50, // Day 1
-    75, // Day 2
-    100, // Day 3
-    150, // Day 4
-    200, // Day 5
-    300, // Day 6
-    500, // Day 7 (Jackpot!)
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    10, // Week 1 (Days 1-7) - Small bonus on day 7
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    15, // Week 2 (Days 8-14) - Bonus on day 14
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    20, // Week 3 (Days 15-21) - Bonus on day 21
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    10, // Week 4 (Days 22-28)
+    10,
+    15,
+    50, // Days 29-30 - MEGA JACKPOT on day 30!
   ];
 
   /**
@@ -59,11 +85,20 @@ export class DailyBonusService {
     });
 
     if (todayBonus) {
+      // Recalculate amount from DAILY_REWARDS array to ensure it's up to date
+      const correctAmount = this.DAILY_REWARDS[todayBonus.day - 1];
+
+      // Update the amount if it doesn't match (in case rewards were changed)
+      if (todayBonus.amount !== correctAmount && !todayBonus.claimed) {
+        todayBonus.amount = correctAmount;
+        await todayBonus.save();
+      }
+
       return {
-        canClaim: false,
+        canClaim: !todayBonus.claimed,
         claimed: todayBonus.claimed,
         day: todayBonus.day,
-        amount: todayBonus.amount,
+        amount: correctAmount, // Always return the correct amount from array
         streakCount: todayBonus.streakCount,
       };
     }
@@ -79,7 +114,7 @@ export class DailyBonusService {
 
     if (yesterdayBonus && yesterdayBonus.claimed) {
       // Continue streak
-      day = yesterdayBonus.day === 7 ? 1 : yesterdayBonus.day + 1;
+      day = yesterdayBonus.day === 30 ? 1 : yesterdayBonus.day + 1;
       streakCount = yesterdayBonus.streakCount + 1;
     } else {
       // Check if there's any previous bonus (streak broken)
@@ -114,7 +149,7 @@ export class DailyBonusService {
       amount,
       streakCount,
       nextBonus:
-        day < 7
+        day < 30
           ? {
               day: day + 1,
               amount: this.DAILY_REWARDS[day],
@@ -135,6 +170,19 @@ export class DailyBonusService {
     message: string;
   }> {
     const today = this.getTodayDate();
+
+    // Check if platform is profitable today (only award bonuses if profitable)
+    try {
+      const profitability = await financialSummaryService.checkProfitability();
+      if (!profitability.isProfitable) {
+        throw new Error(
+          "Daily bonuses are temporarily unavailable. Please try again tomorrow when the platform is profitable."
+        );
+      }
+    } catch (error) {
+      // If we can't check profitability, allow the bonus (fail open)
+      console.warn("Could not check profitability for daily bonus:", error);
+    }
 
     // Find today's bonus
     const todayBonus = await DailyBonus.findOne({
@@ -164,8 +212,8 @@ export class DailyBonusService {
     );
 
     let message = `You've claimed ₦${todayBonus.amount} for Day ${todayBonus.day}!`;
-    if (todayBonus.day === 7) {
-      message += " 🎉 Jackpot! Your streak resets tomorrow.";
+    if (todayBonus.day === 30) {
+      message += " 🎉 MEGA JACKPOT! Your streak resets tomorrow.";
     } else {
       message += ` Come back tomorrow for ₦${
         this.DAILY_REWARDS[todayBonus.day]

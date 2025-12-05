@@ -39,19 +39,16 @@ const taskSubmissionSchema = new Schema<ITaskSubmission>(
       type: Schema.Types.ObjectId,
       ref: "Task",
       required: true,
-      index: true,
     },
     workerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     sponsorId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
     },
     proofs: [
       {
@@ -77,7 +74,6 @@ const taskSubmissionSchema = new Schema<ITaskSubmission>(
         "resubmitted",
       ],
       default: "pending",
-      index: true,
     },
     reviewNotes: String,
     reviewedAt: Date,

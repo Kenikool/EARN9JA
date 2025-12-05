@@ -23,54 +23,65 @@ interface SpinResult {
 }
 
 export class SpinWheelService {
-  // Define wheel segments with probabilities
+  // Feature flag - DISABLED for profitability
+  private static FEATURE_ENABLED = false;
+
+  // Define wheel segments with probabilities (harder to win big)
   private static WHEEL_SEGMENTS: WheelSegment[] = [
+    {
+      id: "better_luck",
+      type: "cash",
+      value: 0,
+      label: "Better Luck Next Time",
+      probability: 35,
+      color: "#9E9E9E",
+    },
+    {
+      id: "cash_5",
+      type: "cash",
+      value: 5,
+      label: "₦5",
+      probability: 25,
+      color: "#FFB800",
+    },
     {
       id: "cash_10",
       type: "cash",
       value: 10,
       label: "₦10",
-      probability: 30,
-      color: "#FFB800",
+      probability: 18,
+      color: "#00A86B",
     },
     {
       id: "cash_25",
       type: "cash",
       value: 25,
       label: "₦25",
-      probability: 25,
-      color: "#00A86B",
+      probability: 10,
+      color: "#FFB800",
     },
     {
       id: "cash_50",
       type: "cash",
       value: 50,
       label: "₦50",
-      probability: 15,
-      color: "#FFB800",
+      probability: 5,
+      color: "#00A86B",
     },
     {
-      id: "cash_100",
+      id: "cash_75",
       type: "cash",
-      value: 100,
-      label: "₦100",
-      probability: 10,
-      color: "#00A86B",
+      value: 75,
+      label: "₦75",
+      probability: 3,
+      color: "#FFB800",
     },
     {
       id: "multiplier_1.5x",
       type: "bonus_multiplier",
       value: 1.5,
       label: "1.5x Bonus",
-      probability: 10,
-      color: "#9C27B0",
-    },
-    {
-      id: "multiplier_2x",
-      type: "bonus_multiplier",
-      value: 2,
-      label: "2x Bonus",
-      probability: 5,
+      probability: 2,
       color: "#9C27B0",
     },
     {
@@ -78,15 +89,31 @@ export class SpinWheelService {
       type: "free_spin",
       value: 1,
       label: "Free Spin",
-      probability: 3,
+      probability: 1.5,
       color: "#2196F3",
+    },
+    {
+      id: "multiplier_2x",
+      type: "bonus_multiplier",
+      value: 2,
+      label: "2x Bonus",
+      probability: 0.4,
+      color: "#9C27B0",
+    },
+    {
+      id: "cash_100",
+      type: "cash",
+      value: 100,
+      label: "₦100 Jackpot!",
+      probability: 0.1,
+      color: "#FFB800",
     },
     {
       id: "cash_500",
       type: "cash",
       value: 500,
-      label: "₦500 Jackpot!",
-      probability: 2,
+      label: "₦500 MEGA JACKPOT! 🎰",
+      probability: 0.05,
       color: "#FF5722",
     },
   ];
@@ -119,12 +146,25 @@ export class SpinWheelService {
       date: today,
     });
 
-    const spinsRemaining = Math.max(0, this.DAILY_SPIN_LIMIT - todaySpins);
+    // Count unclaimed extra spins (from ads)
+    const extraSpinDate = new Date(today);
+    extraSpinDate.setFullYear(1970); // Special date for extra spins
+    const extraSpins = await SpinReward.countDocuments({
+      userId,
+      date: extraSpinDate,
+      claimed: false,
+    });
 
-    if (spinsRemaining > 0) {
+    const regularSpinsRemaining = Math.max(
+      0,
+      this.DAILY_SPIN_LIMIT - todaySpins
+    );
+    const totalSpinsRemaining = regularSpinsRemaining + extraSpins;
+
+    if (totalSpinsRemaining > 0) {
       return {
         canSpin: true,
-        spinsRemaining,
+        spinsRemaining: totalSpinsRemaining,
       };
     }
 
@@ -143,6 +183,13 @@ export class SpinWheelService {
    * Spin the wheel
    */
   static async spin(userId: string): Promise<SpinResult> {
+    // Check if feature is enabled
+    if (!this.FEATURE_ENABLED) {
+      throw new Error(
+        "Spin wheel is temporarily disabled. Check back soon for exciting rewards!"
+      );
+    }
+
     // Check if user can spin
     const { canSpin, spinsRemaining } = await this.canSpin(userId);
 
@@ -150,35 +197,77 @@ export class SpinWheelService {
       throw new Error("Daily spin limit reached. Come back tomorrow!");
     }
 
+    const today = this.getTodayDate();
+
+    // Check if user has extra spins from ads
+    const extraSpinDate = new Date(today);
+    extraSpinDate.setFullYear(1970);
+    const extraSpin = await SpinReward.findOne({
+      userId,
+      date: extraSpinDate,
+      claimed: false,
+    });
+
+    if (extraSpin) {
+      // Use extra spin - mark it as claimed
+      extraSpin.claimed = true;
+      extraSpin.claimedAt = new Date();
+      await extraSpin.save();
+    } else {
+      // Use regular daily spin - create new record
+      await SpinReward.create({
+        userId,
+        date: today,
+        reward: {
+          type: "pending",
+          value: 0,
+          label: "Pending",
+        },
+        claimed: false,
+        claimedAt: null,
+      });
+    }
+
     // Select a random reward based on probabilities
     const reward = this.selectRandomReward();
 
-    // Save spin record
-    const today = this.getTodayDate();
-    await SpinReward.create({
-      userId,
-      date: today,
-      reward: {
+    // Update the spin record with actual reward
+    const spinRecord =
+      extraSpin ||
+      (await SpinReward.findOne({
+        userId,
+        date: today,
+        claimed: false,
+      }).sort({ createdAt: -1 }));
+
+    if (spinRecord) {
+      spinRecord.reward = {
         type: reward.type,
         value: reward.value,
         label: reward.label,
-      },
-      claimed: true,
-      claimedAt: new Date(),
-    });
+      };
+      spinRecord.claimed = true;
+      spinRecord.claimedAt = new Date();
+      await spinRecord.save();
+    }
 
     // Process reward
     let message = "";
 
     switch (reward.type) {
       case "cash": {
-        await walletService.credit(
-          userId,
-          reward.value as number,
-          "referral_bonus",
-          `Spin the wheel reward: ${reward.label}`
-        );
-        message = `Congratulations! You won ${reward.label}! 🎉`;
+        const cashAmount = reward.value as number;
+        if (cashAmount > 0) {
+          await walletService.credit(
+            userId,
+            cashAmount,
+            "referral_bonus",
+            `Spin the wheel reward: ${reward.label}`
+          );
+          message = `Congratulations! You won ${reward.label}! 🎉`;
+        } else {
+          message = `Better luck next time! Try again tomorrow! 🍀`;
+        }
         break;
       }
 
@@ -197,7 +286,8 @@ export class SpinWheelService {
       }
 
       case "free_spin": {
-        // Add extra spin for today
+        // Grant another extra spin
+        await this.grantExtraSpin(userId);
         message = `Lucky you! You got a free spin! Spin again! 🎰`;
         break;
       }
@@ -329,6 +419,43 @@ export class SpinWheelService {
       active: true,
       value: user.bonusMultiplier.value,
       expiresAt: user.bonusMultiplier.expiresAt,
+    };
+  }
+
+  /**
+   * Grant an extra spin (from watching ad)
+   */
+  static async grantExtraSpin(userId: string): Promise<{
+    success: boolean;
+    message: string;
+    spinsRemaining: number;
+  }> {
+    const today = this.getTodayDate();
+
+    // Create a special "extra spin" record that doesn't count against daily limit
+    // We use a special date in the past to mark it as an extra spin
+    const extraSpinDate = new Date(today);
+    extraSpinDate.setFullYear(1970); // Use epoch year to mark as extra spin
+
+    await SpinReward.create({
+      userId,
+      date: extraSpinDate, // Special date to identify extra spins
+      reward: {
+        type: "free_spin",
+        value: 1,
+        label: "Extra Spin from Ad",
+      },
+      claimed: false, // Not claimed yet - user still needs to spin
+      claimedAt: null,
+    });
+
+    // Get updated spin count
+    const { spinsRemaining } = await this.canSpin(userId);
+
+    return {
+      success: true,
+      message: "Extra spin granted! You can spin again.",
+      spinsRemaining: spinsRemaining + 1, // Add the extra spin
     };
   }
 }

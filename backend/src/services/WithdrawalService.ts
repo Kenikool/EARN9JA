@@ -225,6 +225,17 @@ class WithdrawalService {
         withdrawal.processedAt = new Date();
         await withdrawal.save({ session });
 
+        // Notify user about successful withdrawal
+        const { NotificationHelpers } = await import(
+          "./NotificationHelpers.js"
+        );
+        await NotificationHelpers.notifyWithdrawalProcessed(
+          withdrawal.userId.toString(),
+          withdrawalId,
+          withdrawal.amount,
+          withdrawal.method
+        );
+
         console.log(`✅ Withdrawal ${withdrawalId} completed successfully`);
       } else {
         // Mark as failed and refund

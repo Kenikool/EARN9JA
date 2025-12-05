@@ -60,6 +60,16 @@ class GamificationController {
     }
   }
 
+  async grantExtraSpin(req: AuthRequest, res: Response) {
+    try {
+      const userId = req.user!.id;
+      const result = await SpinWheelService.grantExtraSpin(userId);
+      res.json(result);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+
   async getSpinStats(req: AuthRequest, res: Response) {
     try {
       const userId = req.user!.id;

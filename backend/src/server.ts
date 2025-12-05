@@ -33,8 +33,11 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import { createServer } from "http";
 import { connectDatabase } from "./config/database.js";
+import { initSentry, Sentry } from "./config/sentry.js";
 import { connectRedis } from "./config/redis.js";
+import { initializeSocket } from "./config/socket.js";
 import admobRoutes from "./routes/admob.routes.js";
 import adminAnalyticsRoutes from "./routes/adminAnalytics.routes.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -47,12 +50,49 @@ import gamificationRoutes from "./routes/gamification.routes.js";
 import referralRoutes from "./routes/referral.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import supportRoutes from "./routes/support.routes.js";
+import securityRoutes from "./routes/security.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
+import escrowRoutes from "./routes/escrow.routes.js";
+import financialRoutes from "./routes/financial.routes.js";
+import launchRoutes from "./routes/launch.routes.js";
+import sponsorRoutes from "./routes/sponsor.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
+import draftRoutes from "./routes/draft.routes.js";
+import validationRoutes from "./routes/validation.routes.js";
+import templateRoutes from "./routes/template.routes.js";
+import targetingRoutes from "./routes/targeting.routes.js";
+import previewRoutes from "./routes/preview.routes.js";
+import requirementRoutes from "./routes/requirement.routes.js";
+import bulkRoutes from "./routes/bulk.routes.js";
+import scheduleRoutes from "./routes/schedule.routes.js";
+import budgetRoutes from "./routes/budget.routes.js";
+import abtestRoutes from "./routes/abtest.routes.js";
+import postbackRoutes from "./routes/postback.routes.js";
+import offerwallRoutes from "./routes/offerwall.routes.js";
+import currencyRoutes from "./routes/currency.routes.js";
+import providerRoutes from "./routes/provider.routes.js";
+import fraudRoutes from "./routes/fraud.routes.js";
+import offerwallAnalyticsRoutes from "./routes/offerwall-analytics.routes.js";
+import { setupDraftCleanupJob } from "./jobs/draftCleanup.job.js";
+import { startTaskExpiryJob } from "./jobs/taskExpiry.job.js";
+import { startScheduleExecutionJob } from "./jobs/scheduleExecution.job.js";
+import { startBudgetMonitoringJob } from "./jobs/budgetMonitoring.job.js";
+import { startExchangeRateUpdateJob } from "./jobs/exchangeRateUpdate.job.js";
+import { startProviderHealthCheckJob } from "./jobs/providerHealthCheck.job.js";
+
+// Initialize Sentry
+initSentry();
 
 const app = express();
+const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
 const API_VERSION = process.env.API_VERSION || "v1";
 
 // Middleware
+if (process.env.SENTRY_DSN && Sentry.Handlers) {
+  app.use(Sentry.Handlers.requestHandler());
+}
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
@@ -106,6 +146,30 @@ app.use(`/api/${API_VERSION}/gamification`, gamificationRoutes);
 app.use(`/api/${API_VERSION}/referrals`, referralRoutes);
 app.use(`/api/${API_VERSION}/notifications`, notificationRoutes);
 app.use(`/api/${API_VERSION}/admin`, adminRoutes);
+app.use(`/api/${API_VERSION}/support`, supportRoutes);
+app.use(`/api/${API_VERSION}/security`, securityRoutes);
+app.use(`/api/${API_VERSION}/analytics`, analyticsRoutes);
+app.use(`/api/${API_VERSION}`, escrowRoutes);
+app.use(`/api/${API_VERSION}`, financialRoutes);
+app.use(`/api/${API_VERSION}`, launchRoutes);
+app.use(`/api/${API_VERSION}/sponsors`, sponsorRoutes);
+app.use(`/api/${API_VERSION}/upload`, uploadRoutes);
+app.use(`/api/${API_VERSION}/tasks/drafts`, draftRoutes);
+app.use(`/api/${API_VERSION}/validation`, validationRoutes);
+app.use(`/api/${API_VERSION}/templates`, templateRoutes);
+app.use(`/api/${API_VERSION}/targeting`, targetingRoutes);
+app.use(`/api/${API_VERSION}/preview`, previewRoutes);
+app.use(`/api/${API_VERSION}/requirements`, requirementRoutes);
+app.use(`/api/${API_VERSION}/bulk`, bulkRoutes);
+app.use(`/api/${API_VERSION}/schedules`, scheduleRoutes);
+app.use(`/api/${API_VERSION}/budgets`, budgetRoutes);
+app.use(`/api/${API_VERSION}/abtests`, abtestRoutes);
+app.use(`/api/${API_VERSION}/postback`, postbackRoutes);
+app.use(`/api/${API_VERSION}/offerwalls`, offerwallRoutes);
+app.use(`/api/${API_VERSION}/currency`, currencyRoutes);
+app.use(`/api/${API_VERSION}/providers`, providerRoutes);
+app.use(`/api/${API_VERSION}/fraud`, fraudRoutes);
+app.use(`/api/${API_VERSION}/offerwall-analytics`, offerwallAnalyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -114,6 +178,11 @@ app.use((req, res) => {
     error: "Route not found",
   });
 });
+
+// Sentry error handler must be before other error handlers
+if (process.env.SENTRY_DSN && Sentry.Handlers) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
 // Error handler
 app.use(
@@ -124,6 +193,7 @@ app.use(
     next: express.NextFunction
   ) => {
     console.error("Error:", err);
+    Sentry.captureException(err);
     res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -141,13 +211,26 @@ const startServer = async () => {
     // Connect to Redis
     await connectRedis();
 
+    // Initialize Socket.io
+    initializeSocket(httpServer);
+    console.log("✅ Socket.io initialized");
+
+    // Setup cron jobs
+    setupDraftCleanupJob();
+    startTaskExpiryJob();
+    startScheduleExecutionJob();
+    startBudgetMonitoringJob();
+    startExchangeRateUpdateJob();
+    startProviderHealthCheckJob();
+
     // Start listening
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(
         `📡 API available at http://localhost:${PORT}/api/${API_VERSION}`
       );
       console.log(`🏥 Health check at http://localhost:${PORT}/health`);
+      console.log(`🔌 WebSocket available at ws://localhost:${PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

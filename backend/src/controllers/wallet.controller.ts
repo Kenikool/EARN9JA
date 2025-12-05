@@ -79,7 +79,7 @@ class WalletController {
   }
 
   /**
-   * Request withdrawal - REAL IMPLEMENTATION
+   * Request withdrawal - REAL IMPLEMENTATION with 2FA and Fraud Detection
    */
   async requestWithdrawal(req: AuthRequest, res: Response): Promise<void> {
     try {
@@ -92,7 +92,90 @@ class WalletController {
         return;
       }
 
-      const { amount, method, accountDetails } = req.body;
+      const { amount, method, accountDetails, twoFactorToken } = req.body;
+
+      // Get user for fraud detection
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
+
+      // Check if 2FA is enabled and verify token
+      const { TwoFactorAuthService } = await import(
+        "../services/TwoFactorAuthService.js"
+      );
+      const is2FAEnabled = await TwoFactorAuthService.isEnabled(userId);
+
+      if (is2FAEnabled) {
+        if (!twoFactorToken) {
+          res.status(400).json({
+            success: false,
+            message: "2FA token required for withdrawal",
+            requires2FA: true,
+          });
+          return;
+        }
+
+        const isValidToken = await TwoFactorAuthService.verifyToken(
+          userId,
+          twoFactorToken
+        );
+
+        if (!isValidToken) {
+          res.status(400).json({
+            success: false,
+            message: "Invalid 2FA token",
+          });
+          return;
+        }
+      }
+
+      // Fraud detection check (can be disabled for testing)
+      const ENABLE_FRAUD_DETECTION =
+        process.env.ENABLE_FRAUD_DETECTION !== "false";
+
+      if (ENABLE_FRAUD_DETECTION) {
+        const { FraudDetectionService } = await import(
+          "../services/FraudDetectionService.js"
+        );
+        const deviceId = req.headers["x-device-id"] as string;
+        const ipAddress =
+          (req.headers["x-forwarded-for"] as string) || req.ip || "";
+
+        const fraudCheck = await FraudDetectionService.checkWithdrawalFraud(
+          userId,
+          amount
+        );
+
+        if (fraudCheck.isFraudulent) {
+          await FraudDetectionService.logFraudAttempt(
+            userId,
+            "withdrawal",
+            fraudCheck
+          );
+
+          res.status(403).json({
+            success: false,
+            message:
+              "Withdrawal request flagged for review. Please complete KYC verification and ensure your account meets all requirements.",
+            reason: fraudCheck.reason,
+            riskScore: fraudCheck.riskScore,
+            flags: fraudCheck.flags,
+            requirements: {
+              kycVerified: user.kycVerified || false,
+              accountAge: Math.floor(
+                (Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+              ),
+              minimumAccountAge: 7,
+            },
+          });
+          return;
+        }
+      }
 
       // Validate balance
       const balance = await walletService.getBalance(userId);
@@ -591,6 +674,76 @@ class WalletController {
       res.status(500).json({
         success: false,
         message: error.message || "Failed to get pending topups",
+      });
+    }
+  }
+
+  /**
+   * Check withdrawal eligibility
+   */
+  async checkWithdrawalEligibility(
+    req: AuthRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+        return;
+      }
+
+      const user = await User.findById(userId);
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
+
+      // Calculate account age
+      const accountAge = Date.now() - user.createdAt.getTime();
+      const daysSinceCreation = Math.floor(accountAge / (1000 * 60 * 60 * 24));
+      const minimumAccountAge = 7;
+
+      // Check requirements
+      const requirements = {
+        kycVerified: user.kycVerified || false,
+        accountAge: daysSinceCreation,
+        minimumAccountAge,
+        accountAgeRequirementMet: daysSinceCreation >= minimumAccountAge,
+      };
+
+      const isEligible =
+        requirements.kycVerified && requirements.accountAgeRequirementMet;
+
+      const warnings: string[] = [];
+      if (!requirements.kycVerified) {
+        warnings.push(
+          "KYC verification required. Please complete your KYC to enable withdrawals."
+        );
+      }
+      if (!requirements.accountAgeRequirementMet) {
+        const daysRemaining = minimumAccountAge - daysSinceCreation;
+        warnings.push(
+          `Account must be at least ${minimumAccountAge} days old. ${daysRemaining} day(s) remaining.`
+        );
+      }
+
+      res.status(200).json({
+        success: true,
+        eligible: isEligible,
+        requirements,
+        warnings,
+      });
+    } catch (error: any) {
+      console.error("Check withdrawal eligibility error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to check withdrawal eligibility",
       });
     }
   }

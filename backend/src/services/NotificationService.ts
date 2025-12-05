@@ -1,6 +1,7 @@
 import { admin, initializeFirebase } from "../config/firebase.js";
 import Notification, { INotification } from "../models/Notification.js";
 import { User } from "../models/User.js";
+import { getSocketService } from "../config/socket.js";
 import mongoose from "mongoose";
 
 // Initialize Firebase on service load
@@ -38,6 +39,16 @@ class NotificationService {
       actionUrl: payload.actionUrl,
       read: false,
     });
+
+    // Emit real-time notification via Socket.io
+    try {
+      const socketService = getSocketService();
+      socketService.emitNotification(payload.userId, notification.toObject());
+    } catch (error) {
+      console.log(
+        "Socket service not available, skipping real-time notification"
+      );
+    }
 
     return notification;
   }

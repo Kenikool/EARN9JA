@@ -1,0 +1,738 @@
+# Implementation Plan
+
+- [ ] 1. Set up project structure and core dependencies
+
+  - Initialize React Native Expo project with TypeScript
+  - Set up Node.js backend with Express and TypeScript
+  - Configure MongoDB and Redis connections
+  - Install core dependencies (React Navigation, React Query, Zustand, MMKV)
+  - Set up project folder structure for frontend and backend
+  - _Requirements: 1.1, 1.2_
+
+- [ ] 2. Implement YouTube API integration service
+
+  - [ ] 2.1 Create YouTubeAPIService class with API key configuration
+    - Implement getTrendingVideos method with region and category support
+    - Implement searchVideos method with pagination
+    - Implement getVideoDetails method
+    - Implement getVideosByCategory method
+    - Implement getRelatedVideos method
+    - _Requirements: 1.1, 1.2, 2.2, 3.2, 12.2_
+  - [ ] 2.2 Set up Redis caching layer for API responses
+    - Configure Redis client connection
+    - Implement cache middleware with TTL for different endpoints
+    - Add cache invalidation logic
+    - _Requirements: 1.2_
+  - [ ] 2.3 Create API endpoints for video discovery
+    - Create GET /api/videos/trending endpoint
+    - Create GET /api/videos/search endpoint
+    - Create GET /api/videos/:videoId endpoint
+    - Create GET /api/videos/category/:categoryId endpoint
+    - Create GET /api/videos/:videoId/related endpoint
+    - _Requirements: 1.1, 2.2, 3.2, 12.2_
+
+- [ ] 3. Implement video extraction service
+
+  - [ ] 3.1 Set up yt-dlp integration
+    - Install yt-dlp Python package
+    - Create VideoExtractionService class
+    - Implement extractVideoInfo method to get available formats
+    - Implement getDownloadURL method for specific quality
+    - Implement extractAudioURL method for MP3 extraction
+    - _Requirements: 13.1, 13.4_
+  - [ ] 3.2 Create format detection and parsing logic
+    - Parse yt-dlp output to extract quality options
+    - Calculate estimated file sizes for each format
+    - Filter and sort formats by quality
+    - _Requirements: 13.1, 13.2_
+  - [ ] 3.3 Create API endpoint for quality options
+    - Create GET /api/downloads/formats/:videoId endpoint
+    - Return formatted quality options with file sizes
+    - Handle extraction errors gracefully
+    - _Requirements: 13.1, 13.2_
+
+- [ ] 4. Implement download manager service
+
+  - [ ] 4.1 Set up Bull queue for download job management
+    - Configure Bull queue with Redis
+    - Create download job processor
+    - Implement job retry logic with exponential backoff
+    - Set up concurrent download limits (1-5)
+    - _Requirements: 4.3, 5.5_
+  - [ ] 4.2 Implement download queue operations
+    - Create addToQueue method
+    - Create pauseDownload method with progress saving
+    - Create resumeDownload method
+    - Create cancelDownload method
+    - Implement progress tracking and speed calculation
+    - _Requirements: 4.1, 4.2, 4.4, 5.1, 5.2, 5.3, 5.4_
+  - [ ] 4.3 Create download management API endpoints
+    - Create POST /api/downloads endpoint
+    - Create GET /api/downloads/active endpoint
+    - Create PUT /api/downloads/:downloadId/pause endpoint
+    - Create PUT /api/downloads/:downloadId/resume endpoint
+    - Create DELETE /api/downloads/:downloadId endpoint
+    - _Requirements: 4.1, 5.1, 5.3_
+  - [ ] 4.4 Implement file system operations
+    - Create file download logic with chunking
+    - Implement pause/resume with partial file support
+    - Save files to designated storage location
+    - Generate unique file names to prevent conflicts
+    - _Requirements: 4.2, 5.2, 5.4_
+
+- [ ] 5. Create MongoDB data models and schemas
+
+  - [ ] 5.1 Define and implement User schema
+    - Create User model with deviceId and settings
+    - Implement user creation and retrieval methods
+    - _Requirements: 11.1, 11.2, 11.3, 11.5_
+  - [ ] 5.2 Define and implement DownloadHistory schema
+    - Create DownloadHistory model
+    - Implement methods for saving download records
+    - Implement methods for querying download history
+    - Add search and filter functionality
+    - _Requirements: 6.1, 6.2, 6.3, 8.2_
+  - [ ] 5.3 Define and implement SearchHistory schema
+    - Create SearchHistory model
+    - Implement methods for saving search queries
+    - Implement methods for retrieving recent searches
+    - _Requirements: 2.2_
+
+- [ ] 6. Implement backend API for download history and settings
+
+  - [ ] 6.1 Create download history endpoints
+    - Create GET /api/downloads/history endpoint with pagination
+    - Create DELETE /api/downloads/:downloadId/file endpoint
+    - Implement search and filter logic
+    - _Requirements: 6.1, 6.2, 7.3, 8.2_
+  - [ ] 6.2 Create settings management endpoints
+    - Create GET /api/settings endpoint
+    - Create PUT /api/settings endpoint
+    - Create POST /api/settings/clear-cache endpoint
+    - Create GET /api/settings/storage endpoint
+    - _Requirements: 11.1, 11.2, 11.3, 11.5_
+
+- [ ] 7. Build HomeScreen component
+
+  - [ ] 7.1 Create HomeScreen UI layout
+    - Create horizontal category tabs component
+    - Create video grid layout with thumbnails
+    - Implement pull-to-refresh functionality
+    - Implement infinite scroll for loading more videos
+    - _Requirements: 1.1, 1.3, 3.1, 3.3_
+  - [ ] 7.2 Integrate YouTube API for trending videos
+    - Connect to GET /api/videos/trending endpoint
+    - Implement loading states with skeleton screens
+    - Handle error states with retry option
+    - Cache trending videos locally
+    - _Requirements: 1.1, 1.2, 1.4, 1.5_
+  - [ ] 7.3 Implement category switching functionality
+    - Handle category tab selection
+    - Fetch category-specific videos
+    - Display loading indicators during fetch
+    - Implement automatic pagination on scroll
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [ ] 8. Build SearchScreen component
+
+  - [ ] 8.1 Create search UI with input and results
+    - Create search input field with clear button
+    - Implement debounced search (500ms delay)
+    - Display recent searches below input
+    - Create search results grid layout
+    - _Requirements: 2.1, 2.2, 2.5_
+  - [ ] 8.2 Integrate search API
+    - Connect to GET /api/videos/search endpoint
+    - Display search results with metadata
+    - Implement loading and error states
+    - Save searches to history
+    - _Requirements: 2.2, 2.3, 2.4_
+  - [ ] 8.3 Implement search history management
+    - Display recent searches on search screen
+    - Allow clearing individual search items
+    - Allow clearing all search history
+    - _Requirements: 2.1, 2.5_
+
+- [ ] 9. Build VideoDetailsScreen component
+
+  - [ ] 9.1 Create video details UI layout
+    - Display video thumbnail and title
+    - Display channel information with avatar
+    - Display video stats (views, likes, date)
+    - Display full description with expand/collapse
+    - Display related videos section
+    - _Requirements: 12.1, 12.2, 12.4_
+  - [ ] 9.2 Integrate video details API
+    - Connect to GET /api/videos/:videoId endpoint
+    - Fetch and display related videos
+    - Handle loading and error states
+    - _Requirements: 12.2, 12.4_
+  - [ ] 9.3 Implement download button with quality selector
+    - Create download button on details screen
+    - Fetch available quality options from API
+    - Display quality selection modal
+    - Show estimated file sizes for each quality
+    - Handle quality selection and download initiation
+    - _Requirements: 12.3, 12.5, 13.1, 13.2, 13.3, 13.4, 13.5_
+
+- [ ] 10. Build DownloadsScreen component
+
+  - [ ] 10.1 Create downloads UI with active and completed sections
+    - Create active downloads section with progress bars
+    - Create completed downloads grid layout
+    - Display storage usage indicator
+    - Implement search input for filtering downloads
+    - _Requirements: 4.2, 4.4, 6.1, 6.2, 6.5, 8.1_
+  - [ ] 10.2 Implement active download management
+    - Display real-time download progress
+    - Show download speed and time remaining
+    - Implement pause/resume buttons
+    - Implement cancel button
+    - Handle download status updates via WebSocket or polling
+    - _Requirements: 4.2, 4.4, 5.1, 5.3_
+  - [ ] 10.3 Implement completed downloads management
+    - Fetch and display download history
+    - Implement video playback on tap
+    - Implement long-press for delete option
+    - Implement multi-select mode for batch deletion
+    - Implement search and filter functionality
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 7.1, 7.2, 7.3, 7.5, 8.2, 8.3_
+
+- [ ] 11. Build SettingsScreen component
+
+  - [ ] 11.1 Create settings UI layout
+    - Create download preferences section
+    - Create storage management section
+    - Create notification settings section
+    - Create theme selection section
+    - Create about/help section
+    - _Requirements: 11.1, 11.2, 11.3, 11.5_
+  - [ ] 11.2 Implement settings management
+    - Connect to GET /api/settings endpoint
+    - Connect to PUT /api/settings endpoint
+    - Implement WiFi-only download toggle
+    - Implement default quality selector
+    - Implement max concurrent downloads slider
+    - Implement theme switcher
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+  - [ ] 11.3 Implement storage management features
+    - Display total storage used
+    - Display storage breakdown by video
+    - Implement clear cache button
+    - Show available device storage
+    - _Requirements: 6.5, 7.4_
+
+- [ ] 12. Implement local video player
+
+  - [ ] 12.1 Integrate React Native Video
+    - Install and configure react-native-video
+    - Create VideoPlayer component
+    - Implement playback controls (play, pause, seek)
+    - Implement fullscreen mode
+    - _Requirements: 6.4_
+  - [ ] 12.2 Implement video file access
+    - Load video from local file path
+    - Handle video playback errors
+    - Track last accessed time for downloads
+    - _Requirements: 6.4_
+
+- [ ] 13. Implement offline functionality
+
+  - [ ] 13.1 Set up local storage with MMKV
+    - Configure MMKV for fast local storage
+    - Store active download states locally
+    - Store app preferences locally
+    - _Requirements: 9.1, 9.3_
+  - [ ] 13.2 Implement offline mode detection
+    - Create network status hook
+    - Display offline indicator when disconnected
+    - Disable download-related actions when offline
+    - Allow access to downloaded videos offline
+    - _Requirements: 9.1, 9.2, 9.3, 9.4_
+  - [ ] 13.3 Implement connection restoration handling
+    - Detect when connection is restored
+    - Display connection restored notification
+    - Resume paused downloads automatically (if enabled)
+    - _Requirements: 9.5_
+
+- [ ] 14. Implement push notifications
+
+  - [ ] 14.1 Set up push notification service
+    - Configure Expo notifications
+    - Request notification permissions
+    - Set up notification channels (Android)
+    - _Requirements: 10.1, 10.2, 10.4_
+  - [ ] 14.2 Implement download notifications
+    - Send notification on download completion
+    - Send notification on download failure
+    - Implement notification tap handling to open video
+    - Group multiple notifications by status
+    - Include video title in notification text
+    - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+
+- [ ] 15. Implement share functionality
+
+  - [ ] 15.1 Configure deep linking
+    - Set up URL scheme for the app
+    - Configure intent filters (Android)
+    - Configure universal links (iOS)
+    - _Requirements: 14.1, 14.5_
+  - [ ] 15.2 Implement share handler
+    - Register app in system share menu
+    - Handle incoming YouTube URLs
+    - Parse shared URL and extract video ID
+    - Navigate to video details screen
+    - Auto-fetch video metadata
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
+
+- [ ] 16. Implement error handling and user feedback
+
+  - [ ] 16.1 Create error handling utilities
+    - Define error types enum
+    - Create AppError interface
+    - Implement error logging service
+    - _Requirements: 1.5, 2.2, 5.5, 9.2_
+  - [ ] 16.2 Implement user-facing error messages
+    - Create error display components
+    - Implement retry mechanisms for network errors
+    - Display quota exceeded messages
+    - Handle video unavailable errors
+    - Handle storage full errors
+    - _Requirements: 1.5, 9.2_
+  - [ ] 16.3 Implement loading states
+    - Create skeleton loaders for video grids
+    - Create progress indicators for API calls
+    - Implement pull-to-refresh indicators
+    - _Requirements: 1.4, 3.4_
+
+- [ ] 17. Implement state management
+
+  - [ ] 17.1 Set up Zustand stores
+    - Create downloads store for active downloads state
+    - Create settings store for app preferences
+    - Create UI store for theme and navigation state
+    - _Requirements: 4.2, 11.1_
+  - [ ] 17.2 Set up React Query
+    - Configure React Query client
+    - Create query hooks for trending videos
+    - Create query hooks for search results
+    - Create query hooks for video details
+    - Create mutation hooks for downloads
+    - Implement cache invalidation strategies
+    - _Requirements: 1.1, 2.2, 12.2_
+
+- [ ] 18. Implement navigation structure
+
+  - [ ] 18.1 Set up React Navigation
+    - Configure stack navigator
+    - Configure tab navigator for main screens
+    - Set up navigation types with TypeScript
+    - _Requirements: 1.1, 2.1, 6.1, 11.1_
+  - [ ] 18.2 Create navigation flows
+    - Implement home to video details navigation
+    - Implement search to video details navigation
+    - Implement downloads to video player navigation
+    - Implement deep link navigation
+    - _Requirements: 12.1, 14.4_
+
+- [ ] 19. Implement performance optimizations
+
+  - [ ] 19.1 Optimize image loading
+    - Implement progressive image loading
+    - Set up image caching with react-native-fast-image
+    - Implement lazy loading for video thumbnails
+    - _Requirements: 1.3, 6.2_
+  - [ ] 19.2 Optimize list rendering
+    - Use FlatList with optimized props
+    - Implement virtualization for long lists
+    - Batch API requests for pagination
+    - _Requirements: 1.3, 3.5, 6.1_
+  - [ ] 19.3 Optimize download performance
+    - Implement chunked downloads
+    - Implement parallel chunk downloads for faster speeds
+    - Compress metadata and thumbnails
+    - _Requirements: 4.2, 4.4_
+
+- [ ] 20. Set up backend deployment
+
+  - [ ] 20.1 Configure production environment
+    - Set up environment variables
+    - Configure MongoDB Atlas or production database
+    - Configure Redis instance
+    - Set up logging and monitoring
+    - _Requirements: All_
+  - [ ] 20.2 Deploy backend services
+    - Deploy to cloud platform (AWS, DigitalOcean, or Heroku)
+    - Set up SSL certificates
+    - Configure domain and DNS
+    - Set up CI/CD pipeline
+    - _Requirements: All_
+
+- [ ] 21. Build and deploy mobile app
+
+  - [ ] 21.1 Configure app for production
+    - Set up app icons and splash screens
+    - Configure app.json with proper metadata
+    - Set up app signing for Android
+    - Set up provisioning profiles for iOS
+    - _Requirements: All_
+  - [ ] 21.2 Build production releases
+    - Build Android APK/AAB
+    - Build iOS IPA
+    - Test production builds on physical devices
+    - _Requirements: All_
+  - [ ] 21.3 Publish to app stores
+    - Create Google Play Store listing
+    - Create Apple App Store listing
+    - Submit for review
+    - _Requirements: All_
+
+- [ ] 22. Testing and quality assurance
+
+  - [ ] 22.1 Write unit tests for services
+    - Test YouTubeAPIService methods
+    - Test VideoExtractionService methods
+    - Test DownloadManagerService methods
+    - _Requirements: All_
+  - [ ] 22.2 Write integration tests
+    - Test complete download flow
+    - Test pause/resume functionality
+    - Test offline mode behavior
+    - _Requirements: 4.1, 4.2, 5.1, 5.3, 9.1, 9.3_
+  - [ ] 22.3 Perform end-to-end testing
+    - Test user journey from search to download to playback
+    - Test multiple concurrent downloads
+    - Test app state persistence
+    - Test share functionality
+    - _Requirements: All_
+  - [ ] 22.4 Perform performance testing
+    - Test with 1000+ downloaded videos
+    - Test search performance
+    - Test download speed optimization
+    - Test memory usage during downloads
+    - _Requirements: 4.3, 6.1, 8.2_
+
+- [ ] 23. Implement AdMob integration for monetization
+
+  - [ ] 23.1 Set up AdMob configuration
+    - Install react-native-google-mobile-ads package
+    - Configure AdMob app IDs in app.json for Android and iOS
+    - Create AdMob ad unit IDs for banner, interstitial, rewarded, and native ads
+    - Set up test ad units for development
+    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 14.1, 14.2_
+  - [ ] 23.2 Create AdManagerService
+    - Implement AdManagerService class with preloading logic
+    - Create methods for showing interstitial ads
+    - Create methods for showing rewarded ads
+    - Implement ad frequency control logic
+    - Track ad impressions and user interactions
+    - _Requirements: 13.2, 13.3, 14.1, 14.2, 14.3_
+  - [ ] 23.3 Implement banner ads on all main screens
+    - Create BannerAd component
+    - Add banner ads to HomeScreen
+    - Add banner ads to SearchScreen
+    - Add banner ads to DownloadsScreen
+    - Add banner ads to SettingsScreen
+    - _Requirements: 13.1_
+  - [ ] 23.4 Implement interstitial ads at key points
+    - Show interstitial ad before download starts
+    - Show interstitial ad after every 3 downloads
+    - Show interstitial ad when opening downloaded video
+    - Implement frequency control to avoid ad fatigue
+    - _Requirements: 13.2, 13.3_
+  - [ ] 23.5 Implement rewarded ads for premium features
+    - Create rewarded ad UI for HD quality unlock
+    - Create rewarded ad UI for increased concurrent downloads
+    - Implement reward granting logic after ad completion
+    - Implement feature expiration timer
+    - Handle ad close without completion
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
+  - [ ] 23.6 Implement native advanced ads in lists
+    - Create NativeAd component
+    - Integrate native ads in trending video list (every 6th item)
+    - Integrate native ads in search results (every 6th item)
+    - Integrate native ads in downloads list (every 6th item)
+    - _Requirements: 13.5_
+  - [ ] 23.7 Implement ad analytics and tracking
+    - Track ad impressions by type and placement
+    - Track ad click-through rates
+    - Track rewarded ad completion rates
+    - Send analytics to backend for reporting
+    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
+
+- [ ] 27. Implement video editing system
+
+  - [ ] 27.1 Set up FFmpeg integration
+    - Install react-native-ffmpeg library
+    - Configure FFmpeg for Android and iOS
+    - Create FFmpeg wrapper service
+    - Test basic video operations
+    - _Requirements: 18.1, 18.2_
+  - [ ] 27.2 Implement trim functionality
+    - Create trim UI with timeline scrubber
+    - Implement start/end time selection
+    - Add trim preview functionality
+    - Process trim operation with FFmpeg
+    - _Requirements: 18.3_
+  - [ ] 27.3 Implement crop functionality
+    - Create crop UI with aspect ratio presets
+    - Implement crop area selection
+    - Add crop preview
+    - Process crop operation with FFmpeg
+    - _Requirements: 18.4_
+  - [ ] 27.4 Implement video merge functionality
+    - Create multi-video selection UI
+    - Implement video order management
+    - Add merge preview
+    - Process merge operation with FFmpeg
+    - _Requirements: 18.2_
+  - [ ] 27.5 Create video editor screen
+    - Build video editor UI with tool palette
+    - Implement video playback controls
+    - Add undo/redo functionality
+    - Create export options dialog
+    - _Requirements: 18.1, 18.5_
+
+- [ ] 28. Implement subtitle management system
+
+  - [ ] 28.1 Set up subtitle extraction
+    - Integrate yt-dlp subtitle extraction
+    - Create SubtitleService class
+    - Implement subtitle format detection
+    - Test subtitle download functionality
+    - _Requirements: 19.1, 19.3_
+  - [ ] 28.2 Create subtitle selection UI
+    - Build subtitle language selector
+    - Display available subtitle languages
+    - Show subtitle format options
+    - Add multi-language selection (max 5)
+    - _Requirements: 19.1, 19.2, 19.5_
+  - [ ] 28.3 Implement subtitle download
+    - Download subtitles with video
+    - Store subtitles in organized folders
+    - Handle subtitle format conversion
+    - Update download UI with subtitle status
+    - _Requirements: 19.2, 19.3_
+  - [ ] 28.4 Integrate subtitles with video player
+    - Load subtitles automatically on playback
+    - Implement subtitle track switching
+    - Add subtitle styling options
+    - Handle subtitle synchronization
+    - _Requirements: 19.4_
+
+- [ ] 29. Implement download scheduler system
+
+  - [ ] 29.1 Set up background job scheduler
+    - Install and configure Bull or Agenda
+    - Create SchedulerService class
+    - Implement job queue management
+    - Set up background task processing
+    - _Requirements: 20.1, 20.3_
+  - [ ] 29.2 Create schedule download UI
+    - Build schedule modal with date/time pickers
+    - Add WiFi-only toggle option
+    - Create quick schedule presets
+    - Display scheduled downloads list
+    - _Requirements: 20.2_
+  - [ ] 29.3 Implement schedule execution logic
+    - Monitor scheduled download times
+    - Check network connectivity (WiFi/mobile)
+    - Trigger downloads at scheduled time
+    - Handle schedule conflicts
+    - _Requirements: 20.3, 20.4_
+  - [ ] 29.4 Add schedule notifications
+    - Send notification when download starts
+    - Send notification on completion
+    - Handle failed schedule notifications
+    - Allow rescheduling from notification
+    - _Requirements: 20.5_
+
+- [ ] 30. Implement video conversion system
+
+  - [ ] 30.1 Create video converter service
+    - Build VideoConverterService class
+    - Implement format conversion with FFmpeg
+    - Add quality/bitrate adjustment
+    - Create conversion job queue
+    - _Requirements: 21.1, 21.2, 21.4_
+  - [ ] 30.2 Build conversion UI
+    - Create format selector with icons
+    - Add quality presets (low, medium, high)
+    - Implement advanced settings panel
+    - Show file size estimation
+    - _Requirements: 21.2, 21.3, 21.5_
+  - [ ] 30.3 Implement conversion progress tracking
+    - Parse FFmpeg output for progress
+    - Display conversion progress bar
+    - Show estimated time remaining
+    - Allow conversion cancellation
+    - _Requirements: 21.3_
+  - [ ] 30.4 Handle converted file management
+    - Save converted files in organized folders
+    - Update downloads list with converted files
+    - Clean up temporary conversion files
+    - Add converted file metadata
+    - _Requirements: 21.4_
+
+- [ ] 31. Implement app discovery system
+
+  - [ ] 31.1 Set up app data backend
+    - Create app scraping service for Play Store
+    - Set up Redis caching for app data
+    - Create AppDiscoveryService class
+    - Implement app data refresh job
+    - _Requirements: 23.1, 23.2_
+  - [ ] 31.2 Build app discovery UI
+    - Create app discovery home screen
+    - Implement category tabs
+    - Build app grid with icons and ratings
+    - Add trending apps carousel
+    - _Requirements: 23.1, 23.2, 24.1_
+  - [ ] 31.3 Implement app search functionality
+    - Create search bar with autocomplete
+    - Implement search results filtering
+    - Add search history
+    - Display search suggestions
+    - _Requirements: 24.4_
+  - [ ] 31.4 Create app details screen
+    - Build app details layout
+    - Display app screenshots carousel
+    - Show ratings and reviews
+    - Add developer information section
+    - _Requirements: 23.3, 25.1, 26.1_
+  - [ ] 31.5 Implement app reviews system
+    - Fetch and display app reviews
+    - Add review filtering (all/positive/negative)
+    - Show verified user badges
+    - Implement review sorting
+    - _Requirements: 26.2, 26.3, 26.4_
+  - [ ] 31.6 Add app bookmarking feature
+    - Create bookmark button
+    - Implement bookmark storage
+    - Build bookmarks screen
+    - Add bookmark organization
+    - _Requirements: 27.1, 27.2, 27.3, 27.5_
+  - [ ] 31.7 Implement store deep linking
+    - Create deep link handler for Play Store
+    - Add App Store support for iOS
+    - Implement "Install" button functionality
+    - Handle store not available scenarios
+    - _Requirements: 23.4_
+
+- [ ] 32. Implement premium subscription system
+
+  - [ ] 32.1 Set up subscription backend
+    - Create SubscriptionPlan model
+    - Create UserSubscription model
+    - Implement SubscriptionService
+    - Set up subscription expiry job
+    - _Requirements: 15.1, 15.5_
+  - [ ] 32.2 Integrate payment processing
+    - Set up Google Play Billing for Android
+    - Set up Apple App Store subscriptions for iOS
+    - Implement subscription purchase flow
+    - Handle subscription renewal and cancellation
+    - _Requirements: 15.1_
+  - [ ] 32.3 Create subscription UI screens
+    - Create subscription plans screen with pricing
+    - Create subscription management screen
+    - Create subscription status indicator
+    - Implement subscription purchase flow UI
+    - _Requirements: 15.1_
+  - [ ] 32.4 Implement ad-free experience for premium
+    - Modify AdManagerService to check subscription status
+    - Disable all ads for premium users
+    - Remove ad placeholders from UI for premium users
+    - _Requirements: 15.2, 15.3, 15.4_
+
+- [ ] 33. Implement premium video editing features
+
+  - [ ] 33.1 Add video filters
+    - Create filter library (vintage, black&white, etc.)
+    - Implement filter preview
+    - Add filter intensity slider
+    - Process filters with FFmpeg
+    - _Requirements: 22.1_
+  - [ ] 33.2 Implement text overlay feature
+    - Create text input dialog
+    - Add text positioning controls
+    - Implement text styling options (font, color, size)
+    - Process text overlay with FFmpeg
+    - _Requirements: 22.2_
+  - [ ] 33.3 Add watermark functionality
+    - Create watermark upload/selection
+    - Implement watermark positioning
+    - Add watermark opacity control
+    - Process watermark with FFmpeg
+    - _Requirements: 22.2_
+  - [ ] 33.4 Implement unlimited video merge
+    - Remove merge limit for premium users
+    - Add batch video selection
+    - Implement merge order management
+    - Show premium badge on merge feature
+    - _Requirements: 22.3_
+  - [ ] 33.5 Add 4K export option
+    - Add 4K quality option for premium users
+    - Implement 4K export with FFmpeg
+    - Show file size estimation for 4K
+    - Remove watermark on premium exports
+    - _Requirements: 22.4, 22.5_
+
+- [ ] 34. Implement MP3 download with quality options
+
+  - [ ] 34.1 Set up audio extraction service
+    - Integrate FFmpeg for audio extraction
+    - Create MP3ConversionService
+    - Implement bitrate conversion (128/192/320kbps)
+    - Test audio quality output
+    - _Requirements: 16.1, 16.2, 16.4_
+  - [ ] 34.2 Create MP3 quality selection UI
+    - Add MP3 option to format selector
+    - Display MP3 quality options with file sizes
+    - Show premium badge for high-quality options
+    - Add quality comparison info
+    - _Requirements: 16.1, 16.2, 16.3_
+  - [ ] 34.3 Implement MP3 metadata handling
+    - Extract video metadata (title, channel, thumbnail)
+    - Add ID3 tags to MP3 files
+    - Generate album art from video thumbnail
+    - Store metadata with MP3 files
+    - _Requirements: 16.5_
+  - [ ] 34.4 Create MP3 file management
+    - Organize MP3 files in separate folder
+    - Implement MP3-specific search and filtering
+    - Add MP3 playback preview functionality
+    - Display MP3 metadata in downloads list
+    - _Requirements: 16.5_
+
+- [ ] 35. Implement premium advanced download features
+  - [ ] 35.1 Add unlimited concurrent downloads
+    - Modify download queue for premium users
+    - Remove concurrent download limits
+    - Display premium status in download queue
+    - Show download speed improvements
+    - _Requirements: 17.1_
+  - [ ] 35.2 Add 4K and 8K quality options
+    - Extend quality detection to include 4K and 8K
+    - Mark ultra-high quality as premium-only
+    - Implement premium quality selection UI
+    - Show file size warnings for large downloads
+    - _Requirements: 17.2_
+  - [ ] 35.3 Implement maximum download speeds
+    - Remove download speed throttling for premium
+    - Implement priority download queue
+    - Display speed boost indicator
+    - Show download speed comparison
+    - _Requirements: 17.3_
+  - [ ] 35.4 Add batch playlist download
+    - Create playlist URL input and parsing
+    - Implement batch download queue management
+    - Add playlist download progress tracking
+    - Create playlist download UI for premium users
+    - _Requirements: 17.4_
+  - [ ] 35.5 Implement advanced file organization
+    - Create custom folder structure options
+    - Add automatic file naming templates
+    - Implement file tagging and categorization
+    - Create advanced search and filter options
+    - _Requirements: 17.5_

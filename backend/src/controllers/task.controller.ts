@@ -152,6 +152,83 @@ class TaskController {
   }
 
   /**
+   * Duplicate task (Sponsor)
+   */
+  async duplicateTask(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+        return;
+      }
+
+      const { taskId } = req.params;
+
+      const duplicatedTask = await taskService.duplicateTask(taskId, userId);
+
+      res.status(201).json({
+        success: true,
+        message: "Task duplicated successfully",
+        task: duplicatedTask,
+      });
+    } catch (error: any) {
+      console.error("Duplicate task error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to duplicate task",
+      });
+    }
+  }
+
+  /**
+   * Extend task expiry (Sponsor)
+   */
+  async extendExpiry(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+        return;
+      }
+
+      const { taskId } = req.params;
+      const { expiresAt } = req.body;
+
+      if (!expiresAt) {
+        res.status(400).json({
+          success: false,
+          message: "New expiry date is required",
+        });
+        return;
+      }
+
+      const task = await taskService.extendTaskExpiry(
+        taskId,
+        userId,
+        new Date(expiresAt)
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Task expiry extended successfully",
+        task,
+      });
+    } catch (error: any) {
+      console.error("Extend expiry error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Failed to extend task expiry",
+      });
+    }
+  }
+
+  /**
    * Toggle task status (Sponsor)
    */
   async toggleTaskStatus(req: AuthRequest, res: Response): Promise<void> {
@@ -229,6 +306,9 @@ class TaskController {
       }
 
       const { taskId } = req.params;
+      console.log(
+        `[TaskController] Accept task request - TaskID: ${taskId}, UserID: ${userId}`
+      );
 
       const submission = await taskService.acceptTask(taskId, userId);
 
@@ -238,7 +318,12 @@ class TaskController {
         submission,
       });
     } catch (error: any) {
-      console.error("Accept task error:", error);
+      console.error("[TaskController] Accept task error:", {
+        taskId: req.params.taskId,
+        userId: req.user?.id,
+        error: error.message,
+        stack: error.stack,
+      });
       res.status(500).json({
         success: false,
         message: error.message || "Failed to accept task",

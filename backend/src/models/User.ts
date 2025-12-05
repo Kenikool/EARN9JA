@@ -25,6 +25,14 @@ export interface IUser extends Document {
     businessDescription?: string;
     verificationStatus?: "pending" | "verified" | "rejected";
   };
+  sponsorPackage?: {
+    packageId: mongoose.Types.ObjectId;
+    packageName: "bronze" | "silver" | "gold";
+    subscribedAt: Date;
+    expiresAt: Date;
+    tasksUsed: number;
+    autoRenew: boolean;
+  };
   reputation: {
     score: number;
     level: number;
@@ -66,6 +74,25 @@ export interface IUser extends Document {
     value: number;
     expiresAt: Date;
   };
+  devices?: {
+    deviceId: string;
+    ipAddress: string;
+    lastUsed: Date;
+  }[];
+  bankDetails?: {
+    accountNumber: string;
+    bankName: string;
+    accountName: string;
+  };
+  accountStatus?: "active" | "flagged" | "suspended";
+  flaggedReason?: string;
+  fraudAttempts?: {
+    action: string;
+    riskScore: number;
+    flags: string[];
+    timestamp: Date;
+  }[];
+  kycVerified?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -148,6 +175,26 @@ const userSchema = new Schema<IUser>(
         default: "pending",
       },
     },
+    sponsorPackage: {
+      packageId: {
+        type: Schema.Types.ObjectId,
+        ref: "SponsorPackage",
+      },
+      packageName: {
+        type: String,
+        enum: ["bronze", "silver", "gold"],
+      },
+      subscribedAt: Date,
+      expiresAt: Date,
+      tasksUsed: {
+        type: Number,
+        default: 0,
+      },
+      autoRenew: {
+        type: Boolean,
+        default: true,
+      },
+    },
     isKYCVerified: { type: Boolean, default: false },
     walletId: {
       type: Schema.Types.ObjectId,
@@ -167,6 +214,36 @@ const userSchema = new Schema<IUser>(
     bonusMultiplier: {
       value: Number,
       expiresAt: Date,
+    },
+    devices: [
+      {
+        deviceId: String,
+        ipAddress: String,
+        lastUsed: Date,
+      },
+    ],
+    bankDetails: {
+      accountNumber: String,
+      bankName: String,
+      accountName: String,
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "flagged", "suspended"],
+      default: "active",
+    },
+    flaggedReason: String,
+    fraudAttempts: [
+      {
+        action: String,
+        riskScore: Number,
+        flags: [String],
+        timestamp: Date,
+      },
+    ],
+    kycVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {

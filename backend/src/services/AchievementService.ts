@@ -200,8 +200,25 @@ export class AchievementService {
             userId,
             badge.reward.amount,
             "referral_bonus",
-            `Achievement bonus: ${badge.name}`
+            `Achievement bonus: ${badge.name}`,
+            { achievementId: badge.id }
           );
+        }
+
+        // Notify user about achievement
+        try {
+          const { NotificationHelpers } = await import(
+            "./NotificationHelpers.js"
+          );
+          await NotificationHelpers.notifyAchievementUnlocked(
+            userId,
+            badge.id,
+            badge.name,
+            badge.description,
+            badge.reward?.amount
+          );
+        } catch (error) {
+          console.log("Failed to send achievement notification:", error);
         }
       }
     }

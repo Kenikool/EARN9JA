@@ -302,17 +302,17 @@ This document specifies the requirements for a mobile task-based earning platfor
 4. THE Platform SHALL allow users to configure notification preferences by category including tasks, payments, and promotions
 5. THE Platform SHALL respect device notification settings and handle permission denials gracefully
 
-### Requirement 24: In-App Messaging and Support
+### Requirement 24: Support System
 
-**User Story:** As a user, I want to communicate with support and other users, so that I can get help and collaborate
+**User Story:** As a user, I want to get help from admin support when I have issues, so that I can resolve problems quickly
 
 #### Acceptance Criteria
 
-1. THE Platform SHALL provide in-app chat for Service Workers to contact Sponsors regarding task clarifications
-2. THE Platform SHALL offer support ticket system for users to report issues with priority levels of low, medium, and high
-3. WHEN a user submits a support ticket, THE Platform SHALL acknowledge receipt within 60 seconds and assign to available support agent
-4. THE Platform SHALL maintain chat history for minimum 90 days for reference and dispute resolution
-5. THE Platform SHALL provide FAQ section with searchable knowledge base covering common questions
+1. THE Platform SHALL offer support ticket system for users to report issues with priority levels of low, medium, and high
+2. WHEN a user submits a support ticket, THE Platform SHALL acknowledge receipt within 60 seconds and assign to available admin support agent
+3. THE Platform SHALL maintain support ticket history for minimum 90 days for reference and dispute resolution
+4. THE Platform SHALL provide FAQ section with searchable knowledge base covering common questions
+5. THE Platform SHALL allow users to view status and responses to their support tickets within the app
 
 ### Requirement 25: Security and Fraud Prevention
 

@@ -13,12 +13,24 @@ class AdminController {
   // User Management
   async getAllUsers(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { status, role, isKYCVerified, search, page = 1, limit = 20 } = req.query;
+      const {
+        status,
+        role,
+        isKYCVerified,
+        search,
+        page = 1,
+        limit = 20,
+      } = req.query;
 
       const filters = {
         status,
         role,
-        isKYCVerified: isKYCVerified === "true" ? true : isKYCVerified === "false" ? false : undefined,
+        isKYCVerified:
+          isKYCVerified === "true"
+            ? true
+            : isKYCVerified === "false"
+            ? false
+            : undefined,
         search,
       };
 
@@ -235,7 +247,10 @@ class AdminController {
         return;
       }
 
-      const result = await adminService.approveWithdrawal(withdrawalId, adminId);
+      const result = await adminService.approveWithdrawal(
+        withdrawalId,
+        adminId
+      );
 
       res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
@@ -318,9 +333,6 @@ class AdminController {
       });
     }
   }
-}
-
-export const adminController = new AdminController();
 
   // Dispute Resolution
   async getPendingDisputes(req: AuthRequest, res: Response): Promise<void> {

@@ -78,6 +78,20 @@ router.put(
 );
 
 /**
+ * @route   POST /api/v1/tasks/:taskId/duplicate
+ * @desc    Duplicate task (Sponsor)
+ * @access  Private
+ */
+router.post("/:taskId/duplicate", taskController.duplicateTask);
+
+/**
+ * @route   PUT /api/v1/tasks/:taskId/extend-expiry
+ * @desc    Extend task expiry date (Sponsor)
+ * @access  Private
+ */
+router.put("/:taskId/extend-expiry", taskController.extendExpiry);
+
+/**
  * @route   POST /api/v1/tasks/:taskId/toggle-status
  * @desc    Pause/Resume task (Sponsor)
  * @access  Private

@@ -1,0 +1,392 @@
+export interface RequirementTemplate {
+  id: string;
+  text: string;
+  category: string;
+  platform?: string;
+  difficulty: "easy" | "medium" | "hard";
+  popular: boolean;
+}
+
+export const requirementTemplates: RequirementTemplate[] = [
+  // SOCIAL_MEDIA - Instagram
+  {
+    id: "ig_follow_1",
+    text: "Must have an active Instagram account",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "ig_follow_2",
+    text: "Follow the account and do not unfollow within 7 days",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "ig_like_1",
+    text: "Like the specified post",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "ig_comment_1",
+    text: "Comment must be at least 10 words long",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "ig_comment_2",
+    text: "Comment must be relevant to the post content",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "ig_story_1",
+    text: "Share the post to your Instagram story",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "medium",
+    popular: false,
+  },
+  {
+    id: "ig_proof_1",
+    text: "Take a screenshot showing you completed the action",
+    category: "SOCIAL_MEDIA",
+    platform: "Instagram",
+    difficulty: "easy",
+    popular: true,
+  },
+
+  // SOCIAL_MEDIA - Facebook
+  {
+    id: "fb_like_1",
+    text: "Must have an active Facebook account",
+    category: "SOCIAL_MEDIA",
+    platform: "Facebook",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "fb_like_2",
+    text: "Like the Facebook page",
+    category: "SOCIAL_MEDIA",
+    platform: "Facebook",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "fb_share_1",
+    text: "Share the post publicly on your timeline",
+    category: "SOCIAL_MEDIA",
+    platform: "Facebook",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "fb_comment_1",
+    text: "Leave a meaningful comment (minimum 15 words)",
+    category: "SOCIAL_MEDIA",
+    platform: "Facebook",
+    difficulty: "medium",
+    popular: false,
+  },
+
+  // SOCIAL_MEDIA - Twitter/X
+  {
+    id: "tw_follow_1",
+    text: "Must have an active Twitter/X account",
+    category: "SOCIAL_MEDIA",
+    platform: "Twitter",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tw_follow_2",
+    text: "Follow the account and do not unfollow within 7 days",
+    category: "SOCIAL_MEDIA",
+    platform: "Twitter",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tw_retweet_1",
+    text: "Retweet the specified tweet",
+    category: "SOCIAL_MEDIA",
+    platform: "Twitter",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tw_like_1",
+    text: "Like the specified tweet",
+    category: "SOCIAL_MEDIA",
+    platform: "Twitter",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tw_reply_1",
+    text: "Reply to the tweet with a relevant comment",
+    category: "SOCIAL_MEDIA",
+    platform: "Twitter",
+    difficulty: "medium",
+    popular: false,
+  },
+
+  // SOCIAL_MEDIA - TikTok
+  {
+    id: "tt_follow_1",
+    text: "Must have an active TikTok account",
+    category: "SOCIAL_MEDIA",
+    platform: "TikTok",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tt_follow_2",
+    text: "Follow the account and do not unfollow within 7 days",
+    category: "SOCIAL_MEDIA",
+    platform: "TikTok",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tt_like_1",
+    text: "Like the specified video",
+    category: "SOCIAL_MEDIA",
+    platform: "TikTok",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "tt_comment_1",
+    text: "Leave a positive comment on the video",
+    category: "SOCIAL_MEDIA",
+    platform: "TikTok",
+    difficulty: "medium",
+    popular: false,
+  },
+
+  // SOCIAL_MEDIA - YouTube
+  {
+    id: "yt_subscribe_1",
+    text: "Must have an active YouTube account",
+    category: "SOCIAL_MEDIA",
+    platform: "YouTube",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "yt_subscribe_2",
+    text: "Subscribe to the channel and do not unsubscribe within 7 days",
+    category: "SOCIAL_MEDIA",
+    platform: "YouTube",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "yt_like_1",
+    text: "Like the specified video",
+    category: "SOCIAL_MEDIA",
+    platform: "YouTube",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "yt_watch_1",
+    text: "Watch the video for at least 2 minutes",
+    category: "SOCIAL_MEDIA",
+    platform: "YouTube",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "yt_comment_1",
+    text: "Leave a thoughtful comment (minimum 20 words)",
+    category: "SOCIAL_MEDIA",
+    platform: "YouTube",
+    difficulty: "medium",
+    popular: false,
+  },
+
+  // MUSIC - Spotify
+  {
+    id: "sp_follow_1",
+    text: "Must have an active Spotify account",
+    category: "MUSIC",
+    platform: "Spotify",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sp_follow_2",
+    text: "Follow the artist on Spotify",
+    category: "MUSIC",
+    platform: "Spotify",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sp_save_1",
+    text: "Save the track to your library",
+    category: "MUSIC",
+    platform: "Spotify",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sp_playlist_1",
+    text: "Add the track to a public playlist",
+    category: "MUSIC",
+    platform: "Spotify",
+    difficulty: "medium",
+    popular: false,
+  },
+
+  // MUSIC - SoundCloud
+  {
+    id: "sc_follow_1",
+    text: "Must have an active SoundCloud account",
+    category: "MUSIC",
+    platform: "SoundCloud",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sc_follow_2",
+    text: "Follow the artist on SoundCloud",
+    category: "MUSIC",
+    platform: "SoundCloud",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sc_like_1",
+    text: "Like the specified track",
+    category: "MUSIC",
+    platform: "SoundCloud",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sc_repost_1",
+    text: "Repost the track to your profile",
+    category: "MUSIC",
+    platform: "SoundCloud",
+    difficulty: "medium",
+    popular: false,
+  },
+
+  // REVIEW
+  {
+    id: "rv_account_1",
+    text: "Must have a verified account on the review platform",
+    category: "REVIEW",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "rv_length_1",
+    text: "Review must be at least 50 words long",
+    category: "REVIEW",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "rv_honest_1",
+    text: "Review must be honest and based on actual experience",
+    category: "REVIEW",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "rv_rating_1",
+    text: "Provide a 5-star rating",
+    category: "REVIEW",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "rv_photo_1",
+    text: "Include at least one photo with your review (optional)",
+    category: "REVIEW",
+    difficulty: "medium",
+    popular: false,
+  },
+  {
+    id: "rv_detailed_1",
+    text: "Review must be detailed and cover key aspects",
+    category: "REVIEW",
+    difficulty: "hard",
+    popular: false,
+  },
+
+  // SURVEY
+  {
+    id: "sv_complete_1",
+    text: "Complete all survey questions",
+    category: "SURVEY",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sv_honest_1",
+    text: "Provide honest and thoughtful answers",
+    category: "SURVEY",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sv_time_1",
+    text: "Survey should take approximately 5-10 minutes",
+    category: "SURVEY",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "sv_submit_1",
+    text: "Submit the survey and take a screenshot of confirmation",
+    category: "SURVEY",
+    difficulty: "easy",
+    popular: true,
+  },
+
+  // GENERAL
+  {
+    id: "gen_proof_1",
+    text: "Submit clear screenshot proof of completion",
+    category: "GENERAL",
+    difficulty: "easy",
+    popular: true,
+  },
+  {
+    id: "gen_proof_2",
+    text: "Proof must show your username and timestamp",
+    category: "GENERAL",
+    difficulty: "medium",
+    popular: true,
+  },
+  {
+    id: "gen_time_1",
+    text: "Complete the task within 24 hours of acceptance",
+    category: "GENERAL",
+    difficulty: "easy",
+    popular: false,
+  },
+  {
+    id: "gen_quality_1",
+    text: "Ensure all actions are genuine and not automated",
+    category: "GENERAL",
+    difficulty: "easy",
+    popular: true,
+  },
+];

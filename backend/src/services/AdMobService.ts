@@ -3,6 +3,7 @@ import { AdMobReward, IAdMobReward } from "../models/AdMobReward";
 import { User } from "../models/User";
 import { Wallet } from "../models/Wallet";
 import { Transaction } from "../models/Transaction";
+import { FinancialTransaction } from "../models/FinancialTransaction";
 
 interface AdWatchRequest {
   userId: string;
@@ -37,21 +38,29 @@ interface FraudCheckResult {
 export class AdMobService {
   private readonly MAX_ADS_PER_DAY: number;
   private readonly FRAUD_CHECK_WINDOW: number;
-  private readonly REWARD_AMOUNT: number;
   private readonly RAPID_WATCH_THRESHOLD = 60000; // 1 minute
   private readonly MAX_DEVICES_PER_USER = 3;
   private readonly MAX_IPS_PER_USER = 5;
 
+  // Expected AdMob revenue per ad view in Nigeria (eCPM)
+  private readonly EXPECTED_ADMOB_REVENUE = 0.8;
+
+  // Profitable tiered reward system
+  // With eCPM of ₦0.80, these rewards ensure ₦0.20-₦0.25 profit per ad
+  private readonly REWARD_TIERS = [
+    { min: 1, max: 20, amount: 0.6 }, // First 20 ads: ₦0.60 each (₦0.20 profit per ad)
+    { min: 21, max: 50, amount: 0.55 }, // Next 30 ads: ₦0.55 each (₦0.25 profit per ad)
+  ];
+
   constructor() {
     this.MAX_ADS_PER_DAY = parseInt(
-      process.env.ADMOB_MAX_ADS_PER_DAY || "20",
+      process.env.ADMOB_MAX_ADS_PER_DAY || "50",
       10
     );
     this.FRAUD_CHECK_WINDOW = parseInt(
       process.env.ADMOB_FRAUD_CHECK_WINDOW || "60000",
       10
     );
-    this.REWARD_AMOUNT = parseFloat(process.env.ADMOB_REWARD_AMOUNT || "50");
   }
 
   async processAdReward(request: AdWatchRequest): Promise<AdWatchResponse> {
@@ -71,7 +80,32 @@ export class AdMobService {
         return { success: false, error: "User account is not active" };
       }
 
-      // Perform fraud detection checks
+      // Enhanced fraud detection using FraudDetectionService
+      const { FraudDetectionService } = await import(
+        "./FraudDetectionService.js"
+      );
+      const comprehensiveFraudCheck =
+        await FraudDetectionService.comprehensiveCheck(request.userId, {
+          action: "ad_watch",
+          deviceId: request.deviceId,
+          ipAddress: request.ipAddress,
+        });
+
+      if (comprehensiveFraudCheck.isFraudulent) {
+        await FraudDetectionService.logFraudAttempt(
+          request.userId,
+          "ad_watch",
+          comprehensiveFraudCheck
+        );
+        await session.abortTransaction();
+        return {
+          success: false,
+          error: "Ad watch flagged for review. Please contact support.",
+          fraudScore: comprehensiveFraudCheck.riskScore,
+        };
+      }
+
+      // Perform basic fraud detection checks
       const fraudCheck = await this.performFraudChecks(request);
       if (!fraudCheck.passed) {
         await session.abortTransaction();
@@ -92,12 +126,25 @@ export class AdMobService {
         };
       }
 
+      // Calculate reward based on tier
+      const rewardAmount = this.calculateRewardAmount(todayCount);
+
+      // Validate profit margin
+      const profitMargin = this.EXPECTED_ADMOB_REVENUE - rewardAmount;
+      if (profitMargin < 0) {
+        await session.abortTransaction();
+        return {
+          success: false,
+          error: "Reward calculation error. Please contact support.",
+        };
+      }
+
       // Get or create wallet
       let wallet = await Wallet.findOne({ userId: request.userId }).session(
         session
       );
       if (!wallet) {
-        wallet = await Wallet.create(
+        const wallets = await Wallet.create(
           [
             {
               userId: request.userId,
@@ -110,11 +157,18 @@ export class AdMobService {
             },
           ],
           { session }
-        ).then((wallets) => wallets[0]);
+        );
+        wallet = wallets[0];
 
         // Update user with wallet reference
         user.walletId = wallet._id;
         await user.save({ session });
+      }
+
+      // Ensure wallet exists (TypeScript null check)
+      if (!wallet) {
+        await session.abortTransaction();
+        return { success: false, error: "Failed to create wallet" };
       }
 
       // Create reward record
@@ -123,7 +177,7 @@ export class AdMobService {
           {
             userId: request.userId,
             taskId: request.taskId,
-            reward: this.REWARD_AMOUNT,
+            reward: rewardAmount,
             platform: request.platform,
             deviceId: request.deviceId,
             ipAddress: request.ipAddress,
@@ -138,8 +192,8 @@ export class AdMobService {
 
       // Create transaction and credit wallet
       const balanceBefore = wallet.availableBalance;
-      wallet.availableBalance += this.REWARD_AMOUNT;
-      wallet.lifetimeEarnings += this.REWARD_AMOUNT;
+      wallet.availableBalance += rewardAmount;
+      wallet.lifetimeEarnings += rewardAmount;
       const balanceAfter = wallet.availableBalance;
 
       const transaction = await Transaction.create(
@@ -148,17 +202,19 @@ export class AdMobService {
             walletId: wallet._id,
             userId: request.userId,
             type: "admob_reward",
-            amount: this.REWARD_AMOUNT,
+            amount: rewardAmount,
             balanceBefore,
             balanceAfter,
             status: "completed",
-            description: `AdMob reward for watching ad`,
+            description: `AdMob reward for watching ad (Ad #${todayCount + 1})`,
             referenceId: reward._id.toString(),
             referenceType: "AdMobReward",
             metadata: {
               platform: request.platform,
               deviceId: request.deviceId,
               fraudScore: fraudCheck.score,
+              adNumber: todayCount + 1,
+              tier: this.getTierName(todayCount + 1),
             },
             completedAt: new Date(),
           },
@@ -172,6 +228,48 @@ export class AdMobService {
 
       // Save wallet
       await wallet.save({ session });
+
+      // Log financial transactions for monitoring
+      // profitMargin was already calculated earlier for validation
+
+      // Log ad revenue (what we expect to earn from AdMob)
+      await FinancialTransaction.create(
+        [
+          {
+            type: "ad_revenue",
+            amount: this.EXPECTED_ADMOB_REVENUE,
+            userId: request.userId,
+            description: `AdMob revenue for ad #${todayCount + 1}`,
+            metadata: {
+              adNumber: todayCount + 1,
+              platform: request.platform,
+              deviceId: request.deviceId,
+              rewardId: reward._id.toString(),
+            },
+          },
+        ],
+        { session }
+      );
+
+      // Log ad expense (what we paid to the user)
+      await FinancialTransaction.create(
+        [
+          {
+            type: "ad_expense",
+            amount: rewardAmount,
+            userId: request.userId,
+            description: `Ad reward payment for ad #${todayCount + 1}`,
+            metadata: {
+              adNumber: todayCount + 1,
+              tier: this.getTierName(todayCount + 1),
+              profitMargin,
+              transactionId: transaction._id.toString(),
+              rewardId: reward._id.toString(),
+            },
+          },
+        ],
+        { session }
+      );
 
       // Update user device and IP tracking
       if (!user.deviceIds.includes(request.deviceId)) {
@@ -187,7 +285,7 @@ export class AdMobService {
 
       return {
         success: true,
-        reward: this.REWARD_AMOUNT,
+        reward: rewardAmount,
         newBalance: balanceAfter,
         transactionId: transaction._id.toString(),
         fraudScore: fraudCheck.score,
@@ -303,6 +401,8 @@ export class AdMobService {
     const todayCount = todayRewards.length;
     const todayEarnings = todayRewards.reduce((sum, r) => sum + r.reward, 0);
     const totalEarnings = allRewards.reduce((sum, r) => sum + r.reward, 0);
+    const nextReward = this.getNextRewardAmount(todayCount);
+    const currentTier = this.getTierName(todayCount + 1);
 
     return {
       todayCount,
@@ -310,7 +410,41 @@ export class AdMobService {
       todayEarnings,
       totalEarnings,
       maxAdsPerDay: this.MAX_ADS_PER_DAY,
+      nextReward,
+      currentTier,
+      tiers: this.REWARD_TIERS,
     };
+  }
+  /**
+   * Calculate reward amount based on how many ads the user has watched today
+   */
+  private calculateRewardAmount(todayCount: number): number {
+    const adNumber = todayCount + 1; // Next ad number
+
+    for (const tier of this.REWARD_TIERS) {
+      if (adNumber >= tier.min && adNumber <= tier.max) {
+        return tier.amount;
+      }
+    }
+
+    // Default to lowest tier if beyond all tiers
+    return this.REWARD_TIERS[this.REWARD_TIERS.length - 1].amount;
+  }
+
+  /**
+   * Get tier name for display purposes
+   */
+  private getTierName(adNumber: number): string {
+    if (adNumber >= 1 && adNumber <= 20) return "Standard";
+    if (adNumber >= 21 && adNumber <= 50) return "Economy";
+    return "Economy";
+  }
+
+  /**
+   * Get next reward amount for user
+   */
+  getNextRewardAmount(todayCount: number): number {
+    return this.calculateRewardAmount(todayCount);
   }
 }
 

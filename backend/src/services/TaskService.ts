@@ -3,6 +3,8 @@ import { Task, ITask } from "../models/Task.js";
 import { TaskSubmission, ITaskSubmission } from "../models/TaskSubmission.js";
 import { walletService } from "./WalletService.js";
 import { User } from "../models/User.js";
+import { getSocketService } from "../config/socket.js";
+import { escrowService } from "./EscrowService.js";
 
 class TaskService {
   /**
@@ -27,27 +29,30 @@ class TaskService {
     session.startTransaction();
 
     try {
-      // Calculate total cost (reward * slots + 10% platform fee)
-      const totalReward = taskData.reward * taskData.totalSlots;
-      const platformFee = totalReward * 0.1;
-      const totalCost = totalReward + platformFee;
+      // Calculate total cost (reward * slots)
+      // Note: Platform commission (15%) is taken when task is completed
+      const totalCost = taskData.reward * taskData.totalSlots;
 
-      // Check sponsor's wallet balance
-      const wallet = await walletService.getWalletByUserId(sponsorId);
-      if (!wallet || wallet.availableBalance < totalCost) {
-        throw new Error("Insufficient balance to create task");
+      // Check sponsor's escrow balance
+      const escrowBalance = await escrowService.getBalance(sponsorId);
+      if (!escrowBalance.success) {
+        throw new Error(
+          escrowBalance.error || "Failed to check escrow balance"
+        );
       }
 
-      // Hold funds in escrow
-      await walletService.holdInEscrow(
-        sponsorId,
-        totalCost,
-        "task_creation",
-        `Task: ${taskData.title}`,
-        session
-      );
+      if (
+        escrowBalance.availableBalance === undefined ||
+        escrowBalance.availableBalance < totalCost
+      ) {
+        throw new Error(
+          `Insufficient escrow balance. Available: ₦${
+            escrowBalance.availableBalance || 0
+          }, Required: ₦${totalCost}`
+        );
+      }
 
-      // Create task
+      // Create task first
       const task = await Task.create(
         [
           {
@@ -60,6 +65,19 @@ class TaskService {
         ],
         { session }
       );
+
+      // Reserve funds in escrow for this task
+      const reserveResult = await escrowService.reserveFunds(
+        sponsorId,
+        totalCost,
+        task[0]._id.toString()
+      );
+
+      if (!reserveResult.success) {
+        throw new Error(
+          reserveResult.error || "Failed to reserve escrow funds"
+        );
+      }
 
       await session.commitTransaction();
       console.log(`✅ Task created: ${task[0]._id}`);
@@ -244,6 +262,28 @@ class TaskService {
       await session.commitTransaction();
       console.log(`✅ Task accepted: ${taskId} by ${workerId}`);
 
+      // Notify sponsor about new worker
+      try {
+        const NotificationService = (await import("./NotificationService.js"))
+          .default;
+        await NotificationService.sendToUser({
+          userId: task.sponsorId.toString(),
+          title: "Worker Accepted Task",
+          body: `A worker has accepted your task "${task.title}".`,
+          type: "task_accepted",
+          data: {
+            taskId: task._id.toString(),
+            workerId: workerId,
+          },
+          actionUrl: `/sponsor/submissions/${task._id}`,
+        });
+      } catch (notificationError) {
+        console.log(
+          "Failed to send task accepted notification:",
+          notificationError
+        );
+      }
+
       return submission[0];
     } catch (error) {
       await session.abortTransaction();
@@ -266,7 +306,7 @@ class TaskService {
       const submission = await TaskSubmission.findOne({
         _id: submissionId,
         workerId,
-      });
+      }).populate("taskId");
 
       if (!submission) {
         throw new Error("Submission not found");
@@ -280,6 +320,29 @@ class TaskService {
       submission.proofs = proofs;
       submission.submittedAt = new Date();
       await submission.save();
+
+      // Notify sponsor about new submission
+      try {
+        const task = submission.taskId as any;
+        const NotificationService = (await import("./NotificationService.js"))
+          .default;
+        await NotificationService.sendToUser({
+          userId: submission.sponsorId.toString(),
+          title: "New Task Submission",
+          body: `A worker has submitted their work for "${task.title}". Review it now.`,
+          type: "task_submission",
+          data: {
+            submissionId: submission._id.toString(),
+            taskId: task._id.toString(),
+          },
+          actionUrl: `/sponsor/submissions/${task._id}`,
+        });
+      } catch (notificationError) {
+        console.log(
+          "Failed to send submission notification:",
+          notificationError
+        );
+      }
 
       console.log(`✅ Task submitted: ${submissionId}`);
       return submission;
@@ -343,22 +406,51 @@ class TaskService {
 
         // Update task completed slots
         task.completedSlots += 1;
-        if (task.completedSlots >= task.totalSlots) {
+        const taskFullyCompleted = task.completedSlots >= task.totalSlots;
+        if (taskFullyCompleted) {
           task.status = "completed";
         }
         await task.save({ session });
 
-        // Release escrow and pay worker
-        await walletService.releaseFromEscrow(
-          sponsorId.toString(),
-          task.reward,
-          submission.workerId.toString(),
-          "task_earning",
-          `Task completed: ${task.title}`,
+        // Notify sponsor if task is fully completed
+        if (taskFullyCompleted) {
+          try {
+            const NotificationService = (
+              await import("./NotificationService.js")
+            ).default;
+            await NotificationService.sendToUser({
+              userId: sponsorId.toString(),
+              title: "Task Completed! 🎉",
+              body: `All submissions for "${task.title}" have been completed and approved.`,
+              type: "task_completed",
+              data: {
+                taskId: task._id.toString(),
+                completedSlots: task.completedSlots,
+                totalSlots: task.totalSlots,
+              },
+              actionUrl: `/sponsor/task/${task._id}`,
+            });
+          } catch (notificationError) {
+            console.log(
+              "Failed to send task completed notification:",
+              notificationError
+            );
+          }
+        }
+
+        // Release escrow and pay worker using new escrow service
+        const releaseResult = await escrowService.releaseFunds(
           task._id.toString(),
-          "Task",
-          session
+          sponsorId.toString(),
+          submission.workerId.toString(),
+          task.reward
         );
+
+        if (!releaseResult.success) {
+          throw new Error(
+            releaseResult.error || "Failed to release escrow funds"
+          );
+        }
 
         // Update worker reputation
         await this.updateWorkerReputation(
@@ -369,10 +461,49 @@ class TaskService {
 
         console.log(`✅ Submission approved: ${submissionId}`);
 
-        // Process referral commission (after transaction commits)
+        // Notify worker about approval
+        try {
+          const NotificationService = (await import("./NotificationService.js"))
+            .default;
+          await NotificationService.sendToUser({
+            userId: submission.workerId.toString(),
+            title: "Task Approved! 🎉",
+            body: `Your submission for "${task.title}" has been approved. You earned ₦${task.reward}!`,
+            type: "task_approved",
+            data: {
+              submissionId: submission._id.toString(),
+              taskId: task._id.toString(),
+              reward: task.reward,
+            },
+            actionUrl: `/tasks/submission/${submission._id}`,
+          });
+        } catch (notificationError) {
+          console.log(
+            "Failed to send approval notification:",
+            notificationError
+          );
+        }
+
+        // Emit real-time notification
+        try {
+          const socketService = getSocketService();
+          socketService.emitTaskApproval(
+            submission.workerId.toString(),
+            submission.toObject()
+          );
+        } catch (error) {
+          console.log("Socket service not available");
+        }
+
+        // Track task completion for conditional referral bonuses (after transaction commits)
         session.commitTransaction().then(async () => {
           try {
             const { ReferralService } = await import("./ReferralService.js");
+            // Track task completion for conditional bonuses (awards after 5 tasks)
+            await ReferralService.trackTaskCompletion(
+              submission.workerId.toString()
+            );
+            // Also process old commission system for backwards compatibility
             await ReferralService.processCommission(
               submission.workerId.toString(),
               task.reward
@@ -415,6 +546,42 @@ class TaskService {
         );
 
         console.log(`✅ Submission rejected: ${submissionId}`);
+
+        // Notify worker about rejection
+        try {
+          const NotificationService = (await import("./NotificationService.js"))
+            .default;
+          await NotificationService.sendToUser({
+            userId: submission.workerId.toString(),
+            title: "Task Rejected",
+            body: `Your submission for "${task.title}" was rejected. ${
+              reviewNotes ? "Reason: " + reviewNotes : ""
+            }`,
+            type: "task_rejected",
+            data: {
+              submissionId: submission._id.toString(),
+              taskId: task._id.toString(),
+              reviewNotes: reviewNotes,
+            },
+            actionUrl: `/tasks/submission/${submission._id}`,
+          });
+        } catch (notificationError) {
+          console.log(
+            "Failed to send rejection notification:",
+            notificationError
+          );
+        }
+
+        // Emit real-time notification
+        try {
+          const socketService = getSocketService();
+          socketService.emitTaskRejection(
+            submission.workerId.toString(),
+            submission.toObject()
+          );
+        } catch (error) {
+          console.log("Socket service not available");
+        }
       } else if (action === "request_revision") {
         // Request revision
         submission.status = "revision_requested";
@@ -434,6 +601,31 @@ class TaskService {
         });
 
         await submission.save({ session });
+
+        // Notify worker about revision request
+        try {
+          const NotificationService = (await import("./NotificationService.js"))
+            .default;
+          await NotificationService.sendToUser({
+            userId: submission.workerId.toString(),
+            title: "Revision Requested",
+            body: `The sponsor has requested revisions for "${task.title}". ${
+              reviewNotes ? reviewNotes : "Check the details."
+            }`,
+            type: "task_revision",
+            data: {
+              submissionId: submission._id.toString(),
+              taskId: task._id.toString(),
+              revisionNotes: reviewNotes,
+            },
+            actionUrl: `/tasks/submission/${submission._id}`,
+          });
+        } catch (notificationError) {
+          console.log(
+            "Failed to send revision notification:",
+            notificationError
+          );
+        }
 
         console.log(`✅ Revision requested: ${submissionId}`);
       }
@@ -609,6 +801,87 @@ class TaskService {
   }
 
   /**
+   * Duplicate task (Sponsor)
+   */
+  async duplicateTask(taskId: string, sponsorId: string): Promise<ITask> {
+    try {
+      // Find the original task
+      const originalTask = await Task.findOne({ _id: taskId, sponsorId });
+      if (!originalTask) {
+        throw new Error("Task not found or unauthorized");
+      }
+
+      // Create new task data from original (only required fields for createTask)
+      const duplicatedTaskData = {
+        title: `Copy of ${originalTask.title}`,
+        description: originalTask.description,
+        category: originalTask.category,
+        reward: originalTask.reward,
+        totalSlots: originalTask.totalSlots,
+        requirements: [...originalTask.requirements],
+        proofRequirements: originalTask.proofRequirements.map((pr) => ({
+          type: pr.type,
+          description: pr.description,
+          required: pr.required,
+        })),
+        estimatedTime: originalTask.estimatedTime,
+        // Set new expiry date (7 days from now)
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        targetAudience: originalTask.targetAudience
+          ? { ...originalTask.targetAudience }
+          : undefined,
+      };
+
+      // Create the duplicated task using the createTask method
+      const duplicatedTask = await this.createTask(
+        sponsorId,
+        duplicatedTaskData
+      );
+
+      console.log(`✅ Task duplicated: ${taskId} -> ${duplicatedTask._id}`);
+      return duplicatedTask;
+    } catch (error) {
+      console.error("❌ Duplicate task error:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extend task expiry date (Sponsor)
+   */
+  async extendTaskExpiry(
+    taskId: string,
+    sponsorId: string,
+    newExpiryDate: Date
+  ): Promise<ITask> {
+    try {
+      const task = await Task.findOne({ _id: taskId, sponsorId });
+      if (!task) {
+        throw new Error("Task not found or unauthorized");
+      }
+
+      // Validate new expiry date is in the future
+      if (newExpiryDate <= new Date()) {
+        throw new Error("New expiry date must be in the future");
+      }
+
+      // If task is expired, reactivate it
+      if (task.status === "expired") {
+        task.status = "active";
+      }
+
+      task.expiresAt = newExpiryDate;
+      await task.save();
+
+      console.log(`✅ Task expiry extended: ${taskId} to ${newExpiryDate}`);
+      return task;
+    } catch (error) {
+      console.error("❌ Extend task expiry error:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Pause/Resume task (Sponsor)
    */
   async toggleTaskStatus(taskId: string, sponsorId: string): Promise<ITask> {
@@ -663,19 +936,21 @@ class TaskService {
       // Refund escrow if task not completed
       if (task.status !== "completed") {
         const totalReward = task.reward * task.totalSlots;
-        const platformFee = totalReward * 0.1;
-        const totalCost = totalReward + platformFee;
         const usedAmount = task.reward * task.completedSlots;
-        const refundAmount = totalCost - usedAmount;
+        const refundAmount = totalReward - usedAmount;
 
         if (refundAmount > 0) {
-          await walletService.refundFromEscrow(
+          const refundResult = await escrowService.refundFunds(
+            taskId,
             sponsorId,
-            refundAmount,
-            "task_cancellation",
-            `Task cancelled: ${task.title}`,
-            session
+            refundAmount
           );
+
+          if (!refundResult.success) {
+            throw new Error(
+              refundResult.error || "Failed to refund escrow funds"
+            );
+          }
         }
       }
 
@@ -859,25 +1134,28 @@ class TaskService {
         { status: "rejected", reviewedAt: new Date() }
       ).session(session);
 
-      // Calculate refund amount (remaining slots * reward + platform fee)
+      // Calculate refund amount (remaining slots * reward)
+      // Note: No platform fee on cancellation since commission is only taken on completion
       const completedSlots = await TaskSubmission.countDocuments({
         taskId,
         status: "approved",
       }).session(session);
 
       const remainingSlots = task.totalSlots - completedSlots;
-      const refundReward = remainingSlots * task.reward;
-      const refundPlatformFee = refundReward * 0.1;
-      const refundAmount = refundReward + refundPlatformFee;
+      const refundAmount = remainingSlots * task.reward;
 
       if (refundAmount > 0) {
-        await walletService.refundFromEscrow(
+        const refundResult = await escrowService.refundFunds(
+          taskId,
           sponsorId,
-          refundAmount,
-          "task_cancellation",
-          `Task cancelled: ${task.title}`,
-          session
+          refundAmount
         );
+
+        if (!refundResult.success) {
+          throw new Error(
+            refundResult.error || "Failed to refund escrow funds"
+          );
+        }
       }
 
       // Update task status
