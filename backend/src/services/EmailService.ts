@@ -1,85 +1,68 @@
-import nodemailer from "nodemailer";
-import { createTransport } from "nodemailer";
+import { Resend } from "resend";
 
 export class EmailService {
-  private transporter: any;
+  private resend: Resend | null = null;
   private fromEmail: string;
   private initialized = false;
 
   constructor() {
-    this.fromEmail = "noreply@earn9ja.com";
+    this.fromEmail = "Earn9ja <onboarding@resend.dev>";
   }
 
   private initialize() {
     if (this.initialized) return;
     this.initialized = true;
 
-    this.fromEmail = process.env.EMAIL_USER || "noreply@earn9ja.com";
+    const apiKey = process.env.RESEND_API_KEY;
+    this.fromEmail =
+      process.env.EMAIL_FROM || "Earn9ja <onboarding@resend.dev>";
 
     console.log("🔍 Email Config Check:");
-    console.log("  EMAIL_HOST:", process.env.EMAIL_HOST);
-    console.log("  EMAIL_USER:", process.env.EMAIL_USER);
-    console.log("  EMAIL_PORT:", process.env.EMAIL_PORT);
-    console.log(
-      "  EMAIL_PASS:",
-      process.env.EMAIL_PASS ? "***SET***" : "NOT SET"
-    );
+    console.log("  RESEND_API_KEY:", apiKey ? "***SET***" : "NOT SET");
+    console.log("  EMAIL_FROM:", this.fromEmail);
 
-    if (
-      process.env.EMAIL_HOST &&
-      process.env.EMAIL_USER &&
-      process.env.EMAIL_PASS
-    ) {
-      this.transporter = createTransport({
-        host: process.env.EMAIL_HOST,
-        port: parseInt(process.env.EMAIL_PORT || "587"),
-        secure: process.env.EMAIL_SECURE === "true",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-      console.log("✅ Email service initialized with Gmail");
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+      console.log("✅ Email service initialized with Resend");
     } else {
-      console.log("⚠️  Email credentials not configured - Email disabled");
-      console.log(
-        "⚠️  Missing:",
-        !process.env.EMAIL_HOST ? "EMAIL_HOST " : "",
-        !process.env.EMAIL_USER ? "EMAIL_USER " : "",
-        !process.env.EMAIL_PASS ? "EMAIL_PASS" : ""
-      );
+      console.log("⚠️  Resend API key not configured - Email disabled");
+      console.log("⚠️  Set RESEND_API_KEY in .env");
     }
   }
 
   async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-    this.initialize(); // Initialize on first use
+    this.initialize();
 
     try {
-      if (!this.transporter) {
+      if (!this.resend) {
         console.log(`⚠️  [Email Mock] To: ${to}, Subject: ${subject}`);
         console.log(
-          `⚠️  Email service not configured. Set EMAIL_HOST, EMAIL_USER, and EMAIL_PASS in .env`
+          "⚠️  Email service not configured. Set RESEND_API_KEY in .env"
         );
         return true; // Return true in dev mode to allow testing
       }
 
       console.log(`📧 Attempting to send email to ${to}...`);
 
-      const info = await this.transporter.sendMail({
-        from: `Earn9ja <${this.fromEmail}>`,
-        to,
-        subject,
-        html,
+      const { data, error } = await this.resend.emails.send({
+        from: this.fromEmail,
+        to: [to],
+        subject: subject,
+        html: html,
       });
 
+      if (error) {
+        console.error("❌ Resend API error:", error);
+        throw new Error(`Failed to send email: ${error.message}`);
+      }
+
       console.log(`✅ Email sent successfully to ${to}`);
-      console.log(`📬 Message ID: ${info.messageId}`);
+      console.log(`📬 Email ID: ${data?.id}`);
       return true;
     } catch (error) {
       console.error("❌ Error sending email:", error);
       if (error instanceof Error) {
         console.error("Error details:", error.message);
-        console.error("Error stack:", error.stack);
       }
       return false;
     }
