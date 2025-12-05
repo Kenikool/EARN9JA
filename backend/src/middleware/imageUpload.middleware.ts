@@ -1,6 +1,6 @@
 import multer from "multer";
 import { Request, Response, NextFunction } from "express";
-import { ImageService } from "../services/ImageService";
+import { ImageService } from "../services/ImageService.js";
 
 const storage = multer.memoryStorage();
 
