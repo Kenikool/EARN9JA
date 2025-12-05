@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ReferralService } from "../services/ReferralService";
+import { ReferralService } from "../services/ReferralService.js";
 
 class ReferralController {
   /**
