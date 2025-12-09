@@ -96,8 +96,8 @@ const API_VERSION = process.env.API_VERSION || "v1";
 // }
 app.use(helmet());
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" })); // Increased limit for image uploads
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("dev"));
 
 // Health check endpoint
@@ -142,6 +142,8 @@ app.use(`/api/${API_VERSION}/users`, profileRoutes);
 app.use(`/api/${API_VERSION}/kyc`, kycRoutes);
 app.use(`/api/${API_VERSION}/wallet`, walletRoutes);
 app.use(`/api/${API_VERSION}/webhooks`, webhookRoutes);
+// Register draft routes BEFORE task routes to avoid conflict with /:taskId
+app.use(`/api/${API_VERSION}/tasks/drafts`, draftRoutes);
 app.use(`/api/${API_VERSION}/tasks`, taskRoutes);
 app.use(`/api/${API_VERSION}/gamification`, gamificationRoutes);
 app.use(`/api/${API_VERSION}/referrals`, referralRoutes);
@@ -155,7 +157,6 @@ app.use(`/api/${API_VERSION}`, financialRoutes);
 app.use(`/api/${API_VERSION}`, launchRoutes);
 app.use(`/api/${API_VERSION}/sponsors`, sponsorRoutes);
 app.use(`/api/${API_VERSION}/upload`, uploadRoutes);
-app.use(`/api/${API_VERSION}/tasks/drafts`, draftRoutes);
 app.use(`/api/${API_VERSION}/validation`, validationRoutes);
 app.use(`/api/${API_VERSION}/templates`, templateRoutes);
 app.use(`/api/${API_VERSION}/targeting`, targetingRoutes);

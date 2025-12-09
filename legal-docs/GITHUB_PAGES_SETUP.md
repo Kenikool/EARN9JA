@@ -29,7 +29,7 @@ This guide will help you host your legal documents (Privacy Policy, Terms of Ser
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/earn9ja-legal.git
+git clone https://github.com/kemkool/earn9ja-legal.git
 cd earn9ja-legal
 
 # Copy legal documents
@@ -56,9 +56,9 @@ git push origin main
 Your documents will be available at:
 
 ```
-https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy
-https://YOUR_USERNAME.github.io/earn9ja-legal/terms-of-service
-https://YOUR_USERNAME.github.io/earn9ja-legal/data-protection
+https://legal.earn9ja.site/privacy-policy
+https://legal.earn9ja.site/terms-of-service
+https://legal.earn9ja.site/data-protection
 ```
 
 **Note:** GitHub Pages automatically converts `.md` files to HTML.
@@ -137,7 +137,7 @@ Add a CNAME record in your domain registrar:
 ```
 Type: CNAME
 Name: legal
-Value: YOUR_USERNAME.github.io
+Value: kemkool.github.io
 TTL: 3600
 ```
 
@@ -155,11 +155,9 @@ In your React Native app, update the legal document links:
 ```typescript
 // constants/legal.ts
 export const LEGAL_URLS = {
-  privacyPolicy: "https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy",
-  termsOfService:
-    "https://YOUR_USERNAME.github.io/earn9ja-legal/terms-of-service",
-  dataProtection:
-    "https://YOUR_USERNAME.github.io/earn9ja-legal/data-protection",
+  privacyPolicy: "https://legal.earn9ja.site/privacy-policy",
+  termsOfService: "https://legal.earn9ja.site/terms-of-service",
+  dataProtection: "https://legal.earn9ja.site/data-protection",
 };
 ```
 
@@ -211,14 +209,14 @@ GitHub automatically tracks all changes:
 
 In your app listing:
 
-- **Privacy Policy URL:** `https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy`
+- **Privacy Policy URL:** `https://legal.earn9ja.site/privacy-policy`
 
 ### Apple App Store
 
 In App Store Connect:
 
-- **Privacy Policy URL:** `https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy`
-- **Terms of Service URL:** `https://YOUR_USERNAME.github.io/earn9ja-legal/terms-of-service`
+- **Privacy Policy URL:** `https://legal.earn9ja.site/privacy-policy`
+- **Terms of Service URL:** `https://legal.earn9ja.site/terms-of-service`
 
 ## Troubleshooting
 

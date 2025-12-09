@@ -129,7 +129,7 @@
   - Add theme-aware styling
   - _Requirements: Quality selector, confirmations_
 
-- [ ] 13. Create BottomSheet component
+- [x] 13. Create BottomSheet component
 
   - Implement draggable bottom sheet
   - Add snap points support
@@ -237,7 +237,7 @@
   - Optimize for list rendering
   - _Requirements: Downloads screen_
 
-- [ ] 23. Create QualitySelector component
+- [x] 23. Create QualitySelector component
 
   - Design quality option list
   - Show resolution badges (144p - 8K)
@@ -247,7 +247,7 @@
   - Add theme-aware styling
   - _Requirements: Video details screen_
 
-- [ ] 24. Create VideoPlayer component
+- [x] 24. Create VideoPlayer component
 
   - Integrate react-native-video
   - Create custom controls overlay
@@ -269,7 +269,7 @@
   - Add theme-aware styling
   - _Requirements: Search screen_
 
-- [ ] 26. Create TabBar component
+- [x] 26. Create TabBar component
 
   - Design horizontal scrollable tabs
   - Add active tab indicator
@@ -278,7 +278,8 @@
   - Optimize for performance
   - _Requirements: Category navigation_
 
-- [ ] 27. Create SettingsRow component
+- [x] 27. Create SettingsRow component
+
   - Design settings row layout
   - Add left icon support
   - Add right arrow/toggle/value

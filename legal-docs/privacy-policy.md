@@ -216,12 +216,12 @@ Continued use after changes constitutes acceptance.
 For privacy-related questions or concerns:
 
 **Earn9ja**  
-Email: [email protected]  
-Support: In-app support chat  
-Address: [Your Business Address], Nigeria
+Email: support@earn9ja.site  
+Website: https://earn9ja.site  
+Support: In-app support chat
 
 **Data Protection Officer:**  
-Email: [email protected]
+Email: dpo@earn9ja.site
 
 **Nigeria Data Protection Bureau (NDPB):**  
 Website: https://ndpb.gov.ng  

@@ -1,0 +1,17 @@
+# Development Dependencies
+pytest
+pytest-asyncio
+pytest-cov
+pytest-mock
+factory-boy
+faker
+httpx
+
+# Code Quality
+black
+flake8
+mypy
+isort
+
+# Testing
+locust

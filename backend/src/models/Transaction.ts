@@ -12,7 +12,9 @@ export interface ITransaction extends Document {
     | "task_funding"
     | "refund"
     | "platform_fee"
-    | "topup";
+    | "topup"
+    | "escrow_transfer"
+    | "escrow_transfer_refund";
   amount: number;
   balanceBefore: number;
   balanceAfter: number;
@@ -51,6 +53,8 @@ const transactionSchema = new Schema<ITransaction>(
         "refund",
         "platform_fee",
         "topup",
+        "escrow_transfer",
+        "escrow_transfer_refund",
       ],
       required: true,
       index: true,

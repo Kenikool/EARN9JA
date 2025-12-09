@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "@api_url",
+    "VITE_STRIPE_PUBLIC_KEY": "@stripe_public_key",
+    "VITE_FLUTTERWAVE_PUBLIC_KEY": "@flutterwave_public_key",
+    "VITE_PAYSTACK_PUBLIC_KEY": "@paystack_public_key"
+  }
+}

@@ -1,0 +1,449 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@plugin "daisyui"{
+  themes: all
+}
+
+/* ============================================
+   COMPREHENSIVE ICON COLOR SYSTEM
+   ============================================ */
+
+/* Navigation Icons - VIBRANT COLORS */
+.icon-navbar {
+  color: #3b82f6 !important; /* Bright blue */
+  transition: color 0.2s ease;
+}
+
+.icon-navbar:hover {
+  color: #1d4ed8 !important; /* Darker blue on hover */
+}
+
+.icon-navbar-responsive {
+  color: #3b82f6 !important; /* Bright blue */
+}
+
+@media (min-width: 768px) {
+  .icon-navbar-responsive {
+    color: #3b82f6 !important;
+  }
+}
+
+/* Cart Icons - VIBRANT COLORS */
+.icon-cart {
+  color: #10b981 !important; /* Bright green */
+  transition: color 0.2s ease;
+}
+
+.icon-cart:hover {
+  color: #059669 !important; /* Darker green on hover */
+}
+
+.icon-cart-success {
+  color: #22c55e !important; /* Success green */
+}
+
+.icon-cart-responsive {
+  color: #10b981 !important; /* Bright green */
+}
+
+@media (min-width: 768px) {
+  .icon-cart-responsive {
+    color: #10b981 !important;
+  }
+}
+
+/* Search Icons - VIBRANT COLORS */
+.icon-search {
+  color: #6b7280 !important; /* Gray */
+}
+
+.icon-search:focus {
+  color: #3b82f6 !important; /* Blue on focus */
+}
+
+/* User Icons - VIBRANT COLORS */
+.icon-user {
+  color: #8b5cf6 !important; /* Purple */
+  transition: color 0.2s ease;
+}
+
+.icon-user:hover {
+  color: #7c3aed !important; /* Darker purple on hover */
+}
+
+/* Settings Icons - VIBRANT COLORS */
+.icon-settings {
+  color: #f59e0b !important; /* Orange */
+  transition: color 0.2s ease;
+}
+
+.icon-settings:hover {
+  color: #d97706 !important; /* Darker orange on hover */
+}
+
+/* Package/Order Icons - VIBRANT COLORS */
+.icon-package {
+  color: #8b5cf6 !important; /* Purple */
+  transition: color 0.2s ease;
+}
+
+.icon-package:hover {
+  color: #7c3aed !important; /* Darker purple on hover */
+}
+
+/* Logout Icons - VIBRANT COLORS */
+.icon-logout {
+  color: #ef4444 !important; /* Red */
+  transition: color 0.2s ease;
+}
+
+.icon-logout:hover {
+  color: #dc2626 !important; /* Darker red on hover */
+}
+
+/* Product Icons - VIBRANT COLORS */
+.icon-product {
+  color: #6b7280 !important; /* Gray */
+  transition: color 0.2s ease;
+}
+
+.icon-product:hover {
+  color: #3b82f6 !important; /* Blue on hover */
+}
+
+.icon-product-favorite {
+  color: #ef4444 !important; /* Red */
+}
+
+.icon-product-favorite:hover {
+  color: #dc2626 !important; /* Darker red on hover */
+}
+
+/* Warning Icons - VIBRANT COLORS */
+.icon-warning {
+  color: #f59e0b !important; /* Orange */
+}
+
+.icon-warning-responsive {
+  color: #f59e0b !important; /* Orange */
+}
+
+.icon-warning-hover {
+  color: #f59e0b !important; /* Orange */
+  transition: color 0.2s ease;
+}
+
+.icon-warning-hover:hover {
+  color: #d97706 !important; /* Darker orange on hover */
+}
+
+/* Success Icons - VIBRANT COLORS */
+.icon-success {
+  color: #22c55e !important; /* Green */
+}
+
+.icon-success-hover {
+  color: #22c55e !important; /* Green */
+  transition: color 0.2s ease;
+}
+
+.icon-success-hover:hover {
+  color: #16a34a !important; /* Darker green on hover */
+}
+
+/* Error Icons - VIBRANT COLORS */
+.icon-error {
+  color: #ef4444 !important; /* Red */
+}
+
+.icon-error-hover {
+  color: #ef4444 !important; /* Red */
+  transition: color 0.2s ease;
+}
+
+.icon-error-hover:hover {
+  color: #dc2626 !important; /* Darker red on hover */
+}
+
+/* Muted Icons - VIBRANT COLORS */
+.icon-muted {
+  color: #9ca3af !important; /* Light gray */
+}
+
+.icon-muted-responsive {
+  color: #9ca3af !important; /* Light gray */
+}
+
+@media (min-width: 768px) {
+  .icon-muted-responsive {
+    color: #9ca3af !important;
+  }
+}
+
+/* Heart/Favorite Icons - VIBRANT COLORS */
+.icon-heart {
+  color: #ec4899 !important; /* Pink */
+  transition: color 0.2s ease;
+}
+
+.icon-heart:hover {
+  color: #db2777 !important; /* Darker pink on hover */
+}
+
+.icon-heart-active {
+  color: #ef4444 !important; /* Red filled */
+  fill: currentColor;
+}
+
+/* Star Icons - VIBRANT COLORS */
+.icon-star {
+  color: #d1d5db !important; /* Light gray */
+}
+
+.icon-star-active {
+  color: #fbbf24 !important; /* Bright yellow filled */
+  fill: currentColor;
+}
+
+.icon-star-half {
+  color: #fbbf24 !important; /* Bright yellow */
+}
+
+/* Eye/View Icons - VIBRANT COLORS */
+.icon-eye {
+  color: #3b82f6 !important; /* Blue */
+  transition: color 0.2s ease;
+}
+
+.icon-eye:hover {
+  color: #1d4ed8 !important; /* Darker blue on hover */
+}
+
+/* Menu Icons - VIBRANT COLORS */
+.icon-menu {
+  color: #6b7280 !important; /* Gray */
+  transition: color 0.2s ease;
+}
+
+.icon-menu:hover {
+  color: #374151 !important; /* Darker gray on hover */
+}
+
+/* Bell/Notification Icons - VIBRANT COLORS */
+.icon-bell {
+  color: #f59e0b !important; /* Orange */
+  transition: color 0.2s ease;
+}
+
+.icon-bell:hover {
+  color: #d97706 !important; /* Darker orange on hover */
+}
+
+.icon-bell-active {
+  color: #ef4444 !important; /* Red */
+  animation: pulse 2s infinite;
+}
+
+/* Form Icons - VIBRANT COLORS */
+.icon-form {
+  color: #6b7280 !important; /* Gray */
+  transition: color 0.2s ease;
+}
+
+.icon-form:focus-within {
+  color: #3b82f6 !important; /* Blue on focus */
+}
+
+/* Admin Icons - VIBRANT COLORS */
+.icon-admin {
+  color: #7c3aed !important; /* Purple */
+  transition: color 0.2s ease;
+}
+
+.icon-admin:hover {
+  color: #6d28d9 !important; /* Darker purple on hover */
+}
+
+.icon-admin-navbar {
+  color: #7c3aed !important; /* Purple */
+}
+
+.icon-admin-navbar-hover {
+  color: #7c3aed !important; /* Purple */
+  transition: color 0.2s ease;
+}
+
+.icon-admin-navbar-hover:hover {
+  color: #6d28d9 !important; /* Darker purple on hover */
+}
+
+/* Store/Shop Icons - VIBRANT COLORS */
+.icon-store {
+  color: #22c55e !important; /* Green */
+  transition: color 0.2s ease;
+}
+
+.icon-store:hover {
+  color: #16a34a !important; /* Darker green on hover */
+}
+
+.icon-store-navbar {
+  color: #ffffff !important; /* White for dark backgrounds */
+}
+
+/* Social Icons - VIBRANT COLORS */
+.icon-social {
+  color: #6b7280 !important; /* Gray */
+  transition: color 0.2s ease;
+}
+
+.icon-social:hover {
+  color: #3b82f6 !important; /* Blue on hover */
+}
+
+.icon-social-facebook {
+  color: #1877f2 !important; /* Facebook blue */
+}
+
+.icon-social-twitter {
+  color: #1da1f2 !important; /* Twitter blue */
+}
+
+.icon-social-instagram {
+  color: #e4405f !important; /* Instagram pink */
+}
+
+.icon-social-linkedin {
+  color: #0077b5 !important; /* LinkedIn blue */
+}
+
+/* Loading/Spinner Icons */
+.icon-loading {
+  color: #3b82f6 !important; /* Blue */
+  animation: spin 1s linear infinite;
+}
+
+/* Disabled Icons */
+.icon-disabled {
+  color: #d1d5db !important; /* Light gray */
+  cursor: not-allowed;
+}
+
+/* Icon Animations */
+@keyframes icon-bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-2px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+.icon-bounce {
+  animation: icon-bounce 1s ease-in-out;
+}
+
+@keyframes icon-pulse-soft {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.icon-pulse-soft {
+  animation: icon-pulse-soft 2s ease-in-out infinite;
+}
+
+/* Icon Sizes - Responsive */
+.icon-xs { @apply w-3 h-3; }
+.icon-sm { @apply w-4 h-4; }
+.icon-md { @apply w-5 h-5; }
+.icon-lg { @apply w-6 h-6; }
+.icon-xl { @apply w-8 h-8; }
+.icon-2xl { @apply w-10 h-10; }
+
+/* Responsive icon sizing */
+@media (max-width: 640px) {
+  .icon-responsive-sm { @apply w-4 h-4; }
+  .icon-responsive-md { @apply w-5 h-5; }
+  .icon-responsive-lg { @apply w-6 h-6; }
+}
+
+@media (min-width: 641px) {
+  .icon-responsive-sm { @apply w-4 h-4; }
+  .icon-responsive-md { @apply w-5 h-5; }
+  .icon-responsive-lg { @apply w-6 h-6; }
+}
+
+/* Icon States */
+.icon-state-default {
+  @apply text-base-content/70;
+}
+
+.icon-state-hover {
+  @apply text-primary;
+  transition: color 0.2s ease;
+}
+
+.icon-state-active {
+  @apply text-primary;
+}
+
+.icon-state-selected {
+  @apply text-primary bg-primary/10;
+}
+
+.icon-state-disabled {
+  @apply text-base-content/30;
+  cursor: not-allowed;
+}
+
+/* Special Context Icons */
+.icon-payment {
+  @apply text-success;
+}
+
+.icon-shipping {
+  @apply text-info;
+}
+
+.icon-coupon {
+  @apply text-warning;
+}
+
+.icon-analytics {
+  @apply text-purple-500;
+}
+
+.icon-security {
+  @apply text-error;
+}
+
+.icon-notification {
+  @apply text-warning;
+}
+
+/* Dashboard Icons */
+.icon-dashboard {
+  @apply text-primary;
+}
+
+.icon-dashboard-metric {
+  @apply text-success;
+}
+
+.icon-dashboard-trend-up {
+  @apply text-success;
+}
+
+.icon-dashboard-trend-down {
+  @apply text-error;
+}

@@ -1,6 +1,12 @@
 # Earn9ja Legal Documents
 
-This folder contains all legal documents for the Earn9ja mobile application.
+Official legal documents for the Earn9ja platform.
+
+## Quick Links
+
+- [Privacy Policy](privacy-policy.md)
+- [Terms of Service](terms-of-service.md)
+- [Data Protection Policy](data-protection.md)
 
 ## Documents Included
 
@@ -67,22 +73,12 @@ These documents ensure compliance with:
 - **TermsFeed:** https://www.termsfeed.com (free generator)
 - **iubenda:** https://www.iubenda.com (paid)
 
-## Customization Required
+## Document Status
 
-Before publishing, update these placeholders:
-
-### In All Documents:
-
-- `[email protected]` → Your actual email
-- `[Your Business Address]` → Your physical address
-- `[Your Phone Number]` → Your contact number
-- `[Your Business Registration Number]` → Your CAC number (if registered)
-- `[DPO Name]` → Your Data Protection Officer's name
-
-### URLs to Update:
-
-- Replace `YOUR_USERNAME` with your GitHub username
-- Update all example URLs with your actual URLs
+✅ All documents have been updated with Earn9ja information
+✅ URLs configured for custom domain: legal.earn9ja.site
+✅ Contact information set to support@earn9ja.site and dpo@earn9ja.site
+✅ Ready for deployment to GitHub Pages
 
 ## Integration with App
 
@@ -91,11 +87,9 @@ Before publishing, update these placeholders:
 ```typescript
 // Earn9ja/constants/legal.ts
 export const LEGAL_URLS = {
-  privacyPolicy: "https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy",
-  termsOfService:
-    "https://YOUR_USERNAME.github.io/earn9ja-legal/terms-of-service",
-  dataProtection:
-    "https://YOUR_USERNAME.github.io/earn9ja-legal/data-protection",
+  privacyPolicy: "https://legal.earn9ja.site/privacy-policy",
+  termsOfService: "https://legal.earn9ja.site/terms-of-service",
+  dataProtection: "https://legal.earn9ja.site/data-protection",
 };
 ```
 
@@ -145,14 +139,14 @@ const openLegalDocument = (url: string) => {
 ### Google Play Store
 
 1. Go to Play Console → App content → Privacy policy
-2. Add URL: `https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy`
+2. Add URL: `https://legal.earn9ja.site/privacy-policy`
 3. Save
 
 ### Apple App Store
 
 1. Go to App Store Connect → App Information
-2. Privacy Policy URL: `https://YOUR_USERNAME.github.io/earn9ja-legal/privacy-policy`
-3. Terms of Service URL: `https://YOUR_USERNAME.github.io/earn9ja-legal/terms-of-service`
+2. Privacy Policy URL: `https://legal.earn9ja.site/privacy-policy`
+3. Terms of Service URL: `https://legal.earn9ja.site/terms-of-service`
 4. Save
 
 ## Maintenance

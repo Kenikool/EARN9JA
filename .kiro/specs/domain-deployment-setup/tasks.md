@@ -268,9 +268,9 @@ This implementation plan provides step-by-step tasks for deploying the Earn9ja p
     - Test SMS sending with sample verification code
     - _Requirements: 8.2, 8.5_
 
-- [ ] 9. Configure mobile app for production
+- [x] 9. Configure mobile app for production
 
-  - [ ] 9.1 Update mobile app environment variables
+  - [x] 9.1 Update mobile app environment variables
 
     - Navigate to Earn9ja directory
     - Create or update .env file
@@ -283,7 +283,7 @@ This implementation plan provides step-by-step tasks for deploying the Earn9ja p
     - Commit .env file to repository (or use EAS Secrets)
     - _Requirements: 4.1, 4.2, 4.4_
 
-  - [ ] 9.2 Update legal document URLs in mobile app
+  - [x] 9.2 Update legal document URLs in mobile app
 
     - Search codebase for legal document URL references
     - Update privacy policy URL to https://legal.earn9ja.site/privacy-policy
@@ -293,7 +293,8 @@ This implementation plan provides step-by-step tasks for deploying the Earn9ja p
     - Commit changes to repository
     - _Requirements: 4.1_
 
-  - [ ] 9.3 Configure production Firebase for mobile app
+  - [x] 9.3 Configure production Firebase for mobile app
+
     - Go to Firebase Console (https://console.firebase.google.com)
     - Create new project or use existing: earn9ja-21ae7
     - Add Android app with package: com.earn9ja.app
@@ -305,9 +306,9 @@ This implementation plan provides step-by-step tasks for deploying the Earn9ja p
     - Test push notification delivery
     - _Requirements: 4.5_
 
-- [ ] 10. Build mobile app for production
+- [x] 10. Build mobile app for production
 
-  - [ ] 10.1 Prepare app for production build
+  - [x] 10.1 Prepare app for production build
 
     - Open Earn9ja/app.json
     - Update version number (e.g., from 1.0.0 to 1.0.1)
@@ -317,7 +318,7 @@ This implementation plan provides step-by-step tasks for deploying the Earn9ja p
     - Commit changes to repository
     - _Requirements: 5.1, 5.2_
 
-  - [ ] 10.2 Build Android production APK/AAB
+  - [x] 10.2 Build Android production APK/AAB
 
     - Ensure EAS CLI is installed: npm install -g eas-cli
     - Log in to EAS: eas login
@@ -329,7 +330,8 @@ This implementation plan provides step-by-step tasks for deploying the Earn9ja p
     - Verify app connects to production API
     - _Requirements: 5.1_
 
-  - [ ] 10.3 Build iOS production IPA
+  - [x] 10.3 Build iOS production IPA
+
     - Ensure Apple Developer account is active
     - Configure EAS build profile in eas.json for production
     - Run build command: eas build --platform ios --profile production

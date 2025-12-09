@@ -321,9 +321,9 @@ We are not liable for delays or failures due to circumstances beyond our control
 For questions about these Terms:
 
 **Earn9ja**  
-Email: [email protected]  
-Support: In-app support chat  
-Address: [Your Business Address], Nigeria
+Email: support@earn9ja.site  
+Website: https://earn9ja.site  
+Support: In-app support chat
 
 ---
 

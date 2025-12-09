@@ -2,6 +2,84 @@ import { Request, Response } from "express";
 import { ImageService } from "../services/ImageService.js";
 
 export class UploadController {
+  static async uploadImagesBase64(req: Request, res: Response) {
+    try {
+      console.log("📤 Base64 upload request received");
+      const { images, taskId } = req.body;
+      console.log("📦 Images count:", images?.length, "TaskId:", taskId);
+
+      if (!images || !Array.isArray(images) || images.length === 0) {
+        console.log("❌ No images provided");
+        return res.status(400).json({ error: "No images provided" });
+      }
+
+      if (images.length > 5) {
+        console.log("❌ Too many images:", images.length);
+        return res.status(400).json({ error: "Maximum 5 images allowed" });
+      }
+
+      const uploadedImages = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+
+        if (!image.data || !image.filename) {
+          continue;
+        }
+
+        // Convert base64 to buffer
+        const buffer = Buffer.from(image.data, "base64");
+
+        // Validate size (5MB limit)
+        if (!ImageService.validateImageSize(buffer.length)) {
+          return res.status(400).json({
+            error: `Image ${image.filename} exceeds 5MB size limit`,
+          });
+        }
+
+        // Compress image
+        const compressedBuffer = await ImageService.compressImage(buffer);
+
+        // Upload to Cloudinary
+        const { url } = await ImageService.uploadToCloudinary(
+          compressedBuffer,
+          image.filename
+        );
+
+        // Save to database if taskId provided
+        let savedImage = null;
+        if (taskId) {
+          savedImage = await ImageService.saveTaskImage(
+            taskId,
+            url,
+            image.filename,
+            compressedBuffer.length,
+            image.order || i
+          );
+        }
+
+        uploadedImages.push({
+          id: savedImage?._id,
+          url,
+          filename: image.filename,
+          size: compressedBuffer.length,
+          order: image.order || i,
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        images: uploadedImages,
+      });
+    } catch (error: any) {
+      console.error("Base64 image upload error:", error);
+      res.status(500).json({
+        error: "Failed to upload images",
+        message: error.message,
+      });
+    }
+  }
+
   static async uploadImages(req: Request, res: Response) {
     try {
       const files = req.files as Express.Multer.File[];

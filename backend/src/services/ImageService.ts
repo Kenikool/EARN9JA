@@ -28,6 +28,13 @@ export class ImageService {
     buffer: Buffer,
     filename: string
   ): Promise<{ url: string; publicId: string }> {
+    console.log("📤 Uploading to Cloudinary:", filename);
+    console.log("🔑 Cloudinary config:", {
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY ? "✓" : "✗",
+      api_secret: process.env.CLOUDINARY_API_SECRET ? "✓" : "✗",
+    });
+
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -36,9 +43,16 @@ export class ImageService {
           format: "jpg",
         },
         (error, result) => {
-          if (error) return reject(error);
-          if (!result) return reject(new Error("Upload failed"));
+          if (error) {
+            console.error("❌ Cloudinary upload error:", error);
+            return reject(error);
+          }
+          if (!result) {
+            console.error("❌ Cloudinary upload failed: No result");
+            return reject(new Error("Upload failed"));
+          }
 
+          console.log("✅ Cloudinary upload success:", result.secure_url);
           resolve({
             url: result.secure_url,
             publicId: result.public_id,

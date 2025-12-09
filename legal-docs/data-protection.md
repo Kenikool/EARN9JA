@@ -20,10 +20,9 @@ This policy complies with:
 ## 3. Data Controller Information
 
 **Data Controller:** Earn9ja  
-**Registration:** [Your Business Registration Number]  
-**Address:** [Your Business Address], Nigeria  
-**Email:** [email protected]  
-**Data Protection Officer:** [email protected]
+**Email:** support@earn9ja.site  
+**Website:** https://earn9ja.site  
+**Data Protection Officer:** dpo@earn9ja.site
 
 ## 4. Principles of Data Processing
 
@@ -328,8 +327,7 @@ We conduct DPIAs for high-risk processing activities:
 
 Our DPO oversees data protection compliance:
 
-**Name:** [DPO Name]  
-**Email:** [email protected]  
+**Email:** dpo@earn9ja.site  
 **Responsibilities:**
 
 - Monitor NDPR compliance
@@ -352,9 +350,9 @@ Users will be notified of significant changes.
 
 ### For Data Protection Inquiries:
 
-**Email:** [email protected]  
-**Phone:** [Your Phone Number]  
-**Address:** [Your Business Address], Nigeria
+**Email:** dpo@earn9ja.site  
+**Website:** https://earn9ja.site  
+**Support:** In-app support chat
 
 ### To Lodge a Complaint with NDPB:
 

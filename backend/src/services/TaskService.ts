@@ -811,12 +811,21 @@ class TaskService {
         throw new Error("Task not found or unauthorized");
       }
 
-      // Create new task data from original (only required fields for createTask)
+      // Create new task data from original (all required fields for createTask)
       const duplicatedTaskData = {
         title: `Copy of ${originalTask.title}`,
         description: originalTask.description,
         category: originalTask.category,
+        taskType: originalTask.taskType,
+        platform: originalTask.platform,
         reward: originalTask.reward,
+        pricing: {
+          actualPrice: originalTask.pricing?.actualPrice || originalTask.reward,
+          suggestedPrice:
+            originalTask.pricing?.suggestedPrice || originalTask.reward,
+          minimumPrice:
+            originalTask.pricing?.minimumPrice || originalTask.reward * 0.8,
+        },
         totalSlots: originalTask.totalSlots,
         requirements: [...originalTask.requirements],
         proofRequirements: originalTask.proofRequirements.map((pr) => ({

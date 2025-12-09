@@ -1,0 +1,55 @@
+# Core Framework
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+
+# Database
+motor
+pymongo
+
+# Task Queue
+celery
+redis
+
+# AI/ML Libraries
+torch
+torchvision
+diffusers
+transformers
+accelerate
+safetensors
+omegaconf
+
+# Image Processing
+pillow
+opencv-python
+imageio
+imageio-ffmpeg
+
+# Video Processing
+moviepy
+ffmpeg-python
+
+# Audio Processing
+soundfile
+librosa
+scipy
+
+# TTS
+TTS
+
+# Utilities
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+python-dotenv
+httpx
+aiofiles
+websockets
+huggingface-hub
+tqdm
+requests
+
+# Monitoring
+prometheus-client

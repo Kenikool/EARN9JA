@@ -8,7 +8,14 @@ import { authenticate } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// Upload images (with or without taskId)
+// Upload images via base64 (preferred method)
+router.post(
+  "/images/base64",
+  authenticate,
+  UploadController.uploadImagesBase64
+);
+
+// Upload images (with or without taskId) - legacy multipart
 router.post(
   "/images",
   authenticate,
