@@ -20,7 +20,7 @@ export const registerSchema = Joi.object({
   firstName: Joi.string().required(),
   lastName: Joi.string().required(),
   roles: Joi.array()
-    .items(Joi.string().valid("service_worker", "sponsor"))
+    .items(Joi.string().valid("service_worker", "sponsor", "admin"))
     .min(1)
     .required(),
   // Sponsor-specific fields (optional, allow empty strings)
