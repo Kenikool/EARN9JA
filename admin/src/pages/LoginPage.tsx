@@ -23,7 +23,7 @@ export default function LoginPage() {
     },
     onSuccess: (data) => {
       if (data.user.roles.includes("admin")) {
-        login(data.user, data.token);
+        login(data.user, data.accessToken);
         toast.success("Welcome back! 🎉");
       } else {
         toast.error("Access denied. Admin privileges required.");
