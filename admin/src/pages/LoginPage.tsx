@@ -14,7 +14,10 @@ export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: { email: string; password: string }) => {
+    mutationFn: async (credentials: {
+      identifier: string;
+      password: string;
+    }) => {
       const { data } = await api.post("/auth/login", credentials);
       return data;
     },
@@ -37,7 +40,7 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate({ email, password });
+    loginMutation.mutate({ identifier: email, password });
   };
 
   return (
