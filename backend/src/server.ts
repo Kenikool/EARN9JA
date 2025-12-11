@@ -74,6 +74,7 @@ import currencyRoutes from "./routes/currency.routes.js";
 import providerRoutes from "./routes/provider.routes.js";
 import fraudRoutes from "./routes/fraud.routes.js";
 import offerwallAnalyticsRoutes from "./routes/offerwall-analytics.routes.js";
+import appRoutes from "./routes/app.routes.js";
 import { setupDraftCleanupJob } from "./jobs/draftCleanup.job.js";
 import { startTaskExpiryJob } from "./jobs/taskExpiry.job.js";
 import { startScheduleExecutionJob } from "./jobs/scheduleExecution.job.js";
@@ -172,6 +173,7 @@ app.use(`/api/${API_VERSION}/currency`, currencyRoutes);
 app.use(`/api/${API_VERSION}/providers`, providerRoutes);
 app.use(`/api/${API_VERSION}/fraud`, fraudRoutes);
 app.use(`/api/${API_VERSION}/offerwall-analytics`, offerwallAnalyticsRoutes);
+app.use(`/api/${API_VERSION}/app`, appRoutes);
 
 // 404 handler
 app.use((req, res) => {

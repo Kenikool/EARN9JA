@@ -1,43 +1,33 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuthStore } from "./store/authStore";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import DashboardLayout from "./layouts/DashboardLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
-import Users from "./pages/Users";
-import Tasks from "./pages/Tasks";
-import Withdrawals from "./pages/Withdrawals";
-import Analytics from "./pages/Analytics";
-import Settings from "./pages/Settings";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import UnauthorizedPage from "./pages/auth/UnauthorizedPage";
 
-function App() {
-  const { isAuthenticated } = useAuthStore();
-
+const App: React.FC = () => {
   return (
     <Routes>
-      <Route
-        path="/login"
-        element={!isAuthenticated ? <LoginPage /> : <Navigate to="/" />}
-      />
-      <Route
-        path="/register"
-        element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/" />}
-      />
+      {/* Public Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+      {/* Protected Routes */}
       <Route
         path="/"
         element={
-          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" />
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
         }
-      >
-        <Route index element={<Dashboard />} />
-        <Route path="users" element={<Users />} />
-        <Route path="tasks" element={<Tasks />} />
-        <Route path="withdrawals" element={<Withdrawals />} />
-        <Route path="analytics" element={<Analytics />} />
-        <Route path="settings" element={<Settings />} />
-      </Route>
+      />
+
+      {/* Catch all - redirect to dashboard */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
-}
+};
 
 export default App;

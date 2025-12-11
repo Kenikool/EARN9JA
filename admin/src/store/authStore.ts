@@ -2,19 +2,22 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface User {
-  id: string;
+  _id: string;
   email: string;
-  firstName: string;
-  lastName: string;
   roles: string[];
+  profile: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (user: User, token: string) => void;
   logout: () => void;
+  setUser: (user: User) => void;
+  setToken: (token: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -23,11 +26,26 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      login: (user, token) => set({ user, token, isAuthenticated: true }),
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+
+      logout: () => {
+        set({ user: null, token: null, isAuthenticated: false });
+      },
+
+      setUser: (user: User) => {
+        set({ user, isAuthenticated: true });
+      },
+
+      setToken: (token: string) => {
+        set({ token });
+      },
     }),
     {
-      name: "admin-auth",
+      name: "auth-storage",
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );

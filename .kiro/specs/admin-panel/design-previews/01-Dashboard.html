@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Earn9ja Admin Panel</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@5.0.0/dist/full.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hover-lift {
+        transition: transform 0.2s;
+      }
+      .hover-lift:hover {
+        transform: translateY(-2px);
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-in;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      #download-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+      }
+    </style>
+  </head>
+  <body class="bg-base-200">
+    <button id="download-btn" class="btn btn-primary btn-sm gap-2">
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+        />
+      </svg>
+      Download PNG
+    </button>
+
+    <div id="capture-area" class="min-h-screen">
+      <!-- Sidebar -->
+      <div class="drawer lg:drawer-open">
+        <input id="drawer" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content flex flex-col">
+          <!-- Header -->
+          <div class="navbar bg-base-100 shadow-lg">
+            <div class="flex-none lg:hidden">
+              <label for="drawer" class="btn btn-square btn-ghost">
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </label>
+            </div>
+            <div class="flex-1 px-4">
+              <h1 class="text-xl font-bold">Dashboard</h1>
+            </div>
+            <div class="flex-none gap-2">
+              <div class="form-control">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  class="input input-bordered w-24 md:w-auto"
+                />
+              </div>
+              <div class="dropdown dropdown-end">
+                <div
+                  tabindex="0"
+                  role="button"
+                  class="btn btn-ghost btn-circle"
+                >
+                  <div class="indicator">
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                      />
+                    </svg>
+                    <span class="badge badge-xs badge-primary indicator-item"
+                      >3</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown dropdown-end">
+                <div
+                  tabindex="0"
+                  role="button"
+                  class="btn btn-ghost btn-circle avatar"
+                >
+                  <div
+                    class="w-10 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold"
+                  >
+                    AD
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="p-6 space-y-6 fade-in">
+            <!-- Header -->
+            <div
+              class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
+            >
+              <div>
+                <h1 class="text-4xl font-bold gradient-text mb-2">Dashboard</h1>
+                <p class="text-base-content/70 text-lg">
+                  Welcome back! Here's your platform overview.
+                </p>
+              </div>
+              <div class="flex gap-3">
+                <button class="btn btn-outline btn-primary">
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  Export Report
+                </button>
+                <button class="btn btn-primary">
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  Settings
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <!-- Stat Card 1 -->
+              <div
+                class="card bg-gradient-to-br from-primary to-primary/70 text-white shadow-xl hover-lift"
+              >
+                <div class="card-body">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="text-4xl">👥</div>
+                    <div class="badge badge-success badge-sm">+12%</div>
+                  </div>
+                  <h3 class="text-lg font-semibold opacity-90">Total Users</h3>
+                  <p class="text-3xl font-bold">2,547</p>
+                  <p class="text-sm opacity-70">Registered users</p>
+                </div>
+              </div>
+
+              <!-- Stat Card 2 -->
+              <div
+                class="card bg-gradient-to-br from-secondary to-secondary/70 text-white shadow-xl hover-lift"
+              >
+                <div class="card-body">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="text-4xl">📋</div>
+                    <div class="badge badge-success badge-sm">+8%</div>
+                  </div>
+                  <h3 class="text-lg font-semibold opacity-90">Active Tasks</h3>
+                  <p class="text-3xl font-bold">156</p>
+                  <p class="text-sm opacity-70">Currently running</p>
+                </div>
+              </div>
+
+              <!-- Stat Card 3 -->
+              <div
+                class="card bg-gradient-to-br from-accent to-accent/70 text-white shadow-xl hover-lift"
+              >
+                <div class="card-body">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="text-4xl">💰</div>
+                    <div class="badge badge-error badge-sm">-5%</div>
+                  </div>
+                  <h3 class="text-lg font-semibold opacity-90">
+                    Pending Withdrawals
+                  </h3>
+                  <p class="text-3xl font-bold">23</p>
+                  <p class="text-sm opacity-70">Awaiting approval</p>
+                </div>
+              </div>
+
+              <!-- Stat Card 4 -->
+              <div
+                class="card bg-gradient-to-br from-success to-success/70 text-white shadow-xl hover-lift"
+              >
+                <div class="card-body">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="text-4xl">💵</div>
+                    <div class="badge badge-success badge-sm">+23%</div>
+                  </div>
+                  <h3 class="text-lg font-semibold opacity-90">
+                    Platform Revenue
+                  </h3>
+                  <p class="text-3xl font-bold">₦1,245,000</p>
+                  <p class="text-sm opacity-70">Total platform fees</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card bg-base-100 shadow-xl hover-lift">
+              <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">
+                  <svg
+                    class="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  Quick Actions
+                </h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <button
+                    class="btn btn-outline btn-primary h-20 flex flex-col gap-2"
+                  >
+                    <span class="text-2xl">👥</span>
+                    <span class="text-xs font-medium">View Users</span>
+                  </button>
+                  <button
+                    class="btn btn-outline btn-secondary h-20 flex flex-col gap-2"
+                  >
+                    <span class="text-2xl">📋</span>
+                    <span class="text-xs font-medium">Pending Tasks</span>
+                  </button>
+                  <button
+                    class="btn btn-outline btn-accent h-20 flex flex-col gap-2"
+                  >
+                    <span class="text-2xl">💳</span>
+                    <span class="text-xs font-medium">Withdrawals</span>
+                  </button>
+                  <button
+                    class="btn btn-outline btn-success h-20 flex flex-col gap-2"
+                  >
+                    <span class="text-2xl">📊</span>
+                    <span class="text-xs font-medium">Analytics</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Platform Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Task Statistics -->
+              <div class="card bg-base-100 shadow-xl hover-lift">
+                <div class="card-body">
+                  <div class="flex items-center justify-between mb-4">
+                    <h2 class="card-title text-xl">Task Overview</h2>
+                    <a href="#" class="link link-primary text-sm">View All</a>
+                  </div>
+                  <div class="space-y-4">
+                    <div
+                      class="flex justify-between items-center p-4 bg-primary/10 rounded-lg"
+                    >
+                      <div>
+                        <div class="text-2xl font-bold text-primary">342</div>
+                        <div class="text-sm text-base-content/70">
+                          Total Tasks
+                        </div>
+                      </div>
+                      <div class="text-primary text-2xl">📋</div>
+                    </div>
+                    <div
+                      class="flex justify-between items-center p-4 bg-success/10 rounded-lg"
+                    >
+                      <div>
+                        <div class="text-2xl font-bold text-success">186</div>
+                        <div class="text-sm text-base-content/70">
+                          Completed Tasks
+                        </div>
+                      </div>
+                      <div class="text-success text-2xl">✅</div>
+                    </div>
+                    <div
+                      class="flex justify-between items-center p-4 bg-warning/10 rounded-lg"
+                    >
+                      <div>
+                        <div class="text-2xl font-bold text-warning">156</div>
+                        <div class="text-sm text-base-content/70">
+                          Active Tasks
+                        </div>
+                      </div>
+                      <div class="text-warning text-2xl">⚡</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial Overview -->
+              <div class="card bg-base-100 shadow-xl hover-lift">
+                <div class="card-body">
+                  <div class="flex items-center justify-between mb-4">
+                    <h2 class="card-title text-xl">Financial Overview</h2>
+                    <a href="#" class="link link-primary text-sm">View All</a>
+                  </div>
+                  <div class="space-y-4">
+                    <div
+                      class="flex justify-between items-center p-4 bg-success/10 rounded-lg"
+                    >
+                      <div>
+                        <div class="text-2xl font-bold text-success">
+                          ₦1,245,000
+                        </div>
+                        <div class="text-sm text-base-content/70">
+                          Total Revenue
+                        </div>
+                      </div>
+                      <div class="text-success text-2xl">💰</div>
+                    </div>
+                    <div
+                      class="flex justify-between items-center p-4 bg-info/10 rounded-lg"
+                    >
+                      <div>
+                        <div class="text-2xl font-bold text-info">₦890,000</div>
+                        <div class="text-sm text-base-content/70">
+                          Total Payouts
+                        </div>
+                      </div>
+                      <div class="text-info text-2xl">💳</div>
+                    </div>
+                    <div
+                      class="flex justify-between items-center p-4 bg-warning/10 rounded-lg"
+                    >
+                      <div>
+                        <div class="text-2xl font-bold text-warning">
+                          ₦355,000
+                        </div>
+                        <div class="text-sm text-base-content/70">
+                          Net Revenue
+                        </div>
+                      </div>
+                      <div class="text-warning text-2xl">📈</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="drawer-side">
+          <label for="drawer" class="drawer-overlay"></label>
+          <aside class="bg-base-100 w-64 min-h-screen">
+            <div class="p-4">
+              <h1 class="text-2xl font-bold gradient-text">Earn9ja Admin</h1>
+            </div>
+            <ul class="menu p-4 space-y-2">
+              <li>
+                <a class="active"
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    /></svg
+                  >Dashboard</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    /></svg
+                  >Users</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    /></svg
+                  >Tasks</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                    /></svg
+                  >Withdrawals</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    /></svg
+                  >Disputes</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                    /></svg
+                  >Analytics</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                    /></svg
+                  >KYC</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+                    /></svg
+                  >Support</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    /></svg
+                  >Activity Log</a
+                >
+              </li>
+              <li>
+                <a
+                  ><svg
+                    class="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    /></svg
+                  >Settings</a
+                >
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("download-btn")
+        .addEventListener("click", function () {
+          const button = this;
+          button.disabled = true;
+          button.innerHTML =
+            '<span class="loading loading-spinner loading-sm"></span> Generating...';
+
+          html2canvas(document.getElementById("capture-area"), {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: "#f3f4f6",
+          }).then((canvas) => {
+            const link = document.createElement("a");
+            link.download = "dashboard-design.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+
+            button.disabled = false;
+            button.innerHTML =
+              '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Download PNG';
+          });
+        });
+    </script>
+  </body>
+</html>
+""
