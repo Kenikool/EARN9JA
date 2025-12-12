@@ -1,6 +1,12 @@
 import React from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Dashborad from "./pages/Dashborad";
+import UserManagement from "./pages/Users";
+import Tasks from "./pages/Tasks";
+import Withdrawals from "./pages/Withdrawals";
+import Disputes from "./pages/Disputes";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -53,25 +59,49 @@ const App = () => {
         }
       >
         <Route index element={<Dashborad />} />
-        {/* Additional protected routes will be added here */}
-        <Route path="analytics" element={<div>Analytics Page</div>} />
-        <Route path="users" element={<div>User Management Page</div>} />
-        <Route path="tasks" element={<div>Task Management Page</div>} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="tasks" element={<Tasks />} />
+        <Route path="tasks/pending" element={<Tasks />} />
+        <Route path="withdrawals" element={<Withdrawals />} />
+        <Route path="withdrawals/pending" element={<Withdrawals />} />
+        <Route path="disputes" element={<Disputes />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="settings" element={<Settings />} />
+        {/* Placeholder pages - to be implemented */}
         <Route
-          path="withdrawals"
-          element={<div>Withdrawal Management Page</div>}
+          path="revenue"
+          element={
+            <div className="p-6">
+              <h1 className="text-2xl font-bold">
+                Revenue & Payments - Coming Soon
+              </h1>
+            </div>
+          }
         />
-        <Route path="disputes" element={<div>Dispute Resolution Page</div>} />
-        <Route path="revenue" element={<div>Revenue & Payments Page</div>} />
-        <Route path="platform" element={<div>Platform Management Page</div>} />
-        <Route path="support" element={<div>Support Page</div>} />
-        <Route path="settings" element={<div>Settings Page</div>} />
+        <Route
+          path="platform"
+          element={
+            <div className="p-6">
+              <h1 className="text-2xl font-bold">
+                Platform Management - Coming Soon
+              </h1>
+            </div>
+          }
+        />
+        <Route
+          path="support"
+          element={
+            <div className="p-6">
+              <h1 className="text-2xl font-bold">Support - Coming Soon</h1>
+            </div>
+          }
+        />
       </Route>
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Catch all route - redirect to login */}
+      {/* Catch all route */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

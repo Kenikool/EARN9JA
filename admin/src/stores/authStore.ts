@@ -60,19 +60,23 @@ export const useAuthStore = create<AuthState>()(
               error: null,
             });
           } else {
+            const errorMessage = response.message || "Login failed";
             set({
               isLoading: false,
-              error: response.message || "Login failed",
+              error: errorMessage,
             });
+            throw new Error(errorMessage);
           }
-        } catch (error) {
+        } catch (error: unknown) {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.message ||
+            "An error occurred during login";
           set({
             isLoading: false,
-            error:
-              error instanceof Error
-                ? error.message
-                : "An error occurred during login",
+            error: errorMessage,
           });
+          throw new Error(errorMessage);
         }
       },
 

@@ -103,6 +103,7 @@ const LoginPage = () => {
         password: formData.password,
       });
 
+      // If we reach here, login was successful
       toast.success("Login successful!", {
         icon: "✨",
         style: {
@@ -110,11 +111,11 @@ const LoginPage = () => {
           color: "#fff",
         },
       });
-    } catch (error) {
-      // Error is handled by the store
-      if (error) {
-        toast.error("Login failed. Please check your credentials.");
-      }
+    } catch (error: unknown) {
+      // Error is already set in the store, just show the toast
+      toast.error(
+        error.message || "Login failed. Please check your credentials."
+      );
     }
   };
 

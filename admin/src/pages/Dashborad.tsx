@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
@@ -10,173 +10,133 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Eye,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
-
-interface StatsCard {
-  title: string;
-  value: string;
-  change: string;
-  changeType: "increase" | "decrease";
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
-}
-
-interface RecentActivity {
-  id: string;
-  type: "user" | "task" | "withdrawal" | "dispute";
-  title: string;
-  description: string;
-  time: string;
-  status: "pending" | "completed" | "rejected";
-}
+import {
+  usePlatformStats,
+  usePendingTasks,
+  usePendingWithdrawals,
+  usePendingDisputes,
+} from "../hooks/useAdminData";
 
 const Dashboard: React.FC = () => {
-  const [stats] = useState<StatsCard[]>([
+  const {
+    data: statsData,
+    isLoading: statsLoading,
+    error: statsError,
+  } = usePlatformStats();
+  const { data: tasksData, isLoading: tasksLoading } = usePendingTasks(1, 5);
+  const { data: withdrawalsData, isLoading: withdrawalsLoading } =
+    usePendingWithdrawals(1, 5);
+  const { data: disputesData, isLoading: disputesLoading } = usePendingDisputes(
+    1,
+    5
+  );
+
+  const stats = statsData?.data;
+  const pendingTasks = tasksData?.data?.tasks || [];
+  const pendingWithdrawals = withdrawalsData?.data?.withdrawals || [];
+  const pendingDisputes = disputesData?.data?.disputes || [];
+
+  // Loading state
+  if (statsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (statsError) {
+    return (
+      <div className="alert alert-error">
+        <AlertTriangle className="w-5 h-5" />
+        <span>Failed to load dashboard data. Please try again.</span>
+      </div>
+    );
+  }
+
+  const statsCards = [
     {
       title: "Total Users",
-      value: "12,345",
+      value: stats?.users.total?.toLocaleString() || "0",
       change: "+12.5%",
-      changeType: "increase",
+      changeType: "increase" as const,
       icon: Users,
       color: "bg-blue-500",
     },
     {
       title: "Active Tasks",
-      value: "1,234",
+      value: stats?.tasks.active?.toLocaleString() || "0",
       change: "+8.2%",
-      changeType: "increase",
+      changeType: "increase" as const,
       icon: FileText,
       color: "bg-green-500",
     },
     {
       title: "Total Revenue",
-      value: "₦45,678",
+      value: `₦${stats?.financials.totalRevenue?.toLocaleString() || "0"}`,
       change: "+23.1%",
-      changeType: "increase",
+      changeType: "increase" as const,
       icon: DollarSign,
       color: "bg-yellow-500",
     },
     {
-      title: "Conversion Rate",
-      value: "4.7%",
-      change: "-2.1%",
-      changeType: "decrease",
-      icon: TrendingUp,
+      title: "Completed Tasks",
+      value: stats?.tasks.completed?.toLocaleString() || "0",
+      change: "+15.3%",
+      changeType: "increase" as const,
+      icon: CheckCircle,
       color: "bg-purple-500",
     },
-  ]);
+  ];
 
-  const [recentActivities] = useState<RecentActivity[]>([
-    {
-      id: "1",
-      type: "user",
-      title: "New user registration",
-      description: "John Doe registered successfully",
-      time: "2 minutes ago",
-      status: "completed",
-    },
-    {
-      id: "2",
-      type: "task",
-      title: "Task submitted",
-      description: "Social media engagement task pending review",
-      time: "5 minutes ago",
-      status: "pending",
-    },
-    {
-      id: "3",
-      type: "withdrawal",
-      title: "Withdrawal request",
-      description: "Jane Smith requested ₦5,000 withdrawal",
-      time: "10 minutes ago",
-      status: "pending",
-    },
-    {
-      id: "4",
-      type: "dispute",
-      title: "Dispute resolved",
-      description: "Task completion dispute was resolved",
-      time: "1 hour ago",
-      status: "completed",
-    },
-    {
-      id: "5",
-      type: "task",
-      title: "Task approved",
-      description: "Survey task approved and published",
-      time: "2 hours ago",
-      status: "completed",
-    },
-  ]);
-
-  const [quickActions] = useState([
-    {
-      title: "Create Task",
-      description: "Add new task to platform",
-      icon: FileText,
-      color: "bg-blue-500",
-    },
+  const quickActions = [
     {
       title: "User Management",
       description: "Manage platform users",
       icon: Users,
-      color: "bg-green-500",
+      color: "bg-blue-500",
+      href: "/dashboard/users",
     },
     {
-      title: "Review Withdrawals",
+      title: "Task Approval",
+      description: "Review pending tasks",
+      icon: FileText,
+      color: "bg-green-500",
+      href: "/dashboard/tasks/pending",
+    },
+    {
+      title: "Withdrawal Review",
       description: "Process pending withdrawals",
       icon: DollarSign,
       color: "bg-yellow-500",
+      href: "/dashboard/withdrawals/pending",
     },
     {
-      title: "View Analytics",
-      description: "Check platform statistics",
+      title: "Analytics",
+      description: "View platform analytics",
       icon: TrendingUp,
       color: "bg-purple-500",
+      href: "/dashboard/analytics",
     },
-  ]);
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "user":
-        return <Users className="w-4 h-4" />;
-      case "task":
-        return <FileText className="w-4 h-4" />;
-      case "withdrawal":
-        return <DollarSign className="w-4 h-4" />;
-      case "dispute":
-        return <AlertTriangle className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <div className="badge badge-success badge-sm">Completed</div>;
-      case "pending":
-        return <div className="badge badge-warning badge-sm">Pending</div>;
-      case "rejected":
-        return <div className="badge badge-error badge-sm">Rejected</div>;
-      default:
-        return <div className="badge badge-ghost badge-sm">Unknown</div>;
-    }
-  };
+  ];
 
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-6 text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, Admin!</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome to Earn9ja Admin!</h1>
         <p className="text-blue-100">
-          Here's what's happening with your platform today.
+          Monitor and manage your platform from this dashboard.
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
+        {statsCards.map((stat, index) => (
           <div
             key={index}
             className="card bg-white shadow-sm border border-gray-200"
@@ -221,73 +181,119 @@ const Dashboard: React.FC = () => {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activities */}
-        <div className="lg:col-span-2">
-          <div className="card bg-white shadow-sm border border-gray-200">
-            <div className="card-body">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="card-title">Recent Activities</h2>
-                <Link
-                  to="/dashboard/activities"
-                  className="btn btn-ghost btn-sm"
-                >
-                  View All
-                  <Eye className="w-4 h-4 ml-1" />
-                </Link>
+        {/* Pending Tasks */}
+        <div className="card bg-white shadow-sm border border-gray-200">
+          <div className="card-body">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="card-title">Pending Tasks</h2>
+              <Link
+                to="/dashboard/tasks/pending"
+                className="btn btn-ghost btn-sm"
+              >
+                View All
+                <Eye className="w-4 h-4 ml-1" />
+              </Link>
+            </div>
+            {tasksLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="loading loading-spinner"></div>
               </div>
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
+            ) : pendingTasks.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <p>No pending tasks</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pendingTasks.map((task: any) => (
                   <div
-                    key={activity.id}
-                    className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    key={task._id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                   >
-                    <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {activity.title}
-                        </p>
-                        {getStatusBadge(activity.status)}
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {activity.description}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {task.title}
                       </p>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {activity.time}
+                      <p className="text-xs text-gray-600">
+                        {task.category} • ₦{task.reward}
                       </p>
                     </div>
+                    <div className="badge badge-warning badge-sm">Pending</div>
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* Pending Withdrawals */}
+        <div className="card bg-white shadow-sm border border-gray-200">
+          <div className="card-body">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="card-title">Pending Withdrawals</h2>
+              <Link
+                to="/dashboard/withdrawals/pending"
+                className="btn btn-ghost btn-sm"
+              >
+                View All
+                <Eye className="w-4 h-4 ml-1" />
+              </Link>
             </div>
+            {withdrawalsLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="loading loading-spinner"></div>
+              </div>
+            ) : pendingWithdrawals.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <DollarSign className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                <p>No pending withdrawals</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pendingWithdrawals.map((withdrawal: any) => (
+                  <div
+                    key={withdrawal._id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        {withdrawal.userId?.profile?.firstName}{" "}
+                        {withdrawal.userId?.profile?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        ₦{withdrawal.amount.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="badge badge-warning badge-sm">Pending</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div>
-          <div className="card bg-white shadow-sm border border-gray-200">
-            <div className="card-body">
-              <h2 className="card-title mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                {quickActions.map((action, index) => (
-                  <button
-                    key={index}
-                    className="btn btn-ghost justify-start h-auto p-4 text-left"
-                  >
-                    <div className={`${action.color} p-2 rounded-lg mr-3`}>
-                      <action.icon className="w-4 h-4 text-white" />
+        <div className="card bg-white shadow-sm border border-gray-200">
+          <div className="card-body">
+            <h2 className="card-title mb-4">Quick Actions</h2>
+            <div className="space-y-3">
+              {quickActions.map((action, index) => (
+                <Link
+                  key={index}
+                  to={action.href}
+                  className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
+                >
+                  <div className={`${action.color} p-2 rounded-lg mr-3`}>
+                    <action.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <div className="font-medium">{action.title}</div>
+                    <div className="text-xs text-gray-500">
+                      {action.description}
                     </div>
-                    <div>
-                      <div className="font-medium">{action.title}</div>
-                      <div className="text-xs text-gray-500">
-                        {action.description}
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -295,7 +301,7 @@ const Dashboard: React.FC = () => {
 
       {/* Additional Dashboard Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pending Approvals */}
+        {/* Pending Approvals Summary */}
         <div className="card bg-white shadow-sm border border-gray-200">
           <div className="card-body">
             <h2 className="card-title">Pending Approvals</h2>
@@ -306,11 +312,14 @@ const Dashboard: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium">Task Submissions</p>
                     <p className="text-xs text-gray-600">
-                      12 tasks pending review
+                      {tasksData?.data?.pagination?.total || 0} tasks pending
+                      review
                     </p>
                   </div>
                 </div>
-                <div className="badge badge-warning">12</div>
+                <div className="badge badge-warning">
+                  {tasksData?.data?.pagination?.total || 0}
+                </div>
               </div>
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div className="flex items-center space-x-3">
@@ -330,11 +339,29 @@ const Dashboard: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium">Withdrawal Requests</p>
                     <p className="text-xs text-gray-600">
-                      3 requests to process
+                      {withdrawalsData?.data?.pagination?.total || 0} requests
+                      to process
                     </p>
                   </div>
                 </div>
-                <div className="badge badge-success">3</div>
+                <div className="badge badge-success">
+                  {withdrawalsData?.data?.pagination?.total || 0}
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                  <div>
+                    <p className="text-sm font-medium">Disputes</p>
+                    <p className="text-xs text-gray-600">
+                      {disputesData?.data?.pagination?.total || 0} disputes
+                      pending
+                    </p>
+                  </div>
+                </div>
+                <div className="badge badge-error">
+                  {disputesData?.data?.pagination?.total || 0}
+                </div>
               </div>
             </div>
             <div className="card-actions justify-end mt-4">
@@ -348,18 +375,11 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* System Status */}
+        {/* Platform Status */}
         <div className="card bg-white shadow-sm border border-gray-200">
           <div className="card-body">
-            <h2 className="card-title">System Status</h2>
+            <h2 className="card-title">Platform Status</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Server Status</span>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-green-600">Online</span>
-                </div>
-              </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Database</span>
                 <div className="flex items-center">
@@ -368,10 +388,17 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">API Services</span>
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-green-600">Operational</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Payment Gateway</span>
                 <div className="flex items-center">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-yellow-600">Maintenance</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                  <span className="text-sm text-green-600">Active</span>
                 </div>
               </div>
               <div className="flex items-center justify-between">
