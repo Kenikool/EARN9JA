@@ -1,31 +1,78 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Dashboard from "./pages/Dashboard";
+import { Route, Routes, Navigate } from "react-router-dom";
+import Dashborad from "./pages/Dashborad";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-import UnauthorizedPage from "./pages/auth/UnauthorizedPage";
+import DashboardLayout from "./components/layout/DashboardLayout";
+import useAuthStore from "./stores/authStore";
 
-const App: React.FC = () => {
+// Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuthStore();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+// Public Route Component (redirects to dashboard if authenticated)
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuthStore();
+  return !isAuthenticated ? (
+    <>{children}</>
+  ) : (
+    <Navigate to="/dashboard" replace />
+  );
+};
+
+const App = () => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-
-      {/* Protected Routes */}
       <Route
-        path="/"
+        path="/login"
         element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
         }
       />
 
-      {/* Catch all - redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Protected Routes */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Dashborad />} />
+        {/* Additional protected routes will be added here */}
+        <Route path="analytics" element={<div>Analytics Page</div>} />
+        <Route path="users" element={<div>User Management Page</div>} />
+        <Route path="tasks" element={<div>Task Management Page</div>} />
+        <Route
+          path="withdrawals"
+          element={<div>Withdrawal Management Page</div>}
+        />
+        <Route path="disputes" element={<div>Dispute Resolution Page</div>} />
+        <Route path="revenue" element={<div>Revenue & Payments Page</div>} />
+        <Route path="platform" element={<div>Platform Management Page</div>} />
+        <Route path="support" element={<div>Support Page</div>} />
+        <Route path="settings" element={<div>Settings Page</div>} />
+      </Route>
+
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* Catch all route - redirect to login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 };

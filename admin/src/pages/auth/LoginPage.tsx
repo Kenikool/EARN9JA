@@ -1,253 +1,321 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { z } from "zod";
-import { useAuth } from "@/hooks/useAuth";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  AlertCircle,
+  Shield,
+  Sparkles,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuthStore } from "../../stores/authStore";
 
-// Zod validation schema
-const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email format"),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(100, "Password is too long"),
-  rememberMe: z.boolean().optional(),
-});
+const LoginPage = () => {
+  const { login, isLoading, error, clearError } = useAuthStore();
 
-type LoginFormData = z.infer<typeof loginSchema>;
-
-const LoginPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { login, loginLoading, isAuthenticated } = useAuth();
-
-  const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
+  const [formData, setFormData] = useState({
+    identifier: "",
     password: "",
-    rememberMe: false,
   });
-
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof LoginFormData, string>>
-  >({});
   const [showPassword, setShowPassword] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Redirect if already authenticated
+  // Clear error when component mounts
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
+    clearError();
+  }, [clearError]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  // Validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhoneNumber = (phone: string): boolean => {
+    const phoneRegex = /^(\+?[1-9]\d{1,14}|0\d{10})$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 8;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    // Validate identifier (email or phone)
+    if (!formData.identifier.trim()) {
+      errors.identifier = "Email or phone number is required";
+    } else if (
+      !validateEmail(formData.identifier) &&
+      !validatePhoneNumber(formData.identifier)
+    ) {
+      errors.identifier = "Please enter a valid email or phone number";
+    }
+
+    // Validate password
+    if (!formData.password) {
+      errors.password = "Password is required";
+    } else if (!validatePassword(formData.password)) {
+      errors.password = "Password must be at least 8 characters long";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
 
-    // Clear error for this field when user starts typing
-    if (errors[name as keyof LoginFormData]) {
-      setErrors((prev) => ({
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => ({
         ...prev,
-        [name]: undefined,
+        [name]: "",
       }));
+    }
+
+    // Clear global error when user starts typing
+    if (error) {
+      clearError();
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate form data with Zod
-    const result = loginSchema.safeParse(formData);
-
-    if (!result.success) {
-      // Extract errors from Zod validation
-      const fieldErrors: Partial<Record<keyof LoginFormData, string>> = {};
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof LoginFormData;
-        fieldErrors[field] = issue.message;
-      });
-      setErrors(fieldErrors);
+    if (!validateForm()) {
       return;
     }
 
-    // Clear all errors
-    setErrors({});
+    try {
+      await login({
+        identifier: formData.identifier.trim(),
+        password: formData.password,
+      });
 
-    // Call login mutation
-    login({
-      email: formData.email,
-      password: formData.password,
-    });
+      toast.success("Login successful!", {
+        icon: "✨",
+        style: {
+          background: "#10b981",
+          color: "#fff",
+        },
+      });
+    } catch (error) {
+      // Error is handled by the store
+      if (error) {
+        toast.error("Login failed. Please check your credentials.");
+      }
+    }
   };
 
+  const isIdentifierEmail = formData.identifier.includes("@");
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-base-200 to-secondary/10 p-4">
-      <div className="card w-full max-w-md bg-base-100 shadow-2xl">
-        <div className="card-body p-8">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2">
-              <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Earn9ja Admin
-              </span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative z-10 container mx-auto p-4 flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-md">
+          {/* Logo/Header Section */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg mb-4">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Earn9ja Admin
             </h1>
-            <h2 className="text-2xl font-bold text-base-content mb-2">
-              Admin Login
-            </h2>
-            <p className="text-sm text-base-content/70">
-              Sign in to access the Earn9ja admin panel
-            </p>
+            <p className="text-gray-600 mt-2">Welcome back to your dashboard</p>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Email Address</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-base-content/40" />
-                </div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="admin@earn9ja.site"
-                  className={`input input-bordered w-full pl-10 ${
-                    errors.email ? "input-error" : ""
-                  }`}
-                  disabled={loginLoading}
-                  autoComplete="email"
-                />
-              </div>
-              {errors.email && (
-                <label className="label">
-                  <span className="label-text-alt text-error">
-                    {errors.email}
-                  </span>
-                </label>
-              )}
-            </div>
+          {/* Main Login Card */}
+          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 p-8 relative">
+            {/* Card glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5 rounded-3xl"></div>
 
-            {/* Password Field */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium">Password</span>
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-base-content/40" />
+            <div className="relative z-10">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Sign In
+                </h2>
+                <p className="text-gray-600">
+                  Enter your credentials to access the admin panel
+                </p>
+              </div>
+
+              {/* Global Error Display */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center gap-3 animate-shake">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  <span className="text-sm">{error}</span>
                 </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  className={`input input-bordered w-full pl-10 pr-10 ${
-                    errors.password ? "input-error" : ""
-                  }`}
-                  disabled={loginLoading}
-                  autoComplete="current-password"
-                />
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Identifier Field */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-blue-600" />
+                      {isIdentifierEmail ? "Email Address" : "Phone Number"}
+                    </div>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="identifier"
+                      value={formData.identifier}
+                      onChange={handleInputChange}
+                      onFocus={() => setFocusedField("identifier")}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder={
+                        isIdentifierEmail
+                          ? "Enter your email"
+                          : "Enter your phone number"
+                      }
+                      className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        validationErrors.identifier
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                          : focusedField === "identifier"
+                          ? "border-blue-500 focus:border-blue-600 focus:ring-blue-200"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                      } focus:outline-none focus:ring-4 placeholder-gray-400`}
+                      required
+                    />
+                    {/* Floating label effect */}
+                    {formData.identifier && (
+                      <div className="absolute -top-2 left-3 px-1 bg-white text-xs text-blue-600 font-medium">
+                        {isIdentifierEmail ? "Email" : "Phone"}
+                      </div>
+                    )}
+                  </div>
+                  {validationErrors.identifier && (
+                    <p className="text-red-600 text-sm flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {validationErrors.identifier}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password Field */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-blue-600" />
+                      Password
+                    </div>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      onFocus={() => setFocusedField("password")}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder="Enter your password"
+                      className={`w-full px-4 py-3 pr-12 border-2 rounded-xl transition-all duration-200 bg-white/50 backdrop-blur-sm ${
+                        validationErrors.password
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-200"
+                          : focusedField === "password"
+                          ? "border-blue-500 focus:border-blue-600 focus:ring-blue-200"
+                          : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                      } focus:outline-none focus:ring-4 placeholder-gray-400`}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                    {/* Floating label effect */}
+                    {formData.password && (
+                      <div className="absolute -top-2 left-3 px-1 bg-white text-xs text-blue-600 font-medium">
+                        Password
+                      </div>
+                    )}
+                  </div>
+                  {validationErrors.password && (
+                    <p className="text-red-600 text-sm flex items-center gap-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {validationErrors.password}
+                    </p>
+                  )}
+                </div>
+
+                {/* Forgot Password Link */}
+                <div className="flex justify-end">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors flex items-center gap-1"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    Forgot password?
+                  </Link>
+                </div>
+
+                {/* Submit Button */}
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  tabIndex={-1}
+                  type="submit"
+                  disabled={isLoading}
+                  className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-200 transform ${
+                    isLoading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                  }`}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-base-content/40 hover:text-base-content/60" />
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Signing In...
+                    </span>
                   ) : (
-                    <Eye className="h-5 w-5 text-base-content/40 hover:text-base-content/60" />
+                    <span className="flex items-center justify-center gap-2">
+                      <Shield className="w-5 h-5" />
+                      Sign In
+                    </span>
                   )}
                 </button>
+              </form>
+
+              {/* Register Link */}
+              <div className="mt-8 text-center">
+                <p className="text-gray-600">
+                  Don't have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="text-blue-600 hover:text-blue-800 font-semibold transition-colors hover:underline"
+                  >
+                    Create one here
+                  </Link>
+                </p>
               </div>
-              {errors.password && (
-                <label className="label">
-                  <span className="label-text-alt text-error">
-                    {errors.password}
-                  </span>
-                </label>
-              )}
             </div>
-
-            {/* Remember Me Checkbox */}
-            <div className="form-control">
-              <label className="label cursor-pointer justify-start gap-2">
-                <input
-                  type="checkbox"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  className="checkbox checkbox-primary checkbox-sm"
-                  disabled={loginLoading}
-                />
-                <span className="label-text">Remember me</span>
-              </label>
-            </div>
-
-            {/* Submit Button */}
-            <div className="form-control mt-6">
-              <button
-                type="submit"
-                className="btn btn-primary w-full"
-                disabled={loginLoading}
-              >
-                {loginLoading ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </button>
-            </div>
-          </form>
-
-          {/* Footer Links */}
-          <div className="divider text-xs text-base-content/50">OR</div>
-          <div className="text-center space-y-2">
-            <p className="text-sm text-base-content/70">
-              Don't have an account?{" "}
-              <Link to="/register" className="link link-primary font-medium">
-                Register here
-              </Link>
-            </p>
-            <p className="text-sm text-base-content/70">
-              <Link
-                to="/forgot-password"
-                className="link link-primary font-medium"
-              >
-                Forgot password?
-              </Link>
-            </p>
           </div>
 
-          {/* Security Notice */}
-          <div className="alert alert-info mt-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="stroke-current shrink-0 w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            <span className="text-xs">
-              This is a secure admin area. Only authorized personnel with admin
-              privileges can access this panel.
-            </span>
+          {/* Footer */}
+          <div className="text-center mt-8 text-sm text-gray-500">
+            <p>© 2024 Earn9ja Admin Panel. All rights reserved.</p>
           </div>
         </div>
       </div>

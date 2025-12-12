@@ -1,148 +1,73 @@
-# Earn9ja Admin Panel
+# React + TypeScript + Vite
 
-Modern admin dashboard built with React, Vite, TailwindCSS v4, and DaisyUI v5.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Current Status
+Currently, two official plugins are available:
 
-This is the initial setup with authentication only. Dashboard features will be implemented based on the spec.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Features
+## React Compiler
 
-- ✅ Login with admin credentials
-- ✅ Admin registration with OTP verification
-- ✅ DaisyUI components and themes
-- ✅ Responsive design
-- ✅ React Query for data fetching
-- ✅ React Router for navigation
-- ✅ Toast notifications
-- ⏳ Dashboard (to be implemented)
-- ⏳ User management (to be implemented)
-- ⏳ Task management (to be implemented)
-- ⏳ Withdrawal management (to be implemented)
-- ⏳ Analytics (to be implemented)
-- ⏳ Settings (to be implemented)
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Tech Stack
+## Expanding the ESLint configuration
 
-- **React 19** - UI library
-- **Vite** - Build tool
-- **TailwindCSS v4** - Styling
-- **DaisyUI v5** - UI components
-- **React Router** - Routing
-- **React Query** - Data fetching
-- **Zustand** - State management
-- **Axios** - HTTP client
-- **React Hot Toast** - Notifications
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## Getting Started
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-### 1. Install Dependencies
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-```bash
-npm install
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-### 2. Configure Environment
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-Create `.env` file:
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-```env
-VITE_API_URL=https://api.earn9ja.site/api/v1
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-
-### 3. Run Development Server
-
-```bash
-npm run dev
-```
-
-Visit: http://localhost:5173
-
-### 4. Build for Production
-
-```bash
-npm run build
-```
-
-## Default Admin Credentials
-
-```
-Email: admin@earn9ja.site
-Password: Admin@Earn9ja2024!
-```
-
-**⚠️ Change password after first login!**
-
-## Project Structure
-
-```
-admin/
-├── src/
-│   ├── pages/
-│   │   ├── LoginPage.tsx
-│   │   └── RegisterPage.tsx
-│   ├── store/
-│   │   └── authStore.ts
-│   ├── lib/
-│   │   └── api.ts
-│   ├── assets/
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── .env
-├── package.json
-└── vite.config.ts
-```
-
-## Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-
-## Deployment
-
-### Deploy to Vercel
-
-```bash
-npm install -g vercel
-vercel
-```
-
-### Deploy to Netlify
-
-```bash
-npm run build
-# Upload dist/ folder to Netlify
-```
-
-## DaisyUI Themes
-
-The app uses all DaisyUI themes. Users can switch themes in settings (coming soon).
-
-Available themes: light, dark, cupcake, bumblebee, emerald, corporate, synthwave, retro, cyberpunk, valentine, halloween, garden, forest, aqua, lofi, pastel, fantasy, wireframe, black, luxury, dracula, cmyk, autumn, business, acid, lemonade, night, coffee, winter, dim, nord, sunset
-
-## API Integration
-
-The admin panel connects to the Earn9ja backend API at `https://api.earn9ja.site/api/v1`.
-
-All API calls are authenticated with JWT tokens stored in localStorage.
-
-## Next Steps
-
-The admin panel will be built following a spec-driven approach:
-
-1. Create comprehensive requirements document
-2. Design the admin panel architecture
-3. Implement features incrementally:
-   - Dashboard with platform statistics
-   - User management (view, suspend, ban, reactivate)
-   - Task management (approve, reject, monitor)
-   - Withdrawal management (approve, reject, process)
-   - Analytics and reporting
-   - Settings and configuration
-
-## Support
-
-For issues or questions, contact: support@earn9ja.site

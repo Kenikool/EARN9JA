@@ -89,6 +89,41 @@ export class ReferralService {
       await newUser.save();
     }
 
+    // Award immediate signup bonus (₦10 to referrer)
+    const SIGNUP_BONUS = 10;
+    try {
+      await walletService.credit(
+        referrer._id.toString(),
+        SIGNUP_BONUS,
+        "referral_bonus",
+        `Referral signup bonus: ${
+          newUser?.profile?.firstName || "New user"
+        } joined using your code!`,
+        { referredUserId: newUserId, milestone: "signup" }
+      );
+
+      console.log(
+        `💰 Signup bonus: ₦${SIGNUP_BONUS} credited to referrer ${referrer._id}`
+      );
+
+      // Send notification
+      try {
+        const { NotificationHelpers } = await import(
+          "./NotificationHelpers.js"
+        );
+        await NotificationHelpers.notifyReferralBonus(
+          referrer._id.toString(),
+          newUser?.profile?.firstName || "Someone",
+          SIGNUP_BONUS,
+          "signed up using your referral code"
+        );
+      } catch (error) {
+        console.error("Failed to send signup bonus notification:", error);
+      }
+    } catch (error) {
+      console.error("Failed to credit signup bonus:", error);
+    }
+
     console.log(
       `✅ Referral created: ${referrer.profile.firstName} referred user ${newUserId}`
     );
