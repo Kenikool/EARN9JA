@@ -48,6 +48,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authService.login(credentials);
+          console.log("📥 Login response:", response);
 
           if (response.success && response.token && response.user) {
             authService.setTokens(response.token, response.refreshToken!);
@@ -59,8 +60,18 @@ export const useAuthStore = create<AuthState>()(
               isLoading: false,
               error: null,
             });
-          } else {
+          } else if (!response.success) {
+            // Backend returned success: false
             const errorMessage = response.message || "Login failed";
+            set({
+              isLoading: false,
+              error: errorMessage,
+            });
+            throw new Error(errorMessage);
+          } else {
+            // Backend returned success: true but missing token or user
+            const errorMessage =
+              "Invalid response from server. Missing authentication data.";
             set({
               isLoading: false,
               error: errorMessage,
