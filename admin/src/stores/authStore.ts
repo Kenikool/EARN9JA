@@ -47,11 +47,15 @@ export const useAuthStore = create<AuthState>()(
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null });
         try {
+          console.log("🔐 Attempting login with:", credentials.identifier);
           const response = await authService.login(credentials);
           console.log("📥 Login response:", response);
 
-          if (response.success && response.token && response.user) {
-            authService.setTokens(response.token, response.refreshToken!);
+          const token = response.token || response.accessToken;
+          const refreshToken = response.refreshToken;
+
+          if (response.success && token && response.user) {
+            authService.setTokens(token, refreshToken!);
             authService.setStoredUser(response.user);
 
             set({
@@ -61,7 +65,6 @@ export const useAuthStore = create<AuthState>()(
               error: null,
             });
           } else if (!response.success) {
-            // Backend returned success: false
             const errorMessage = response.message || "Login failed";
             set({
               isLoading: false,
@@ -69,7 +72,6 @@ export const useAuthStore = create<AuthState>()(
             });
             throw new Error(errorMessage);
           } else {
-            // Backend returned success: true but missing token or user
             const errorMessage =
               "Invalid response from server. Missing authentication data.";
             set({
@@ -78,11 +80,25 @@ export const useAuthStore = create<AuthState>()(
             });
             throw new Error(errorMessage);
           }
-        } catch (error: unknown) {
-          const errorMessage =
-            error.response?.data?.message ||
-            error.message ||
-            "An error occurred during login";
+        } catch (error) {
+          console.error("❌ Login error:", error);
+
+          let errorMessage = "An error occurred during login";
+
+          if (error && typeof error === "object") {
+            if ("response" in error) {
+              console.error("❌ Error response:", error.response);
+              const response = error.response as {
+                data?: { message?: string };
+              };
+              errorMessage = response.data?.message || errorMessage;
+            }
+            if ("message" in error) {
+              console.error("❌ Error message:", error.message);
+              errorMessage = (error.message as string) || errorMessage;
+            }
+          }
+
           set({
             isLoading: false,
             error: errorMessage,

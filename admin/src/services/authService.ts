@@ -3,7 +3,10 @@ import axios from "axios";
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "https://api.earn9ja.site/api/v1";
 
+console.log("=".repeat(50));
 console.log("🔗 Admin API URL:", API_BASE_URL);
+console.log("🔗 VITE_API_URL env:", import.meta.env.VITE_API_URL);
+console.log("=".repeat(50));
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -49,6 +52,7 @@ export interface AuthResponse {
   data?: unknown;
   user?: unknown;
   token?: string;
+  accessToken?: string;
   refreshToken?: string;
 }
 

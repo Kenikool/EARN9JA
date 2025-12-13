@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Menu,
   Bell,
@@ -10,208 +10,306 @@ import {
   Moon,
 } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
+import { useNavigate } from "react-router-dom";
+import notificationService, {
+  type Notification,
+} from "../../services/notificationService";
 
 interface HeaderProps {
   setSidebarOpen: (isOpen: boolean) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    return document.documentElement.getAttribute("data-theme") || "light";
+  });
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const data = await notificationService.getNotifications(1, 10);
+      setNotifications(data.notifications);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await notificationService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Failed to fetch unread count:", error);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      await notificationService.markAsRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    // In a real app, you'd persist this to localStorage and update the theme
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
   };
 
-  const notifications = [
-    {
-      id: 1,
-      title: "New user registration",
-      message: "John Doe just registered",
-      time: "2 minutes ago",
-      unread: true,
-    },
-    {
-      id: 2,
-      title: "Withdrawal request",
-      message: "New withdrawal request from Jane Smith",
-      time: "5 minutes ago",
-      unread: true,
-    },
-    {
-      id: 3,
-      title: "Task approval needed",
-      message: "3 tasks pending approval",
-      time: "1 hour ago",
-      unread: false,
-    },
-  ];
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/dashboard/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return "just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days} day${days > 1 ? "s" : ""} ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-      <div className="flex items-center justify-between px-4 py-3 lg:px-6">
-        {/* Left Section */}
-        <div className="flex items-center space-x-4">
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <Menu className="w-5 h-5 text-gray-600" />
-          </button>
+    <header className="navbar bg-base-100 border-b border-base-300 sticky top-0 z-30 shadow-sm">
+      <div className="flex-none lg:hidden">
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="btn btn-ghost btn-square"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
 
-          {/* Search */}
-          <div className="hidden md:flex items-center space-x-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="pl-10 pr-4 py-2 w-64 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+      <div className="flex-1 px-2">
+        <form
+          onSubmit={handleSearch}
+          className="w-full max-w-xs sm:max-w-sm md:max-w-md"
+        >
+          <div className="join w-full">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="input input-bordered input-sm sm:input-md join-item w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="btn btn-square btn-sm sm:btn-md join-item"
+            >
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="flex-none gap-2">
+        {/* Theme Toggle */}
+        <label className="swap swap-rotate btn btn-ghost btn-circle">
+          <input
+            type="checkbox"
+            checked={theme === "dark"}
+            onChange={toggleTheme}
+          />
+          <Sun className="swap-on w-5 h-5" />
+          <Moon className="swap-off w-5 h-5" />
+        </label>
+
+        {/* Notifications Dropdown */}
+        <div className="dropdown dropdown-end">
+          <label
+            tabIndex={0}
+            className="btn btn-ghost btn-circle"
+            onClick={() => {
+              if (notifications.length === 0) fetchNotifications();
+            }}
+          >
+            <div className="indicator">
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="badge badge-sm badge-error indicator-item">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+          </label>
+          <div
+            tabIndex={0}
+            className="dropdown-content card card-compact w-80 p-0 shadow-lg bg-base-100 border border-base-300 mt-3"
+          >
+            <div className="card-body p-0">
+              <div className="flex items-center justify-between p-4 border-b border-base-300">
+                <h3 className="font-semibold text-lg">Notifications</h3>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleMarkAllAsRead}
+                    className="btn btn-ghost btn-xs"
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
+              <div className="max-h-96 overflow-y-auto">
+                {loading ? (
+                  <div className="p-8 text-center">
+                    <span className="loading loading-spinner loading-md"></span>
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="p-8 text-center text-base-content/60">
+                    No notifications
+                  </div>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification._id}
+                      onClick={() => {
+                        if (!notification.read) {
+                          handleMarkAsRead(notification._id);
+                        }
+                        (document.activeElement as HTMLElement)?.blur();
+                      }}
+                      className={`p-4 border-b border-base-200 hover:bg-base-200 cursor-pointer ${
+                        !notification.read ? "bg-primary/10" : ""
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <h4 className="text-sm font-medium">
+                            {notification.title}
+                          </h4>
+                          <p className="text-sm opacity-70 mt-1">
+                            {notification.body}
+                          </p>
+                          <p className="text-xs opacity-50 mt-2">
+                            {formatTimeAgo(notification.createdAt)}
+                          </p>
+                        </div>
+                        {!notification.read && (
+                          <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="p-3 border-t border-base-300">
+                <button className="btn btn-ghost btn-sm btn-block">
+                  View all notifications
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Section */}
-        <div className="flex items-center space-x-2 lg:space-x-4">
-          {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            title="Toggle dark mode"
-          >
-            {isDarkMode ? (
-              <Sun className="w-5 h-5 text-gray-600" />
-            ) : (
-              <Moon className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
-
-          {/* Notifications */}
-          <div className="relative">
-            <button
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative"
-            >
-              <Bell className="w-5 h-5 text-gray-600" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  {unreadCount}
+        {/* Profile Dropdown */}
+        <div className="dropdown dropdown-end">
+          <label tabIndex={0} className="btn btn-ghost gap-2">
+            <div className="avatar placeholder">
+              <div className="bg-primary text-primary-content rounded-full w-8">
+                <span className="text-xs">
+                  {user?.profile?.firstName?.[0]}
+                  {user?.profile?.lastName?.[0]}
                 </span>
-              )}
-            </button>
-
-            {/* Notification Dropdown */}
-            {isNotificationOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Notifications
-                  </h3>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-                        notification.unread ? "bg-blue-50" : ""
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-900">
-                            {notification.title}
-                          </h4>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {notification.time}
-                          </p>
-                        </div>
-                        {notification.unread && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-3 border-t border-gray-200">
-                  <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                    View all notifications
-                  </button>
-                </div>
               </div>
-            )}
-          </div>
-
-          {/* Profile Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-white" />
-              </div>
-              <div className="hidden md:block text-left">
-                <p className="text-sm font-medium text-gray-900">
-                  {user?.profile?.firstName || "Admin"}{" "}
-                  {user?.profile?.lastName || "User"}
-                </p>
-                <p className="text-xs text-gray-500">Administrator</p>
-              </div>
-            </button>
-
-            {/* Profile Dropdown */}
-            {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                <div className="p-4 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        {user?.profile?.firstName || "Admin"}{" "}
-                        {user?.profile?.lastName || "User"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {user?.email || "admin@earn9ja.com"}
-                      </p>
-                    </div>
+            </div>
+            <div className="hidden md:block text-left">
+              <p className="text-sm font-medium">
+                {user?.profile?.firstName} {user?.profile?.lastName}
+              </p>
+              <p className="text-xs opacity-60 capitalize">
+                {user?.roles?.join(", ") || "User"}
+              </p>
+            </div>
+          </label>
+          <div
+            tabIndex={0}
+            className="dropdown-content menu p-2 shadow-lg bg-base-100 border border-base-300 rounded-box w-56 mt-3"
+          >
+            <div className="px-4 py-3 border-b border-base-300">
+              <div className="flex items-center gap-3">
+                <div className="avatar placeholder">
+                  <div className="bg-primary text-primary-content rounded-full w-12">
+                    <span className="text-lg">
+                      {user?.profile?.firstName?.[0]}
+                      {user?.profile?.lastName?.[0]}
+                    </span>
                   </div>
                 </div>
-                <div className="py-2">
-                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                    <User className="w-4 h-4 mr-3" />
-                    View Profile
-                  </button>
-                  <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                    <Settings className="w-4 h-4 mr-3" />
-                    Account Settings
-                  </button>
-                  <hr className="my-2" />
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4 mr-3" />
-                    Sign Out
-                  </button>
+                <div>
+                  <p className="text-sm font-medium">
+                    {user?.profile?.firstName} {user?.profile?.lastName}
+                  </p>
+                  <p className="text-xs opacity-60">{user?.email}</p>
                 </div>
               </div>
-            )}
+            </div>
+            <li onClick={() => (document.activeElement as HTMLElement)?.blur()}>
+              <a>
+                <User className="w-4 h-4" />
+                View Profile
+              </a>
+            </li>
+            <li onClick={() => (document.activeElement as HTMLElement)?.blur()}>
+              <a>
+                <Settings className="w-4 h-4" />
+                Account Settings
+              </a>
+            </li>
+            <div className="divider my-0"></div>
+            <li
+              onClick={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                handleLogout();
+              }}
+            >
+              <a className="text-error">
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </a>
+            </li>
           </div>
         </div>
       </div>

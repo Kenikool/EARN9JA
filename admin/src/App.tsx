@@ -7,6 +7,7 @@ import Withdrawals from "./pages/Withdrawals";
 import Disputes from "./pages/Disputes";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import Search from "./pages/Search";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -67,6 +68,7 @@ const App = () => {
         <Route path="disputes" element={<Disputes />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="search" element={<Search />} />
         {/* Placeholder pages - to be implemented */}
         <Route
           path="revenue"

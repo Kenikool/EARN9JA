@@ -6,12 +6,9 @@ import {
   DollarSign,
   TrendingUp,
   AlertTriangle,
-  Clock,
-  ArrowUpRight,
-  ArrowDownRight,
   Eye,
+  ArrowUpRight,
   CheckCircle,
-  XCircle,
 } from "lucide-react";
 import {
   usePlatformStats,
@@ -29,17 +26,12 @@ const Dashboard: React.FC = () => {
   const { data: tasksData, isLoading: tasksLoading } = usePendingTasks(1, 5);
   const { data: withdrawalsData, isLoading: withdrawalsLoading } =
     usePendingWithdrawals(1, 5);
-  const { data: disputesData, isLoading: disputesLoading } = usePendingDisputes(
-    1,
-    5
-  );
+  const { data: disputesData } = usePendingDisputes(1, 5);
 
   const stats = statsData?.data;
   const pendingTasks = tasksData?.data?.tasks || [];
   const pendingWithdrawals = withdrawalsData?.data?.withdrawals || [];
-  const pendingDisputes = disputesData?.data?.disputes || [];
 
-  // Loading state
   if (statsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -48,7 +40,6 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Error state
   if (statsError) {
     return (
       <div className="alert alert-error">
@@ -93,37 +84,6 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  const quickActions = [
-    {
-      title: "User Management",
-      description: "Manage platform users",
-      icon: Users,
-      color: "bg-blue-500",
-      href: "/dashboard/users",
-    },
-    {
-      title: "Task Approval",
-      description: "Review pending tasks",
-      icon: FileText,
-      color: "bg-green-500",
-      href: "/dashboard/tasks/pending",
-    },
-    {
-      title: "Withdrawal Review",
-      description: "Process pending withdrawals",
-      icon: DollarSign,
-      color: "bg-yellow-500",
-      href: "/dashboard/withdrawals/pending",
-    },
-    {
-      title: "Analytics",
-      description: "View platform analytics",
-      icon: TrendingUp,
-      color: "bg-purple-500",
-      href: "/dashboard/analytics",
-    },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
@@ -153,16 +113,8 @@ const Dashboard: React.FC = () => {
                   <div className="flex items-center mt-2">
                     {stat.changeType === "increase" ? (
                       <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4 text-red-500 mr-1" />
-                    )}
-                    <span
-                      className={`text-sm font-medium ${
-                        stat.changeType === "increase"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
+                    ) : null}
+                    <span className="text-sm font-medium text-green-500">
                       {stat.change}
                     </span>
                     <span className="text-sm text-gray-500 ml-1">
@@ -277,145 +229,99 @@ const Dashboard: React.FC = () => {
           <div className="card-body">
             <h2 className="card-title mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              {quickActions.map((action, index) => (
-                <Link
-                  key={index}
-                  to={action.href}
-                  className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
-                >
-                  <div className={`${action.color} p-2 rounded-lg mr-3`}>
-                    <action.icon className="w-4 h-4 text-white" />
+              <Link
+                to="/dashboard/users"
+                className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
+              >
+                <div className="bg-blue-500 p-2 rounded-lg mr-3">
+                  <Users className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <div className="font-medium">User Management</div>
+                  <div className="text-xs text-gray-500">
+                    Manage platform users
                   </div>
-                  <div>
-                    <div className="font-medium">{action.title}</div>
-                    <div className="text-xs text-gray-500">
-                      {action.description}
-                    </div>
+                </div>
+              </Link>
+              <Link
+                to="/dashboard/tasks"
+                className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
+              >
+                <div className="bg-green-500 p-2 rounded-lg mr-3">
+                  <FileText className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <div className="font-medium">Task Approval</div>
+                  <div className="text-xs text-gray-500">
+                    Review pending tasks
                   </div>
-                </Link>
-              ))}
+                </div>
+              </Link>
+              <Link
+                to="/dashboard/analytics"
+                className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
+              >
+                <div className="bg-purple-500 p-2 rounded-lg mr-3">
+                  <TrendingUp className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <div className="font-medium">Analytics</div>
+                  <div className="text-xs text-gray-500">
+                    View platform analytics
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Additional Dashboard Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pending Approvals Summary */}
-        <div className="card bg-white shadow-sm border border-gray-200">
-          <div className="card-body">
-            <h2 className="card-title">Pending Approvals</h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <FileText className="w-5 h-5 text-yellow-600" />
-                  <div>
-                    <p className="text-sm font-medium">Task Submissions</p>
-                    <p className="text-xs text-gray-600">
-                      {tasksData?.data?.pagination?.total || 0} tasks pending
-                      review
-                    </p>
-                  </div>
-                </div>
-                <div className="badge badge-warning">
-                  {tasksData?.data?.pagination?.total || 0}
+      {/* Pending Approvals Summary */}
+      <div className="card bg-white shadow-sm border border-gray-200">
+        <div className="card-body">
+          <h2 className="card-title">Pending Approvals</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <FileText className="w-5 h-5 text-yellow-600" />
+                <div>
+                  <p className="text-sm font-medium">Task Submissions</p>
+                  <p className="text-xs text-gray-600">
+                    {tasksData?.data?.pagination?.total || 0} tasks pending
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm font-medium">User Verifications</p>
-                    <p className="text-xs text-gray-600">
-                      5 users awaiting approval
-                    </p>
-                  </div>
-                </div>
-                <div className="badge badge-info">5</div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <DollarSign className="w-5 h-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-medium">Withdrawal Requests</p>
-                    <p className="text-xs text-gray-600">
-                      {withdrawalsData?.data?.pagination?.total || 0} requests
-                      to process
-                    </p>
-                  </div>
-                </div>
-                <div className="badge badge-success">
-                  {withdrawalsData?.data?.pagination?.total || 0}
-                </div>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                  <div>
-                    <p className="text-sm font-medium">Disputes</p>
-                    <p className="text-xs text-gray-600">
-                      {disputesData?.data?.pagination?.total || 0} disputes
-                      pending
-                    </p>
-                  </div>
-                </div>
-                <div className="badge badge-error">
-                  {disputesData?.data?.pagination?.total || 0}
-                </div>
+              <div className="badge badge-warning">
+                {tasksData?.data?.pagination?.total || 0}
               </div>
             </div>
-            <div className="card-actions justify-end mt-4">
-              <Link
-                to="/dashboard/approvals"
-                className="btn btn-primary btn-sm"
-              >
-                View All Pending
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Platform Status */}
-        <div className="card bg-white shadow-sm border border-gray-200">
-          <div className="card-body">
-            <h2 className="card-title">Platform Status</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Database</span>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-green-600">Healthy</span>
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="text-sm font-medium">Withdrawal Requests</p>
+                  <p className="text-xs text-gray-600">
+                    {withdrawalsData?.data?.pagination?.total || 0} requests
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">API Services</span>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-green-600">Operational</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Payment Gateway</span>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-green-600">Active</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Email Service</span>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-sm text-green-600">Active</span>
-                </div>
+              <div className="badge badge-success">
+                {withdrawalsData?.data?.pagination?.total || 0}
               </div>
             </div>
-            <div className="card-actions justify-end mt-4">
-              <Link
-                to="/dashboard/platform/status"
-                className="btn btn-outline btn-sm"
-              >
-                View Details
-              </Link>
+            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="text-sm font-medium">Disputes</p>
+                  <p className="text-xs text-gray-600">
+                    {disputesData?.data?.pagination?.total || 0} disputes
+                  </p>
+                </div>
+              </div>
+              <div className="badge badge-error">
+                {disputesData?.data?.pagination?.total || 0}
+              </div>
             </div>
           </div>
         </div>
