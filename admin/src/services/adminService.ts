@@ -147,7 +147,7 @@ export const adminService = {
 
   async getUserDetails(
     userId: string
-  ): Promise<{ success: boolean; data: any }> {
+  ): Promise<{ success: boolean; data: User }> {
     const response = await api.get(`/admin/users/${userId}`);
     return response.data;
   },
@@ -185,6 +185,22 @@ export const adminService = {
     const response = await api.get(
       `/admin/tasks/pending?page=${page}&limit=${limit}`
     );
+    return response.data;
+  },
+
+  async getTasks(
+    page: number = 1,
+    limit: number = 20,
+    status?: string
+  ): Promise<{ success: boolean; data: TasksPaginatedResponse }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (status) {
+      params.append("status", status);
+    }
+    const response = await api.get(`/admin/tasks?${params.toString()}`);
     return response.data;
   },
 
@@ -249,7 +265,7 @@ export const adminService = {
 
   async getDisputeDetails(
     disputeId: string
-  ): Promise<{ success: boolean; data: any }> {
+  ): Promise<{ success: boolean; data: Dispute }> {
     const response = await api.get(`/admin/disputes/${disputeId}`);
     return response.data;
   },

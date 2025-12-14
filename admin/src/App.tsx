@@ -8,6 +8,10 @@ import Disputes from "./pages/Disputes";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
 import Search from "./pages/Search";
+import Notifications from "./pages/Notifications";
+import Revenue from "./pages/Revenue";
+import Platform from "./pages/Platform";
+import Support from "./pages/Support";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -60,44 +64,52 @@ const App = () => {
         }
       >
         <Route index element={<Dashborad />} />
+
+        {/* User Management Routes */}
         <Route path="users" element={<UserManagement />} />
+        <Route path="users/active" element={<UserManagement />} />
+        <Route path="users/suspended" element={<UserManagement />} />
+
+        {/* Task Management Routes */}
         <Route path="tasks" element={<Tasks />} />
         <Route path="tasks/pending" element={<Tasks />} />
+        <Route path="tasks/approved" element={<Tasks />} />
+        <Route path="tasks/rejected" element={<Tasks />} />
+
+        {/* Withdrawal Management Routes */}
         <Route path="withdrawals" element={<Withdrawals />} />
         <Route path="withdrawals/pending" element={<Withdrawals />} />
+        <Route path="withdrawals/approved" element={<Withdrawals />} />
+        <Route path="withdrawals/rejected" element={<Withdrawals />} />
+
+        {/* Dispute Routes */}
         <Route path="disputes" element={<Disputes />} />
+        <Route path="disputes/pending" element={<Disputes />} />
+        <Route path="disputes/resolved" element={<Disputes />} />
+
+        {/* Other Routes */}
         <Route path="analytics" element={<Analytics />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="profile" element={<Settings />} />
         <Route path="search" element={<Search />} />
-        {/* Placeholder pages - to be implemented */}
-        <Route
-          path="revenue"
-          element={
-            <div className="p-6">
-              <h1 className="text-2xl font-bold">
-                Revenue & Payments - Coming Soon
-              </h1>
-            </div>
-          }
-        />
-        <Route
-          path="platform"
-          element={
-            <div className="p-6">
-              <h1 className="text-2xl font-bold">
-                Platform Management - Coming Soon
-              </h1>
-            </div>
-          }
-        />
-        <Route
-          path="support"
-          element={
-            <div className="p-6">
-              <h1 className="text-2xl font-bold">Support - Coming Soon</h1>
-            </div>
-          }
-        />
+        <Route path="notifications" element={<Notifications />} />
+
+        {/* Revenue & Payments Routes */}
+        <Route path="revenue" element={<Revenue />} />
+        <Route path="revenue/payments" element={<Revenue />} />
+        <Route path="revenue/commission" element={<Revenue />} />
+
+        {/* Platform Management Routes */}
+        <Route path="platform" element={<Platform />} />
+        <Route path="platform/status" element={<Platform />} />
+        <Route path="platform/security" element={<Platform />} />
+        <Route path="platform/config" element={<Platform />} />
+
+        {/* Support Routes */}
+        <Route path="support" element={<Support />} />
+        <Route path="support/tickets" element={<Support />} />
+        <Route path="support/faqs" element={<Support />} />
+        <Route path="support/messages" element={<Support />} />
       </Route>
 
       {/* Default redirect */}

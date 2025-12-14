@@ -54,6 +54,13 @@ router.post("/users/:userId/reactivate", adminController.reactivateUser);
 
 // Task Moderation
 /**
+ * @route   GET /api/v1/admin/tasks
+ * @desc    Get tasks with optional status filter
+ * @access  Admin
+ */
+router.get("/tasks", adminController.getTasks);
+
+/**
  * @route   GET /api/v1/admin/tasks/pending
  * @desc    Get pending tasks for approval
  * @access  Admin

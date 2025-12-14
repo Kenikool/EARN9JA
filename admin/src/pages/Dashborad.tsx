@@ -87,9 +87,9 @@ const Dashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-6 text-white">
+      <div className="bg-primary rounded-lg p-6 text-primary-content">
         <h1 className="text-3xl font-bold mb-2">Welcome to Earn9ja Admin!</h1>
-        <p className="text-blue-100">
+        <p className="opacity-90">
           Monitor and manage your platform from this dashboard.
         </p>
       </div>
@@ -99,25 +99,25 @@ const Dashboard: React.FC = () => {
         {statsCards.map((stat, index) => (
           <div
             key={index}
-            className="card bg-white shadow-sm border border-gray-200"
+            className="card bg-base-100 shadow-sm border border-base-300"
           >
             <div className="card-body p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-base-content/60">
                     {stat.title}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                  <p className="text-2xl font-bold text-base-content mt-1">
                     {stat.value}
                   </p>
                   <div className="flex items-center mt-2">
                     {stat.changeType === "increase" ? (
-                      <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
+                      <ArrowUpRight className="w-4 h-4 text-success mr-1" />
                     ) : null}
-                    <span className="text-sm font-medium text-green-500">
+                    <span className="text-sm font-medium text-success">
                       {stat.change}
                     </span>
-                    <span className="text-sm text-gray-500 ml-1">
+                    <span className="text-sm text-base-content/50 ml-1">
                       vs last month
                     </span>
                   </div>
@@ -134,10 +134,10 @@ const Dashboard: React.FC = () => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pending Tasks */}
-        <div className="card bg-white shadow-sm border border-gray-200">
+        <div className="card bg-base-100 shadow-sm border border-base-300">
           <div className="card-body">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="card-title">Pending Tasks</h2>
+              <h2 className="card-title text-base-content">Pending Tasks</h2>
               <Link
                 to="/dashboard/tasks/pending"
                 className="btn btn-ghost btn-sm"
@@ -151,8 +151,8 @@ const Dashboard: React.FC = () => {
                 <div className="loading loading-spinner"></div>
               </div>
             ) : pendingTasks.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <FileText className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <div className="text-center py-8 text-base-content/60">
+                <FileText className="w-12 h-12 mx-auto mb-2 text-base-content/30" />
                 <p>No pending tasks</p>
               </div>
             ) : (
@@ -160,13 +160,13 @@ const Dashboard: React.FC = () => {
                 {pendingTasks.map((task: any) => (
                   <div
                     key={task._id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-base-content truncate">
                         {task.title}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-base-content/60">
                         {task.category} • ₦{task.reward}
                       </p>
                     </div>
@@ -179,10 +179,12 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Pending Withdrawals */}
-        <div className="card bg-white shadow-sm border border-gray-200">
+        <div className="card bg-base-100 shadow-sm border border-base-300">
           <div className="card-body">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="card-title">Pending Withdrawals</h2>
+              <h2 className="card-title text-base-content">
+                Pending Withdrawals
+              </h2>
               <Link
                 to="/dashboard/withdrawals/pending"
                 className="btn btn-ghost btn-sm"
@@ -196,23 +198,23 @@ const Dashboard: React.FC = () => {
                 <div className="loading loading-spinner"></div>
               </div>
             ) : pendingWithdrawals.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <DollarSign className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <div className="text-center py-8 text-base-content/60">
+                <DollarSign className="w-12 h-12 mx-auto mb-2 text-base-content/30" />
                 <p>No pending withdrawals</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {pendingWithdrawals.map((withdrawal: any) => (
+                {pendingWithdrawals.map((withdrawal: unknown) => (
                   <div
                     key={withdrawal._id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-base-content">
                         {withdrawal.userId?.profile?.firstName}{" "}
                         {withdrawal.userId?.profile?.lastName}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-base-content/60">
                         ₦{withdrawal.amount.toLocaleString()}
                       </p>
                     </div>
@@ -225,20 +227,22 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="card bg-white shadow-sm border border-gray-200">
+        <div className="card bg-base-100 shadow-sm border border-base-300">
           <div className="card-body">
-            <h2 className="card-title mb-4">Quick Actions</h2>
+            <h2 className="card-title text-base-content mb-4">Quick Actions</h2>
             <div className="space-y-3">
               <Link
                 to="/dashboard/users"
                 className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
               >
-                <div className="bg-blue-500 p-2 rounded-lg mr-3">
-                  <Users className="w-4 h-4 text-white" />
+                <div className="bg-info p-2 rounded-lg mr-3">
+                  <Users className="w-4 h-4 text-info-content" />
                 </div>
                 <div>
-                  <div className="font-medium">User Management</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="font-medium text-base-content">
+                    User Management
+                  </div>
+                  <div className="text-xs text-base-content/60">
                     Manage platform users
                   </div>
                 </div>
@@ -247,12 +251,14 @@ const Dashboard: React.FC = () => {
                 to="/dashboard/tasks"
                 className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
               >
-                <div className="bg-green-500 p-2 rounded-lg mr-3">
-                  <FileText className="w-4 h-4 text-white" />
+                <div className="bg-success p-2 rounded-lg mr-3">
+                  <FileText className="w-4 h-4 text-success-content" />
                 </div>
                 <div>
-                  <div className="font-medium">Task Approval</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="font-medium text-base-content">
+                    Task Approval
+                  </div>
+                  <div className="text-xs text-base-content/60">
                     Review pending tasks
                   </div>
                 </div>
@@ -261,12 +267,12 @@ const Dashboard: React.FC = () => {
                 to="/dashboard/analytics"
                 className="btn btn-ghost justify-start h-auto p-4 text-left w-full"
               >
-                <div className="bg-purple-500 p-2 rounded-lg mr-3">
-                  <TrendingUp className="w-4 h-4 text-white" />
+                <div className="bg-secondary p-2 rounded-lg mr-3">
+                  <TrendingUp className="w-4 h-4 text-secondary-content" />
                 </div>
                 <div>
-                  <div className="font-medium">Analytics</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="font-medium text-base-content">Analytics</div>
+                  <div className="text-xs text-base-content/60">
                     View platform analytics
                   </div>
                 </div>
@@ -277,16 +283,18 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Pending Approvals Summary */}
-      <div className="card bg-white shadow-sm border border-gray-200">
+      <div className="card bg-base-100 shadow-sm border border-base-300">
         <div className="card-body">
-          <h2 className="card-title">Pending Approvals</h2>
+          <h2 className="card-title text-base-content">Pending Approvals</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-warning/10 rounded-lg border border-warning/20">
               <div className="flex items-center space-x-3">
-                <FileText className="w-5 h-5 text-yellow-600" />
+                <FileText className="w-5 h-5 text-warning" />
                 <div>
-                  <p className="text-sm font-medium">Task Submissions</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-sm font-medium text-base-content">
+                    Task Submissions
+                  </p>
+                  <p className="text-xs text-base-content/60">
                     {tasksData?.data?.pagination?.total || 0} tasks pending
                   </p>
                 </div>
@@ -295,12 +303,14 @@ const Dashboard: React.FC = () => {
                 {tasksData?.data?.pagination?.total || 0}
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-success/10 rounded-lg border border-success/20">
               <div className="flex items-center space-x-3">
-                <DollarSign className="w-5 h-5 text-green-600" />
+                <DollarSign className="w-5 h-5 text-success" />
                 <div>
-                  <p className="text-sm font-medium">Withdrawal Requests</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-sm font-medium text-base-content">
+                    Withdrawal Requests
+                  </p>
+                  <p className="text-xs text-base-content/60">
                     {withdrawalsData?.data?.pagination?.total || 0} requests
                   </p>
                 </div>
@@ -309,12 +319,14 @@ const Dashboard: React.FC = () => {
                 {withdrawalsData?.data?.pagination?.total || 0}
               </div>
             </div>
-            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-error/10 rounded-lg border border-error/20">
               <div className="flex items-center space-x-3">
-                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <AlertTriangle className="w-5 h-5 text-error" />
                 <div>
-                  <p className="text-sm font-medium">Disputes</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-sm font-medium text-base-content">
+                    Disputes
+                  </p>
+                  <p className="text-xs text-base-content/60">
                     {disputesData?.data?.pagination?.total || 0} disputes
                   </p>
                 </div>

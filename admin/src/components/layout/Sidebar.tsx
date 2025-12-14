@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -13,7 +13,8 @@ import {
   Shield,
   TrendingUp,
   MessageSquare,
-  UserCheck,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 
@@ -24,7 +25,8 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+  const [openMenus, setOpenMenus] = useState<string[]>([]);
 
   const menuItems = [
     {
@@ -129,6 +131,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
     );
   };
 
+  const toggleMenu = (path: string) => {
+    setOpenMenus((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    );
+  };
+
+  const isMenuOpen = (path: string) => {
+    return openMenus.includes(path) || isActivePath(path);
+  };
+
   const handleLogout = async () => {
     await logout();
   };
@@ -145,63 +157,73 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed left-0 top-0 h-screen bg-base-100 border-r border-base-300 shadow-xl transform transition-transform duration-300 ease-in-out z-50 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:inset-0 w-72`}
+        } lg:translate-x-0 lg:fixed w-72 flex flex-col`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-base-300 shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+              <Shield className="w-6 h-6 text-primary-content" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Earn9ja</h1>
-              <p className="text-sm text-gray-500">Admin Panel</p>
+              <h1 className="text-xl font-bold text-base-content">Earn9ja</h1>
+              <p className="text-sm text-base-content/60">Admin Panel</p>
             </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="lg:hidden btn btn-ghost btn-sm btn-square"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Scrollable */}
         <nav className="flex-1 px-4 py-6 overflow-y-auto">
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {menuItems.map((item) => (
               <li key={item.path}>
                 {item.submenu ? (
                   <div>
-                    <div
-                      className={`flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors ${
+                    <button
+                      onClick={() => toggleMenu(item.path)}
+                      className={`w-full flex items-center px-3 py-2 rounded-lg transition-colors ${
                         isActivePath(item.path)
-                          ? "bg-blue-50 text-blue-700"
-                          : ""
+                          ? "bg-primary/10 text-primary"
+                          : "text-base-content hover:bg-base-200"
                       }`}
                     >
-                      <item.icon className="w-5 h-5 mr-3" />
-                      <span className="flex-1 font-medium">{item.title}</span>
-                    </div>
-                    <ul className="ml-8 mt-2 space-y-1">
-                      {item.submenu.map((subItem) => (
-                        <li key={subItem.path}>
-                          <Link
-                            to={subItem.path}
-                            onClick={() => setIsOpen(false)}
-                            className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
-                              location.pathname === subItem.path
-                                ? "bg-blue-100 text-blue-700 font-medium"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                            }`}
-                          >
-                            {subItem.title}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+                      <item.icon className="w-5 h-5 mr-3 shrink-0" />
+                      <span className="flex-1 font-medium text-left">
+                        {item.title}
+                      </span>
+                      {isMenuOpen(item.path) ? (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 shrink-0" />
+                      )}
+                    </button>
+                    {isMenuOpen(item.path) && (
+                      <ul className="ml-8 mt-1 space-y-1">
+                        {item.submenu.map((subItem) => (
+                          <li key={subItem.path}>
+                            <Link
+                              to={subItem.path}
+                              onClick={() => setIsOpen(false)}
+                              className={`block px-3 py-2 text-sm rounded-lg transition-colors ${
+                                location.pathname === subItem.path
+                                  ? "bg-primary/20 text-primary font-medium"
+                                  : "text-base-content/70 hover:bg-base-200 hover:text-base-content"
+                              }`}
+                            >
+                              {subItem.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 ) : (
                   <Link
@@ -209,8 +231,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center px-3 py-2 rounded-lg transition-colors ${
                       isActivePath(item.path)
-                        ? "bg-blue-50 text-blue-700 border-r-2 border-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-base-content hover:bg-base-200"
                     }`}
                   >
                     <item.icon className="w-5 h-5 mr-3" />
@@ -222,24 +244,29 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
           </ul>
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-gray-200">
+        {/* Footer - Fixed at bottom */}
+        <div className="p-4 border-t border-base-300 shrink-0">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <UserCheck className="w-4 h-4 text-gray-600" />
+            <div className="avatar placeholder">
+              <div className="bg-primary text-primary-content rounded-full w-8">
+                <span className="text-xs">
+                  {user?.profile?.firstName?.[0]}
+                  {user?.profile?.lastName?.[0]}
+                </span>
+              </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                Admin User
+              <p className="text-sm font-medium text-base-content truncate">
+                {user?.profile?.firstName} {user?.profile?.lastName}
               </p>
-              <p className="text-xs text-gray-500 truncate">
-                admin@earn9ja.com
+              <p className="text-xs text-base-content/60 truncate">
+                {user?.email}
               </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="w-full flex items-center px-3 py-2 text-sm text-error hover:bg-error/10 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4 mr-3" />
             Sign Out

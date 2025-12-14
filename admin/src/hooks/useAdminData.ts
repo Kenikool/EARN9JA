@@ -16,6 +16,8 @@ export const queryKeys = {
   userDetails: (userId: string) => ["admin", "users", userId] as const,
   pendingTasks: (page: number, limit: number) =>
     ["admin", "tasks", "pending", page, limit] as const,
+  tasks: (page: number, limit: number, status?: string) =>
+    ["admin", "tasks", status || "all", page, limit] as const,
   pendingWithdrawals: (page: number, limit: number) =>
     ["admin", "withdrawals", "pending", page, limit] as const,
   pendingDisputes: (page: number, limit: number) =>
@@ -67,6 +69,19 @@ export const usePendingTasks = (page: number = 1, limit: number = 20) => {
   return useQuery({
     queryKey: queryKeys.pendingTasks(page, limit),
     queryFn: () => adminService.getPendingTasks(page, limit),
+    placeholderData: (previousData) => previousData,
+  });
+};
+
+// Tasks Hook with Status Filter
+export const useTasks = (
+  page: number = 1,
+  limit: number = 20,
+  status?: string
+) => {
+  return useQuery({
+    queryKey: queryKeys.tasks(page, limit, status),
+    queryFn: () => adminService.getTasks(page, limit, status),
     placeholderData: (previousData) => previousData,
   });
 };

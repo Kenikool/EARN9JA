@@ -21,8 +21,13 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
   const [theme, setTheme] = useState(() => {
-    return document.documentElement.getAttribute("data-theme") || "light";
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme || "light";
   });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, []);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -86,6 +91,7 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
   };
 
@@ -209,6 +215,11 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
                         if (!notification.read) {
                           handleMarkAsRead(notification._id);
                         }
+                        if (notification.actionUrl) {
+                          navigate(notification.actionUrl);
+                        } else {
+                          navigate("/dashboard/notifications");
+                        }
                         (document.activeElement as HTMLElement)?.blur();
                       }}
                       className={`p-4 border-b border-base-200 hover:bg-base-200 cursor-pointer ${
@@ -236,7 +247,13 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
                 )}
               </div>
               <div className="p-3 border-t border-base-300">
-                <button className="btn btn-ghost btn-sm btn-block">
+                <button
+                  onClick={() => {
+                    navigate("/dashboard/notifications");
+                    (document.activeElement as HTMLElement)?.blur();
+                  }}
+                  className="btn btn-ghost btn-sm btn-block"
+                >
                   View all notifications
                 </button>
               </div>
@@ -286,13 +303,23 @@ const Header: React.FC<HeaderProps> = ({ setSidebarOpen }) => {
                 </div>
               </div>
             </div>
-            <li onClick={() => (document.activeElement as HTMLElement)?.blur()}>
+            <li
+              onClick={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                navigate("/dashboard/profile");
+              }}
+            >
               <a>
                 <User className="w-4 h-4" />
                 View Profile
               </a>
             </li>
-            <li onClick={() => (document.activeElement as HTMLElement)?.blur()}>
+            <li
+              onClick={() => {
+                (document.activeElement as HTMLElement)?.blur();
+                navigate("/dashboard/settings");
+              }}
+            >
               <a>
                 <Settings className="w-4 h-4" />
                 Account Settings

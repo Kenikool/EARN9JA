@@ -89,11 +89,12 @@ export const useAuthStore = create<AuthState>()(
             if ("response" in error) {
               console.error("❌ Error response:", error.response);
               const response = error.response as {
-                data?: { message?: string };
+                data?: { message?: string; success?: boolean };
               };
+              // Get the actual backend error message
               errorMessage = response.data?.message || errorMessage;
-            }
-            if ("message" in error) {
+              console.error("❌ Backend error message:", errorMessage);
+            } else if ("message" in error) {
               console.error("❌ Error message:", error.message);
               errorMessage = (error.message as string) || errorMessage;
             }
@@ -228,14 +229,27 @@ export const useAuthStore = create<AuthState>()(
 // Initialize auth state on app load
 const initializeAuth = () => {
   const storedUser = authService.getStoredUser();
-  const isAuthenticated = authService.isAuthenticated();
+  const token = authService.getToken();
 
-  if (storedUser && isAuthenticated) {
+  // Only set user if both user data and token exist
+  if (storedUser && token) {
     useAuthStore.getState().setUser(storedUser as User);
+  } else {
+    // Clear everything if either is missing
+    authService.clearTokens();
+    authService.clearStoredUser();
+    useAuthStore.getState().setUser(null);
   }
 };
 
 // Call initialization
 initializeAuth();
+
+// Listen for storage changes (e.g., when tokens are cleared)
+window.addEventListener("storage", (e) => {
+  if (e.key === "token" && !e.newValue) {
+    useAuthStore.getState().setUser(null);
+  }
+});
 
 export default useAuthStore;

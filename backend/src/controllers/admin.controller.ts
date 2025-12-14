@@ -136,6 +136,26 @@ class AdminController {
   }
 
   // Task Moderation
+  async getTasks(req: Request, res: Response): Promise<void> {
+    try {
+      const { page = 1, limit = 20, status } = req.query;
+
+      const result = await adminService.getTasks(
+        Number(page),
+        Number(limit),
+        status as string | undefined
+      );
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      console.error("Get tasks error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch tasks",
+      });
+    }
+  }
+
   async getPendingTasks(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 20 } = req.query;

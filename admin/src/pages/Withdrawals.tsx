@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   DollarSign,
   CheckCircle,
@@ -13,10 +14,33 @@ import {
 } from "../hooks/useAdminData";
 
 const Withdrawals: React.FC = () => {
+  const location = useLocation();
+
+  // Determine status from route
+  const routeStatus = location.pathname.includes("/withdrawals/pending")
+    ? "pending"
+    : location.pathname.includes("/withdrawals/approved")
+    ? "approved"
+    : location.pathname.includes("/withdrawals/rejected")
+    ? "rejected"
+    : "pending";
+
   const [filters, setFilters] = useState({
     page: 1,
     limit: 20,
+    status: routeStatus,
   });
+
+  // Sync filter status with route when route changes
+  React.useEffect(() => {
+    if (filters.status !== routeStatus) {
+      setFilters((prev) => ({
+        ...prev,
+        status: routeStatus,
+        page: 1,
+      }));
+    }
+  }, [routeStatus, filters.status]);
 
   const {
     data: withdrawalsData,
@@ -70,17 +94,44 @@ const Withdrawals: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Withdrawal Management
-          </h1>
-          <p className="text-gray-600">
-            Review and process pending withdrawals
+          <h1 className="text-2xl font-bold">Withdrawal Management</h1>
+          <p className="text-base-content/70">
+            Review and process {filters.status} withdrawals
           </p>
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="card bg-base-100 shadow-sm">
+        <div className="card-body">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Status Filter */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Status</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={filters.status}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    status: e.target.value,
+                    page: 1,
+                  }))
+                }
+              >
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Withdrawals Table */}
-      <div className="card bg-white shadow-sm border border-gray-200">
+      <div className="card bg-base-100 shadow-sm">
         <div className="card-body">
           <div className="overflow-x-auto">
             <table className="table table-zebra">
@@ -98,13 +149,13 @@ const Withdrawals: React.FC = () => {
                 {withdrawals.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-8">
-                      <div className="text-gray-500">
-                        No pending withdrawals
+                      <div className="text-base-content/60">
+                        No {filters.status} withdrawals
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  withdrawals.map((withdrawal: any) => (
+                  withdrawals.map((withdrawal: unknown) => (
                     <tr key={withdrawal._id}>
                       <td>
                         <div>

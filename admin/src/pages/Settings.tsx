@@ -13,21 +13,23 @@ const Settings: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600">Manage platform configuration</p>
+          <h1 className="text-2xl font-bold text-base-content">Settings</h1>
+          <p className="text-base-content/60">Manage platform configuration</p>
         </div>
       </div>
 
       {/* Settings Form */}
       <form onSubmit={handleSaveSettings}>
-        <div className="card bg-white shadow-sm border border-gray-200">
+        <div className="card bg-base-100 shadow-sm border border-base-300">
           <div className="card-body">
-            <h2 className="card-title mb-4">Platform Configuration</h2>
+            <h2 className="card-title mb-4 text-base-content">
+              Platform Configuration
+            </h2>
 
             <div className="space-y-6">
               {/* Withdrawal Settings */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">
+                <h3 className="text-lg font-semibold mb-3 text-base-content">
                   Withdrawal Settings
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -61,7 +63,9 @@ const Settings: React.FC = () => {
 
               {/* Platform Fees */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Platform Fees</h3>
+                <h3 className="text-lg font-semibold mb-3 text-base-content">
+                  Platform Fees
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label">
@@ -80,7 +84,9 @@ const Settings: React.FC = () => {
 
               {/* Feature Toggles */}
               <div>
-                <h3 className="text-lg font-semibold mb-3">Feature Toggles</h3>
+                <h3 className="text-lg font-semibold mb-3 text-base-content">
+                  Feature Toggles
+                </h3>
                 <div className="space-y-3">
                   <div className="form-control">
                     <label className="label cursor-pointer justify-start gap-4">
@@ -138,20 +144,22 @@ const Settings: React.FC = () => {
       </form>
 
       {/* System Information */}
-      <div className="card bg-white shadow-sm border border-gray-200">
+      <div className="card bg-base-100 shadow-sm border border-base-300">
         <div className="card-body">
-          <h2 className="card-title mb-4">System Information</h2>
+          <h2 className="card-title mb-4 text-base-content">
+            System Information
+          </h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Platform Version</span>
-              <span className="font-semibold">1.0.0</span>
+              <span className="text-base-content/60">Platform Version</span>
+              <span className="font-semibold text-base-content">1.0.0</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">API Version</span>
-              <span className="font-semibold">v1</span>
+              <span className="text-base-content/60">API Version</span>
+              <span className="font-semibold text-base-content">v1</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Environment</span>
+              <span className="text-base-content/60">Environment</span>
               <div className="badge badge-success">Production</div>
             </div>
           </div>

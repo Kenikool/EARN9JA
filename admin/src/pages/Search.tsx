@@ -107,7 +107,7 @@ const Search: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <SearchIcon className="w-16 h-16 text-base-content/30 mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">Search</h2>
+        <h2 className="text-2xl font-bold text-base-content mb-2">Search</h2>
         <p className="text-base-content/60">
           Enter a search query to find users, tasks, transactions, and more
         </p>
@@ -118,7 +118,9 @@ const Search: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Search Results</h1>
+        <h1 className="text-3xl font-bold text-base-content mb-2">
+          Search Results
+        </h1>
         <p className="text-base-content/60">Showing results for "{query}"</p>
       </div>
 
@@ -197,7 +199,9 @@ const Search: React.FC = () => {
           {results.results.length === 0 ? (
             <div className="text-center py-12">
               <SearchIcon className="w-12 h-12 text-base-content/30 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No results found</h3>
+              <h3 className="text-xl font-bold text-base-content mb-2">
+                No results found
+              </h3>
               <p className="text-base-content/60">
                 Try adjusting your search query or filters
               </p>
@@ -219,7 +223,9 @@ const Search: React.FC = () => {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="card-title text-lg">{result.title}</h3>
+                          <h3 className="card-title text-lg text-base-content">
+                            {result.title}
+                          </h3>
                           <span
                             className={`badge badge-sm ${getTypeColor(
                               result.type

@@ -228,6 +228,53 @@ class AdminService {
   }
 
   // Task Moderation
+  async getTasks(page: number = 1, limit: number = 20, status?: string) {
+    try {
+      const skip = (page - 1) * limit;
+
+      // Build query based on status
+      let query: any = {};
+      if (status) {
+        if (status === "pending") {
+          query.status = "pending_approval";
+        } else if (status === "approved") {
+          query.status = "active";
+          query.moderationStatus = "approved";
+        } else if (status === "rejected") {
+          query.moderationStatus = "rejected";
+        }
+      }
+
+      const tasks = await Task.find(query)
+        .populate("sponsorId", "profile.firstName profile.lastName email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean();
+
+      const total = await Task.countDocuments(query);
+
+      return {
+        success: true,
+        data: {
+          tasks,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+          },
+        },
+      };
+    } catch (error) {
+      console.error("Get tasks error:", error);
+      return {
+        success: false,
+        message: "Failed to fetch tasks",
+      };
+    }
+  }
+
   async getPendingTasks(page: number = 1, limit: number = 20) {
     try {
       const skip = (page - 1) * limit;

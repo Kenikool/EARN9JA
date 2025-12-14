@@ -1,8 +1,10 @@
 import React, { useState } from "react";
-import { BarChart3, TrendingUp, Users, DollarSign, Eye } from "lucide-react";
-import { usePlatformStats, useRevenueReport } from "../hooks/useAdminData";
+import { useLocation } from "react-router-dom";
+import { TrendingUp, DollarSign, CreditCard, Download } from "lucide-react";
+import { useRevenueReport } from "../hooks/useAdminData";
 
-const Analytics: React.FC = () => {
+const Revenue: React.FC = () => {
+  const location = useLocation();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -11,21 +13,22 @@ const Analytics: React.FC = () => {
     endDate: new Date().toISOString().split("T")[0],
   });
 
-  const { data: statsData, isLoading: statsLoading } = usePlatformStats();
-  const { data: revenueData, isLoading: revenueLoading } = useRevenueReport(
+  const { data: revenueData, isLoading } = useRevenueReport(
     dateRange.startDate,
     dateRange.endDate
   );
 
-  const stats = statsData?.data;
   const revenue = Array.isArray(revenueData?.data) ? revenueData.data : [];
-
   const totalRevenue = revenue.reduce(
     (sum: number, item: { total?: number }) => sum + (item.total || 0),
     0
   );
 
-  if (statsLoading || revenueLoading) {
+  // Determine which view to show based on route
+  const isPaymentsView = location.pathname.includes("/revenue/payments");
+  const isCommissionView = location.pathname.includes("/revenue/commission");
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="loading loading-spinner loading-lg"></div>
@@ -38,11 +41,25 @@ const Analytics: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
+          <h1 className="text-2xl font-bold">
+            {isPaymentsView
+              ? "Payment History"
+              : isCommissionView
+              ? "Commission Report"
+              : "Revenue Report"}
+          </h1>
           <p className="text-base-content/70">
-            Platform performance and insights
+            {isPaymentsView
+              ? "Track all payment transactions"
+              : isCommissionView
+              ? "Platform commission breakdown"
+              : "Platform revenue analytics"}
           </p>
         </div>
+        <button className="btn btn-primary">
+          <Download className="w-4 h-4 mr-2" />
+          Export Report
+        </button>
       </div>
 
       {/* Date Range Selector */}
@@ -89,55 +106,7 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-base-content/70">Total Users</p>
-                <p className="text-2xl font-bold">
-                  {stats?.users.total.toLocaleString() || 0}
-                </p>
-              </div>
-              <div className="bg-info/20 p-3 rounded-lg">
-                <Users className="w-6 h-6 text-info" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-base-content/70">Active Users</p>
-                <p className="text-2xl font-bold">
-                  {stats?.users.active.toLocaleString() || 0}
-                </p>
-              </div>
-              <div className="bg-success/20 p-3 rounded-lg">
-                <Eye className="w-6 h-6 text-success" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-base-content/70">Total Tasks</p>
-                <p className="text-2xl font-bold">
-                  {stats?.tasks.total.toLocaleString() || 0}
-                </p>
-              </div>
-              <div className="bg-secondary/20 p-3 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-secondary" />
-              </div>
-            </div>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="card bg-base-100 shadow-sm">
           <div className="card-body">
             <div className="flex items-center justify-between">
@@ -145,6 +114,54 @@ const Analytics: React.FC = () => {
                 <p className="text-sm text-base-content/70">Total Revenue</p>
                 <p className="text-2xl font-bold">
                   ₦{totalRevenue.toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-success/20 p-3 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-success" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-body">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-base-content/70">
+                  Total Transactions
+                </p>
+                <p className="text-2xl font-bold">
+                  {revenue.reduce(
+                    (sum: number, item: { count?: number }) =>
+                      sum + (item.count || 0),
+                    0
+                  )}
+                </p>
+              </div>
+              <div className="bg-info/20 p-3 rounded-lg">
+                <CreditCard className="w-6 h-6 text-info" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-body">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-base-content/70">Avg Transaction</p>
+                <p className="text-2xl font-bold">
+                  ₦
+                  {revenue.length > 0
+                    ? Math.round(
+                        totalRevenue /
+                          revenue.reduce(
+                            (sum: number, item: { count?: number }) =>
+                              sum + (item.count || 0),
+                            0
+                          )
+                      ).toLocaleString()
+                    : 0}
                 </p>
               </div>
               <div className="bg-warning/20 p-3 rounded-lg">
@@ -155,10 +172,16 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Revenue Chart */}
+      {/* Revenue Table */}
       <div className="card bg-base-100 shadow-sm">
         <div className="card-body">
-          <h2 className="card-title mb-4">Revenue Over Time</h2>
+          <h2 className="card-title mb-4">
+            {isPaymentsView
+              ? "Payment Transactions"
+              : isCommissionView
+              ? "Commission Breakdown"
+              : "Revenue Details"}
+          </h2>
           {revenue.length === 0 ? (
             <div className="text-center py-12 text-base-content/50">
               <TrendingUp className="w-16 h-16 mx-auto mb-4 opacity-30" />
@@ -172,6 +195,7 @@ const Analytics: React.FC = () => {
                     <th>Date</th>
                     <th>Revenue</th>
                     <th>Transactions</th>
+                    <th>Avg Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -190,10 +214,14 @@ const Analytics: React.FC = () => {
                           {String(item._id.month).padStart(2, "0")}-
                           {String(item._id.day).padStart(2, "0")}
                         </td>
-                        <td className="font-semibold">
+                        <td className="font-semibold text-success">
                           ₦{item.total.toLocaleString()}
                         </td>
                         <td>{item.count}</td>
+                        <td>
+                          ₦
+                          {Math.round(item.total / item.count).toLocaleString()}
+                        </td>
                       </tr>
                     )
                   )}
@@ -203,65 +231,8 @@ const Analytics: React.FC = () => {
           )}
         </div>
       </div>
-
-      {/* Task Statistics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <h2 className="card-title mb-4">Task Statistics</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-base-content/70">Total Tasks</span>
-                <span className="font-semibold">
-                  {stats?.tasks.total.toLocaleString() || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-base-content/70">Active Tasks</span>
-                <span className="font-semibold text-success">
-                  {stats?.tasks.active.toLocaleString() || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-base-content/70">Completed Tasks</span>
-                <span className="font-semibold text-info">
-                  {stats?.tasks.completed.toLocaleString() || 0}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <h2 className="card-title mb-4">Financial Overview</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-base-content/70">Total Revenue</span>
-                <span className="font-semibold text-success">
-                  ₦{stats?.financials.totalRevenue.toLocaleString() || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-base-content/70">Total Payouts</span>
-                <span className="font-semibold text-error">
-                  ₦{stats?.financials.totalPayouts.toLocaleString() || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-base-content/70">
-                  Pending Withdrawals
-                </span>
-                <span className="font-semibold text-warning">
-                  {stats?.financials.pendingWithdrawals || 0}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
 
-export default Analytics;
+export default Revenue;

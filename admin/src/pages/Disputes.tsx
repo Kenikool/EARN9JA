@@ -1,14 +1,36 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { AlertTriangle, Eye, CheckCircle } from "lucide-react";
 import { usePendingDisputes, useResolveDispute } from "../hooks/useAdminData";
 
 const Disputes: React.FC = () => {
+  const location = useLocation();
+
+  // Determine status from route
+  const routeStatus = location.pathname.includes("/disputes/pending")
+    ? "pending"
+    : location.pathname.includes("/disputes/resolved")
+    ? "resolved"
+    : "pending";
+
   const [filters, setFilters] = useState({
     page: 1,
     limit: 20,
+    status: routeStatus,
   });
   const [selectedDispute, setSelectedDispute] = useState<any>(null);
   const [showResolveModal, setShowResolveModal] = useState(false);
+
+  // Sync filter status with route when route changes
+  React.useEffect(() => {
+    if (filters.status !== routeStatus) {
+      setFilters((prev) => ({
+        ...prev,
+        status: routeStatus,
+        page: 1,
+      }));
+    }
+  }, [routeStatus, filters.status]);
 
   const {
     data: disputesData,
@@ -84,7 +106,7 @@ const Disputes: React.FC = () => {
             </div>
           </div>
         ) : (
-          disputes.map((dispute: any) => (
+          disputes.map((dispute: unknown) => (
             <div
               key={dispute._id}
               className="card bg-white shadow-sm border border-gray-200"
