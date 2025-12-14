@@ -12,6 +12,9 @@ import Notifications from "./pages/Notifications";
 import Revenue from "./pages/Revenue";
 import Platform from "./pages/Platform";
 import Support from "./pages/Support";
+import PlatformSettings from "./pages/PlatformSettings";
+import MessagingCenter from "./pages/MessagingCenter";
+import VersionManager from "./pages/VersionManager";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -104,6 +107,13 @@ const App = () => {
         <Route path="platform/status" element={<Platform />} />
         <Route path="platform/security" element={<Platform />} />
         <Route path="platform/config" element={<Platform />} />
+        <Route path="platform/settings" element={<PlatformSettings />} />
+
+        {/* Messaging Routes */}
+        <Route path="messaging" element={<MessagingCenter />} />
+
+        {/* Version Management Routes */}
+        <Route path="versions" element={<VersionManager />} />
 
         {/* Support Routes */}
         <Route path="support" element={<Support />} />

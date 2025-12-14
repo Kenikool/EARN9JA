@@ -1,28 +1,20 @@
 import { Router } from "express";
+import * as appVersionController from "../controllers/appVersion.controller.js";
 
 const router = Router();
 
 /**
- * GET /api/v1/app/version
- * Check for app updates
+ * @route   GET /api/v1/app/version
+ * @desc    Get version info for platform (public)
+ * @access  Public
  */
-router.get("/version", (req, res) => {
-  res.json({
-    success: true,
-    data: {
-      latestVersion: "1.0.1", // Update this when you release new version
-      minVersion: "1.0.0", // Minimum version that still works
-      downloadUrl: "https://earn9ja.site/downloads/earn9ja-latest.apk",
-      updateRequired: false, // Set to true to force update
-      releaseNotes: [
-        "✨ Added 2-minute cooldown between ads",
-        "🐛 Fixed ad loading issues",
-        "⚡ Improved app performance",
-        "🎨 UI improvements",
-      ],
-      releaseDate: "2024-12-11",
-    },
-  });
-});
+router.get("/version", appVersionController.getVersionInfo);
+
+/**
+ * @route   GET /api/v1/app/check-version
+ * @desc    Check if update is required
+ * @access  Public
+ */
+router.get("/check-version", appVersionController.checkVersion);
 
 export default router;

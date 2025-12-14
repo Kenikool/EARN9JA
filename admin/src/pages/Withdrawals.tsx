@@ -212,7 +212,7 @@ const Withdrawals: React.FC = () => {
                                 onClick={() =>
                                   handleApproveWithdrawal(withdrawal._id)
                                 }
-                                className="text-green-600"
+                                className="text-success"
                               >
                                 <CheckCircle className="w-4 h-4" />
                                 Approve
@@ -223,7 +223,7 @@ const Withdrawals: React.FC = () => {
                                 onClick={() =>
                                   handleRejectWithdrawal(withdrawal._id)
                                 }
-                                className="text-red-600"
+                                className="text-error"
                               >
                                 <XCircle className="w-4 h-4" />
                                 Reject
@@ -242,7 +242,7 @@ const Withdrawals: React.FC = () => {
           {/* Pagination */}
           {pagination && pagination.pages > 1 && (
             <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-base-content/60">
                 Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
                 {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
                 of {pagination.total} results

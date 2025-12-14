@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { adminController } from "../controllers/admin.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
+import * as platformSettingsController from "../controllers/platformSettings.controller.js";
+import * as bulkMessageController from "../controllers/bulkMessage.controller.js";
+import * as pushNotificationController from "../controllers/pushNotification.controller.js";
+import * as appVersionController from "../controllers/appVersion.controller.js";
 
 const router = Router();
 
@@ -155,5 +159,146 @@ router.patch(
   "/disputes/:disputeId/status",
   adminController.updateDisputeStatus
 );
+
+// Platform Settings
+/**
+ * @route   GET /api/v1/admin/settings
+ * @desc    Get platform settings
+ * @access  Admin
+ */
+router.get("/settings", platformSettingsController.getSettings);
+
+/**
+ * @route   PATCH /api/v1/admin/settings
+ * @desc    Update platform settings
+ * @access  Admin
+ */
+router.patch("/settings", platformSettingsController.updateSettings);
+
+/**
+ * @route   POST /api/v1/admin/settings/reset
+ * @desc    Reset settings to defaults
+ * @access  Admin
+ */
+router.post("/settings/reset", platformSettingsController.resetSettings);
+
+/**
+ * @route   GET /api/v1/admin/settings/audit
+ * @desc    Get settings audit log
+ * @access  Admin
+ */
+router.get("/settings/audit", platformSettingsController.getAuditLog);
+
+/**
+ * @route   GET /api/v1/admin/settings/audit/export
+ * @desc    Export settings audit log to CSV
+ * @access  Admin
+ */
+router.get("/settings/audit/export", platformSettingsController.exportAuditLog);
+
+// Bulk Messaging
+/**
+ * @route   POST /api/v1/admin/messages
+ * @desc    Create a bulk message
+ * @access  Admin
+ */
+router.post("/messages", bulkMessageController.createMessage);
+
+/**
+ * @route   POST /api/v1/admin/messages/:id/send
+ * @desc    Send a bulk message
+ * @access  Admin
+ */
+router.post("/messages/:id/send", bulkMessageController.sendMessage);
+
+/**
+ * @route   POST /api/v1/admin/messages/:id/schedule
+ * @desc    Schedule a bulk message
+ * @access  Admin
+ */
+router.post("/messages/:id/schedule", bulkMessageController.scheduleMessage);
+
+/**
+ * @route   DELETE /api/v1/admin/messages/:id
+ * @desc    Cancel a scheduled message
+ * @access  Admin
+ */
+router.delete("/messages/:id", bulkMessageController.cancelMessage);
+
+/**
+ * @route   GET /api/v1/admin/messages/:id/status
+ * @desc    Get message delivery status
+ * @access  Admin
+ */
+router.get("/messages/:id/status", bulkMessageController.getMessageStatus);
+
+/**
+ * @route   GET /api/v1/admin/messages
+ * @desc    Get all messages
+ * @access  Admin
+ */
+router.get("/messages", bulkMessageController.getMessages);
+
+// Message Templates
+/**
+ * @route   POST /api/v1/admin/templates
+ * @desc    Create a message template
+ * @access  Admin
+ */
+router.post("/templates", bulkMessageController.createTemplate);
+
+/**
+ * @route   GET /api/v1/admin/templates
+ * @desc    Get all templates
+ * @access  Admin
+ */
+router.get("/templates", bulkMessageController.getTemplates);
+
+/**
+ * @route   PATCH /api/v1/admin/templates/:id
+ * @desc    Update a template
+ * @access  Admin
+ */
+router.patch("/templates/:id", bulkMessageController.updateTemplate);
+
+/**
+ * @route   DELETE /api/v1/admin/templates/:id
+ * @desc    Delete a template
+ * @access  Admin
+ */
+router.delete("/templates/:id", bulkMessageController.deleteTemplate);
+
+// Push Notifications
+/**
+ * @route   POST /api/v1/admin/push-notifications
+ * @desc    Send push notifications to users
+ * @access  Admin
+ */
+router.post(
+  "/push-notifications",
+  pushNotificationController.sendPushNotification
+);
+
+// App Version Management
+/**
+ * @route   GET /api/v1/admin/versions
+ * @desc    Get all app versions
+ * @access  Admin
+ */
+router.get("/versions", appVersionController.getAllVersions);
+
+/**
+ * @route   POST /api/v1/admin/versions
+ * @desc    Create/update app version
+ * @access  Admin
+ */
+router.post("/versions", appVersionController.updateVersionConfig);
+
+/**
+ * @route   GET /api/v1/admin/versions/analytics
+ * @desc    Get version adoption analytics
+ * @access  Admin
+ */
+router.get("/versions/analytics", appVersionController.getVersionAnalytics);
 
 export default router;

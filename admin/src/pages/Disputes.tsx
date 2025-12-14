@@ -89,47 +89,74 @@ const Disputes: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Dispute Resolution
-          </h1>
-          <p className="text-gray-600">Review and resolve user disputes</p>
+          <h1 className="text-2xl font-bold">Dispute Resolution</h1>
+          <p className="text-base-content/70">
+            Review and resolve {filters.status} disputes
+          </p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="card bg-base-100 shadow-sm">
+        <div className="card-body">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Status Filter */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Status</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={filters.status}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    status: e.target.value,
+                    page: 1,
+                  }))
+                }
+              >
+                <option value="pending">Pending</option>
+                <option value="resolved">Resolved</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Disputes Grid */}
       <div className="grid grid-cols-1 gap-6">
         {disputes.length === 0 ? (
-          <div className="card bg-white shadow-sm border border-gray-200">
+          <div className="card bg-base-100 shadow-sm">
             <div className="card-body text-center py-12">
-              <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-              <p className="text-gray-500">No pending disputes</p>
+              <AlertTriangle className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p className="text-base-content/60">
+                No {filters.status} disputes
+              </p>
             </div>
           </div>
         ) : (
-          disputes.map((dispute: unknown) => (
-            <div
-              key={dispute._id}
-              className="card bg-white shadow-sm border border-gray-200"
-            >
+          disputes.map((dispute: any) => (
+            <div key={dispute._id} className="card bg-base-100 shadow-sm">
               <div className="card-body">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-semibold">
                       {dispute.title || "Dispute"}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-base-content/70 mt-1">
                       {dispute.description}
                     </p>
                     <div className="flex items-center gap-4 mt-3">
                       <div className="badge badge-warning">
                         {dispute.status}
                       </div>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-base-content/70">
                         Reported by: {dispute.reportedBy?.profile?.firstName}{" "}
                         {dispute.reportedBy?.profile?.lastName}
                       </span>
                       {dispute.taskId && (
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-base-content/70">
                           Task: {dispute.taskId.title}
                         </span>
                       )}
@@ -160,7 +187,7 @@ const Disputes: React.FC = () => {
       {/* Pagination */}
       {pagination && pagination.pages > 1 && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-base-content/60">
             Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
             {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
             {pagination.total} results

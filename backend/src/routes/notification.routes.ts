@@ -1,6 +1,7 @@
 import { Router } from "express";
 import notificationController from "../controllers/notification.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
+import * as pushNotificationController from "../controllers/pushNotification.controller.js";
 
 const router = Router();
 
@@ -23,9 +24,9 @@ router.patch("/read-all", notificationController.markAllAsRead);
 router.delete("/:notificationId", notificationController.deleteNotification);
 
 // Register FCM token
-router.post("/register-token", notificationController.registerToken);
+router.post("/register-token", pushNotificationController.registerToken);
 
 // Unregister FCM token
-router.post("/unregister-token", notificationController.unregisterToken);
+router.delete("/unregister-token", pushNotificationController.unregisterToken);
 
 export default router;

@@ -66,7 +66,15 @@ export interface IUser extends Document {
   status: "active" | "suspended" | "banned" | "pending_verification";
   deviceIds: string[];
   ipAddresses: string[];
-  fcmTokens: string[];
+  fcmTokens: {
+    token: string;
+    platform: "ios" | "android";
+    deviceId: string;
+    registeredAt: Date;
+    lastUsed: Date;
+    isActive: boolean;
+    failureCount: number;
+  }[];
   lastLoginAt?: Date;
   referralCode?: string;
   referredBy?: string;
@@ -207,7 +215,39 @@ const userSchema = new Schema<IUser>(
     },
     deviceIds: [String],
     ipAddresses: [String],
-    fcmTokens: [String],
+    fcmTokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+        platform: {
+          type: String,
+          enum: ["ios", "android"],
+          required: true,
+        },
+        deviceId: {
+          type: String,
+          required: true,
+        },
+        registeredAt: {
+          type: Date,
+          default: Date.now,
+        },
+        lastUsed: {
+          type: Date,
+          default: Date.now,
+        },
+        isActive: {
+          type: Boolean,
+          default: true,
+        },
+        failureCount: {
+          type: Number,
+          default: 0,
+        },
+      },
+    ],
     lastLoginAt: Date,
     referralCode: String,
     referredBy: String,
@@ -250,6 +290,10 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
   }
 );
+
+// Indexes for FCM tokens
+userSchema.index({ "fcmTokens.token": 1 });
+userSchema.index({ "fcmTokens.isActive": 1 });
 
 // Cascade delete related data when user is deleted
 userSchema.pre(
