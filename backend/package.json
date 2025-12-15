@@ -13,7 +13,7 @@
     "test:system": "tsx scripts/test-system.ts",
     "seed:providers": "tsx scripts/seedProviders.ts",
     "seed:templates": "tsx scripts/seedDefaultTemplates.js",
-    "migrate:platform-settings": "node scripts/migrations/001-platform-settings-management.js",
+    "migrate:platform-settings": "tsx scripts/migrations/001-platform-settings-management.js",
     "lint": "eslint src/**/*.ts"
   },
   "keywords": [
