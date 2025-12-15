@@ -333,7 +333,7 @@ class AppVersionService {
         .populate("publishedBy", "profile.firstName profile.lastName email")
         .lean();
 
-      return versions as IAppVersion[];
+      return versions as unknown as IAppVersion[];
     } catch (error) {
       console.error("Get all versions error:", error);
       throw error;

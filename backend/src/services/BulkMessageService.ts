@@ -204,7 +204,7 @@ class BulkMessageService {
         throw new Error("Message not found");
       }
 
-      return message as IBulkMessage;
+      return message as unknown as IBulkMessage;
     } catch (error) {
       console.error("Get message status error:", error);
       throw error;
@@ -245,7 +245,7 @@ class BulkMessageService {
       const total = await BulkMessage.countDocuments(query);
 
       return {
-        messages: messages as IBulkMessage[],
+        messages: messages as unknown as IBulkMessage[],
         pagination: {
           page,
           limit,

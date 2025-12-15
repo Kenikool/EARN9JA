@@ -121,16 +121,23 @@ class NotificationService {
 
     // Send push notification
     if (user.fcmTokens && user.fcmTokens.length > 0) {
-      await this.sendPushNotification({
-        title: payload.title,
-        body: payload.body,
-        data: {
-          type: payload.type,
-          actionUrl: payload.actionUrl || "",
-          ...payload.data,
-        },
-        tokens: user.fcmTokens,
-      });
+      // Extract active tokens
+      const activeTokens = user.fcmTokens
+        .filter((t) => t.isActive)
+        .map((t) => t.token);
+
+      if (activeTokens.length > 0) {
+        await this.sendPushNotification({
+          title: payload.title,
+          body: payload.body,
+          data: {
+            type: payload.type,
+            actionUrl: payload.actionUrl || "",
+            ...payload.data,
+          },
+          tokens: activeTokens,
+        });
+      }
     }
   }
 
@@ -232,17 +239,36 @@ class NotificationService {
   /**
    * Register FCM token for a user
    */
-  async registerFCMToken(userId: string, token: string): Promise<void> {
+  async registerFCMToken(
+    userId: string,
+    token: string,
+    platform: "ios" | "android" = "android",
+    deviceId: string = "unknown"
+  ): Promise<void> {
     const user = await User.findById(userId);
     if (!user) {
       throw new Error("User not found");
     }
 
-    // Add token if not already present
-    if (!user.fcmTokens.includes(token)) {
-      user.fcmTokens.push(token);
+    // Check if token already exists
+    const existingToken = user.fcmTokens.find((t) => t.token === token);
+    if (!existingToken) {
+      user.fcmTokens.push({
+        token,
+        platform,
+        deviceId,
+        registeredAt: new Date(),
+        lastUsed: new Date(),
+        isActive: true,
+        failureCount: 0,
+      });
       await user.save();
       console.log(`✅ FCM token registered for user ${userId}`);
+    } else {
+      // Update existing token
+      existingToken.lastUsed = new Date();
+      existingToken.isActive = true;
+      await user.save();
     }
   }
 
@@ -251,7 +277,7 @@ class NotificationService {
    */
   async unregisterFCMToken(userId: string, token: string): Promise<void> {
     await User.findByIdAndUpdate(userId, {
-      $pull: { fcmTokens: token },
+      $pull: { fcmTokens: { token } },
     });
     console.log(`✅ FCM token unregistered for user ${userId}`);
   }
@@ -263,8 +289,8 @@ class NotificationService {
     if (tokens.length === 0) return;
 
     await User.updateMany(
-      { fcmTokens: { $in: tokens } },
-      { $pull: { fcmTokens: { $in: tokens } } }
+      { "fcmTokens.token": { $in: tokens } },
+      { $pull: { fcmTokens: { token: { $in: tokens } } } }
     );
 
     console.log(`🗑️ Removed ${tokens.length} invalid FCM tokens`);
