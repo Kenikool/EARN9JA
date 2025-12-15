@@ -30,8 +30,8 @@ export interface PlatformSettings {
 export interface SettingsAuditLog {
   _id: string;
   settingKey: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   changedBy: string;
   changedByName: string;
   timestamp: string;
@@ -70,12 +70,14 @@ export const platformSettingsService = {
 
   async getAuditLog(filters: AuditLogFilters = {}): Promise<{
     success: boolean;
-    data: SettingsAuditLog[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
+    data: {
+      logs: SettingsAuditLog[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
     };
   }> {
     const params = new URLSearchParams();
@@ -85,7 +87,13 @@ export const platformSettingsService = {
       }
     });
     const response = await api.get(`/admin/settings/audit?${params}`);
-    return response.data;
+    return {
+      success: response.data.success,
+      data: {
+        logs: response.data.data,
+        pagination: response.data.pagination,
+      },
+    };
   },
 
   async exportAuditLog(filters: AuditLogFilters = {}): Promise<Blob> {

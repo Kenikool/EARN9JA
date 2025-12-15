@@ -76,6 +76,7 @@ import fraudRoutes from "./routes/fraud.routes.js";
 import offerwallAnalyticsRoutes from "./routes/offerwall-analytics.routes.js";
 import appRoutes from "./routes/app.routes.js";
 import searchRoutes from "./routes/search.routes.js";
+import healthRoutes from "./routes/health.routes.js";
 import { setupDraftCleanupJob } from "./jobs/draftCleanup.job.js";
 import { startTaskExpiryJob } from "./jobs/taskExpiry.job.js";
 import { startScheduleExecutionJob } from "./jobs/scheduleExecution.job.js";
@@ -144,6 +145,7 @@ app.get("/api/status", (req, res) => {
 });
 
 // API Routes
+app.use(`/api/${API_VERSION}/health`, healthRoutes);
 app.use(`/api/${API_VERSION}/auth`, authRoutes);
 app.use(`/api/${API_VERSION}/admob`, admobRoutes);
 app.use(`/api/${API_VERSION}/admin/analytics`, adminAnalyticsRoutes);
@@ -220,6 +222,10 @@ const startServer = async () => {
 
     // Connect to Redis
     await connectRedis();
+
+    // Initialize Firebase
+    const { initializeFirebase } = await import("./config/firebase.js");
+    initializeFirebase();
 
     // Initialize Socket.io
     initializeSocket(httpServer);

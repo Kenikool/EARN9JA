@@ -1,44 +1,93 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Activity, AlertCircle, Server, Database, Lock } from "lucide-react";
+import { Activity, Server, Database, Lock } from "lucide-react";
+import { platformSettingsService } from "../services/platformSettingsService";
+import {
+  healthService,
+  type HealthCheckData,
+  type SystemMetrics,
+} from "../services/healthService";
+
+interface AuditLog {
+  _id: string;
+  settingKey: string;
+  oldValue: unknown;
+  newValue: unknown;
+  changedBy: string;
+  changedByName: string;
+  timestamp: string;
+  ipAddress?: string;
+}
 
 const Platform: React.FC = () => {
   const location = useLocation();
+  const [securityLogs, setSecurityLogs] = useState<AuditLog[]>([]);
+  const [healthData, setHealthData] = useState<HealthCheckData | null>(null);
+  const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [healthLoading, setHealthLoading] = useState(false);
+  const [healthError, setHealthError] = useState<string | null>(null);
 
   // Determine which view to show based on route
   const isStatusView = location.pathname.includes("/platform/status");
   const isSecurityView = location.pathname.includes("/platform/security");
   const isConfigView = location.pathname.includes("/platform/config");
 
-  // Mock data - replace with actual API calls
-  const systemStatus = {
-    api: "operational",
-    database: "operational",
-    payment: "operational",
-    notifications: "degraded",
+  // Fetch health status when status view is active
+  useEffect(() => {
+    if (isStatusView) {
+      fetchHealthStatus();
+    }
+  }, [isStatusView]);
+
+  // Fetch security logs (audit logs) when security view is active
+  useEffect(() => {
+    if (isSecurityView) {
+      fetchSecurityLogs();
+    }
+  }, [isSecurityView]);
+
+  const fetchHealthStatus = async () => {
+    try {
+      setHealthLoading(true);
+      setHealthError(null);
+      const [healthResponse, metricsResponse] = await Promise.all([
+        healthService.getHealthStatus(),
+        healthService.getSystemMetrics(),
+      ]);
+
+      if (healthResponse.success) {
+        setHealthData(healthResponse.data);
+      }
+      if (metricsResponse.success) {
+        setMetrics(metricsResponse.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch health status:", error);
+      setHealthError(
+        error instanceof Error ? error.message : "Failed to fetch health data"
+      );
+    } finally {
+      setHealthLoading(false);
+    }
   };
 
-  const now = new Date();
-  const oneHourAgo = new Date(now.getTime() - 3600000);
-
-  const securityLogs = [
-    {
-      id: 1,
-      type: "login",
-      user: "admin@earn9ja.com",
-      action: "Successful login",
-      timestamp: now.toISOString(),
-      status: "success",
-    },
-    {
-      id: 2,
-      type: "failed_login",
-      user: "unknown@example.com",
-      action: "Failed login attempt",
-      timestamp: oneHourAgo.toISOString(),
-      status: "warning",
-    },
-  ];
+  const fetchSecurityLogs = async () => {
+    try {
+      setLoading(true);
+      const response = await platformSettingsService.getAuditLog({
+        page: 1,
+        limit: 50,
+      });
+      if (response.success && response.data) {
+        setSecurityLogs(response.data.logs);
+      }
+    } catch (error) {
+      console.error("Failed to fetch security logs:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -82,103 +131,189 @@ const Platform: React.FC = () => {
       {/* System Status View */}
       {(isStatusView || (!isSecurityView && !isConfigView)) && (
         <>
-          {/* Status Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-content/70">API Server</p>
-                    <p className="text-lg font-bold mt-1">
-                      {getStatusBadge(systemStatus.api)}
-                    </p>
-                  </div>
-                  <div className="bg-success/20 p-3 rounded-lg">
-                    <Server className="w-6 h-6 text-success" />
-                  </div>
-                </div>
-              </div>
+          {healthLoading ? (
+            <div className="flex justify-center py-12">
+              <span className="loading loading-spinner loading-lg"></span>
             </div>
+          ) : healthError ? (
+            <div className="alert alert-error">
+              <span>{healthError}</span>
+              <button onClick={fetchHealthStatus} className="btn btn-sm">
+                Retry
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Status Overview */}
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  {healthData && (
+                    <div className="badge badge-lg">
+                      Overall: {healthData.overall}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={fetchHealthStatus}
+                  className="btn btn-sm btn-ghost"
+                >
+                  Refresh
+                </button>
+              </div>
 
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-content/70">Database</p>
-                    <p className="text-lg font-bold mt-1">
-                      {getStatusBadge(systemStatus.database)}
-                    </p>
-                  </div>
-                  <div className="bg-success/20 p-3 rounded-lg">
-                    <Database className="w-6 h-6 text-success" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="card bg-base-100 shadow-sm">
+                  <div className="card-body">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-base-content/70">
+                          API Server
+                        </p>
+                        <p className="text-lg font-bold mt-1">
+                          {getStatusBadge(healthData?.api.status || "down")}
+                        </p>
+                        {healthData?.api.message && (
+                          <p className="text-xs text-base-content/60 mt-1">
+                            {healthData.api.message}
+                          </p>
+                        )}
+                      </div>
+                      <div
+                        className={`${
+                          healthData?.api.status === "operational"
+                            ? "bg-success/20"
+                            : "bg-error/20"
+                        } p-3 rounded-lg`}
+                      >
+                        <Server
+                          className={`w-6 h-6 ${
+                            healthData?.api.status === "operational"
+                              ? "text-success"
+                              : "text-error"
+                          }`}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-content/70">
-                      Payment Gateway
-                    </p>
-                    <p className="text-lg font-bold mt-1">
-                      {getStatusBadge(systemStatus.payment)}
-                    </p>
-                  </div>
-                  <div className="bg-success/20 p-3 rounded-lg">
-                    <Activity className="w-6 h-6 text-success" />
+                <div className="card bg-base-100 shadow-sm">
+                  <div className="card-body">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-base-content/70">Database</p>
+                        <p className="text-lg font-bold mt-1">
+                          {getStatusBadge(
+                            healthData?.database.status || "down"
+                          )}
+                        </p>
+                        {healthData?.database.message && (
+                          <p className="text-xs text-base-content/60 mt-1">
+                            {healthData.database.message}
+                          </p>
+                        )}
+                      </div>
+                      <div
+                        className={`${
+                          healthData?.database.status === "operational"
+                            ? "bg-success/20"
+                            : "bg-error/20"
+                        } p-3 rounded-lg`}
+                      >
+                        <Database
+                          className={`w-6 h-6 ${
+                            healthData?.database.status === "operational"
+                              ? "text-success"
+                              : "text-error"
+                          }`}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="card bg-base-100 shadow-sm">
-              <div className="card-body">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-content/70">
-                      Notifications
-                    </p>
-                    <p className="text-lg font-bold mt-1">
-                      {getStatusBadge(systemStatus.notifications)}
-                    </p>
-                  </div>
-                  <div className="bg-warning/20 p-3 rounded-lg">
-                    <AlertCircle className="w-6 h-6 text-warning" />
+                <div className="card bg-base-100 shadow-sm">
+                  <div className="card-body">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-base-content/70">Firebase</p>
+                        <p className="text-lg font-bold mt-1">
+                          {getStatusBadge(
+                            healthData?.firebase.status || "down"
+                          )}
+                        </p>
+                        {healthData?.firebase.message && (
+                          <p className="text-xs text-base-content/60 mt-1">
+                            {healthData.firebase.message}
+                          </p>
+                        )}
+                      </div>
+                      <div
+                        className={`${
+                          healthData?.firebase.status === "operational"
+                            ? "bg-success/20"
+                            : "bg-error/20"
+                        } p-3 rounded-lg`}
+                      >
+                        <Activity
+                          className={`w-6 h-6 ${
+                            healthData?.firebase.status === "operational"
+                              ? "text-success"
+                              : "text-error"
+                          }`}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* System Metrics */}
-          <div className="card bg-base-100 shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title mb-4">System Metrics</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-base-content/70">Uptime</span>
-                  <span className="font-semibold text-success">99.9%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-base-content/70">Response Time</span>
-                  <span className="font-semibold">120ms</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-base-content/70">
-                    Active Connections
-                  </span>
-                  <span className="font-semibold">1,234</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-base-content/70">Error Rate</span>
-                  <span className="font-semibold text-success">0.01%</span>
+              {/* System Metrics */}
+              <div className="card bg-base-100 shadow-sm">
+                <div className="card-body">
+                  <h2 className="card-title mb-4">System Metrics</h2>
+                  {metrics ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-base-content/70">Uptime</span>
+                        <span className="font-semibold text-success">
+                          {Math.floor(metrics.uptime / 3600)}h{" "}
+                          {Math.floor((metrics.uptime % 3600) / 60)}m
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-base-content/70">
+                          Memory Used
+                        </span>
+                        <span className="font-semibold">
+                          {(metrics.memory.used / 1024 / 1024).toFixed(2)} MB /{" "}
+                          {(metrics.memory.total / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-base-content/70">
+                          Node Version
+                        </span>
+                        <span className="font-semibold">
+                          {metrics.nodeVersion}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-base-content/70">Platform</span>
+                        <span className="font-semibold">
+                          {metrics.platform}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-base-content/70">
+                      No metrics available
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </>
       )}
 
@@ -186,41 +321,70 @@ const Platform: React.FC = () => {
       {isSecurityView && (
         <div className="card bg-base-100 shadow-sm">
           <div className="card-body">
-            <h2 className="card-title mb-4">Recent Security Events</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="card-title">Settings Audit Log</h2>
+              <button
+                onClick={fetchSecurityLogs}
+                className="btn btn-sm btn-ghost"
+                disabled={loading}
+              >
+                {loading ? "Loading..." : "Refresh"}
+              </button>
+            </div>
             <div className="overflow-x-auto">
-              <table className="table table-zebra">
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>User</th>
-                    <th>Action</th>
-                    <th>Timestamp</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {securityLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td>
-                        <div className="flex items-center gap-2">
-                          <Lock className="w-4 h-4" />
-                          {log.type.replace("_", " ")}
-                        </div>
-                      </td>
-                      <td>{log.user}</td>
-                      <td>{log.action}</td>
-                      <td>{new Date(log.timestamp).toLocaleString()}</td>
-                      <td>
-                        {log.status === "success" ? (
-                          <div className="badge badge-success">Success</div>
-                        ) : (
-                          <div className="badge badge-warning">Warning</div>
-                        )}
-                      </td>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <span className="loading loading-spinner loading-lg"></span>
+                </div>
+              ) : securityLogs.length === 0 ? (
+                <div className="text-center py-8 text-base-content/70">
+                  No audit logs found
+                </div>
+              ) : (
+                <table className="table table-zebra">
+                  <thead>
+                    <tr>
+                      <th>Setting</th>
+                      <th>Changed By</th>
+                      <th>Old Value</th>
+                      <th>New Value</th>
+                      <th>Timestamp</th>
+                      <th>IP Address</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {securityLogs.map((log) => (
+                      <tr key={log._id}>
+                        <td>
+                          <div className="flex items-center gap-2">
+                            <Lock className="w-4 h-4" />
+                            <span className="font-mono text-sm">
+                              {log.settingKey}
+                            </span>
+                          </div>
+                        </td>
+                        <td>{log.changedByName}</td>
+                        <td>
+                          <code className="text-xs bg-base-200 px-2 py-1 rounded">
+                            {JSON.stringify(log.oldValue)}
+                          </code>
+                        </td>
+                        <td>
+                          <code className="text-xs bg-base-200 px-2 py-1 rounded">
+                            {JSON.stringify(log.newValue)}
+                          </code>
+                        </td>
+                        <td>{new Date(log.timestamp).toLocaleString()}</td>
+                        <td>
+                          <span className="text-xs text-base-content/70">
+                            {log.ipAddress || "N/A"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
