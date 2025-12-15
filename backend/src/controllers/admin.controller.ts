@@ -62,7 +62,7 @@ class AdminController {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -88,7 +88,7 @@ class AdminController {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -113,7 +113,7 @@ class AdminController {
   async reactivateUser(req: Request, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -178,7 +178,7 @@ class AdminController {
   async approveTask(req: Request, res: Response): Promise<void> {
     try {
       const { taskId } = req.params;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -204,7 +204,7 @@ class AdminController {
     try {
       const { taskId } = req.params;
       const { reason } = req.body;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -249,7 +249,7 @@ class AdminController {
   async approveWithdrawal(req: Request, res: Response): Promise<void> {
     try {
       const { withdrawalId } = req.params;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -278,7 +278,7 @@ class AdminController {
     try {
       const { withdrawalId } = req.params;
       const { reason } = req.body;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -386,7 +386,7 @@ class AdminController {
     try {
       const { disputeId } = req.params;
       const { decision, action, notes } = req.body;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -458,7 +458,7 @@ class AdminController {
   async approveKYC(req: Request, res: Response): Promise<void> {
     try {
       const { kycId } = req.params;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({
@@ -484,7 +484,7 @@ class AdminController {
     try {
       const { kycId } = req.params;
       const { reason } = req.body;
-      const adminId = req.user?.id;
+      const adminId = req.user?._id.toString();
 
       if (!adminId) {
         res.status(401).json({

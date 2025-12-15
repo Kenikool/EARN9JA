@@ -4,7 +4,7 @@ import { adMobService } from "../services/AdMobService.js";
 class AdMobController {
   async watchAd(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,
@@ -72,7 +72,7 @@ class AdMobController {
 
   async getStats(req: Request, res: Response): Promise<void> {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?._id.toString();
       if (!userId) {
         res.status(401).json({
           success: false,

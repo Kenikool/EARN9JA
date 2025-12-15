@@ -6,7 +6,7 @@ import { bulkMessageService } from "../services/BulkMessageService.js";
  */
 export const createMessage = async (req: Request, res: Response) => {
   try {
-    const adminId = (req as any).user.userId;
+    const adminId = (req as any).user?.id || (req as any).user?._id;
     const messageData = req.body;
 
     const messageId = await bulkMessageService.createMessage(
@@ -154,7 +154,7 @@ export const getMessages = async (req: Request, res: Response) => {
  */
 export const createTemplate = async (req: Request, res: Response) => {
   try {
-    const adminId = (req as any).user.userId;
+    const adminId = (req as any).user?.id || (req as any).user?._id;
     const templateData = {
       ...req.body,
       createdBy: adminId,

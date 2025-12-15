@@ -9,7 +9,7 @@ class EscrowController {
    */
   async initiateDeposit(req: Request, res: Response): Promise<void> {
     try {
-      const sponsorId = req.user?.id;
+      const sponsorId = req.user?._id.toString();
       if (!sponsorId) {
         res.status(401).json({
           success: false,
@@ -123,7 +123,7 @@ class EscrowController {
    */
   async initiateExternalDeposit(req: Request, res: Response): Promise<void> {
     try {
-      const sponsorId = req.user?.id;
+      const sponsorId = req.user?._id.toString();
       if (!sponsorId) {
         res.status(401).json({
           success: false,
@@ -208,7 +208,7 @@ class EscrowController {
    */
   async getBalance(req: Request, res: Response): Promise<void> {
     try {
-      const sponsorId = req.user?.id;
+      const sponsorId = req.user?._id.toString();
       if (!sponsorId) {
         res.status(401).json({
           success: false,

@@ -115,7 +115,7 @@ export const getAllVersions = async (req: Request, res: Response) => {
  */
 export const updateVersionConfig = async (req: Request, res: Response) => {
   try {
-    const adminId = (req as any).user.userId;
+    const adminId = (req as any).user?.id || (req as any).user?._id;
     const config = req.body;
 
     if (!config.platform || !config.latestVersion || !config.minVersion) {

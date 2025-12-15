@@ -6,7 +6,7 @@ import { pushNotificationService } from "../services/PushNotificationService.js"
  */
 export const registerToken = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.userId;
+    const userId = (req as any).user?.id || (req as any).user?._id;
     const { token, platform, deviceId } = req.body;
 
     if (!token || !platform || !deviceId) {
@@ -48,7 +48,7 @@ export const registerToken = async (req: Request, res: Response) => {
  */
 export const unregisterToken = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user.userId;
+    const userId = (req as any).user?.id || (req as any).user?._id;
     const { token } = req.body;
 
     if (!token) {
