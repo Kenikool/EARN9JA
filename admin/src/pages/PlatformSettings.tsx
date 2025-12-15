@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Save, RotateCcw, AlertTriangle } from "lucide-react";
-import platformSettingsService, {
-  PlatformSettings,
-} from "../services/platformSettingsService";
+import platformSettingsService from "../services/platformSettingsService";
+import type { PlatformSettings } from "../services/platformSettingsService";
 
 const PlatformSettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<PlatformSettings | null>(null);

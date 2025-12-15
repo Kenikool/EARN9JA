@@ -9,7 +9,8 @@ import {
   Save,
   AlertTriangle,
 } from "lucide-react";
-import versionService, {
+import versionService from "../services/versionService";
+import type {
   AppVersion,
   VersionConfig,
   VersionAnalytics,

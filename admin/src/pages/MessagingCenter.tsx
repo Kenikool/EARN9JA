@@ -9,7 +9,8 @@ import {
   XCircle,
   Loader,
 } from "lucide-react";
-import messagingService, {
+import messagingService from "../services/messagingService";
+import type {
   BulkMessage,
   MessageTemplate,
   BulkMessageInput,

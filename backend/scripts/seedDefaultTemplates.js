@@ -135,13 +135,31 @@ async function seedTemplates() {
     console.log("✅ Connected to MongoDB");
 
     // Find an admin user to set as creator
-    const adminUser = await User.findOne({ roles: "admin" });
+    let adminUser = await User.findOne({ roles: "admin" });
+
     if (!adminUser) {
-      throw new Error(
-        "No admin user found. Please create an admin user first."
-      );
+      console.log("⚠️  No admin user found. Creating a system admin user...");
+
+      // Create a system admin user for seeding purposes
+      adminUser = new User({
+        email: "system@earn9ja.site",
+        phoneNumber: "+2340000000000",
+        password: "$2a$10$dummyHashForSystemUser", // Dummy hash, this user can't login
+        roles: ["admin"],
+        profile: {
+          firstName: "System",
+          lastName: "Admin",
+        },
+        isActive: false, // Inactive so it can't be used for login
+        emailVerified: true,
+        phoneVerified: true,
+      });
+
+      await adminUser.save();
+      console.log("✅ Created system admin user for template seeding");
+    } else {
+      console.log(`✅ Found admin user: ${adminUser.email}`);
     }
-    console.log(`✅ Found admin user: ${adminUser.email}`);
 
     // Seed templates
     let createdCount = 0;

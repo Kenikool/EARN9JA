@@ -15,6 +15,9 @@ import {
   MessageSquare,
   ChevronDown,
   ChevronRight,
+  Sliders,
+  Send,
+  Smartphone,
 } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 
@@ -106,6 +109,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { title: "System Status", path: "/dashboard/platform/status" },
         { title: "Security Logs", path: "/dashboard/platform/security" },
         { title: "Configuration", path: "/dashboard/platform/config" },
+        { title: "Platform Settings", path: "/dashboard/platform/settings" },
+        { title: "Messaging Center", path: "/dashboard/messaging" },
+        { title: "Version Manager", path: "/dashboard/versions" },
       ],
     },
     {
