@@ -428,6 +428,91 @@ class AdminController {
       });
     }
   }
+
+  // KYC Management
+  async getKYCRequests(req: Request, res: Response): Promise<void> {
+    try {
+      const { status, search, page = 1, limit = 20 } = req.query;
+
+      const filters = {
+        status,
+        search,
+      };
+
+      const result = await adminService.getKYCRequests(
+        filters,
+        Number(page),
+        Number(limit)
+      );
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      console.error("Get KYC requests error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch KYC requests",
+      });
+    }
+  }
+
+  async approveKYC(req: Request, res: Response): Promise<void> {
+    try {
+      const { kycId } = req.params;
+      const adminId = req.user?.id;
+
+      if (!adminId) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+        return;
+      }
+
+      const result = await adminService.approveKYC(kycId, adminId);
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      console.error("Approve KYC error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to approve KYC",
+      });
+    }
+  }
+
+  async rejectKYC(req: Request, res: Response): Promise<void> {
+    try {
+      const { kycId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user?.id;
+
+      if (!adminId) {
+        res.status(401).json({
+          success: false,
+          message: "Unauthorized",
+        });
+        return;
+      }
+
+      if (!reason) {
+        res.status(400).json({
+          success: false,
+          message: "Rejection reason is required",
+        });
+        return;
+      }
+
+      const result = await adminService.rejectKYC(kycId, reason, adminId);
+
+      res.status(result.success ? 200 : 400).json(result);
+    } catch (error) {
+      console.error("Reject KYC error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reject KYC",
+      });
+    }
+  }
 }
 
 export const adminController = new AdminController();

@@ -15,6 +15,7 @@ import Support from "./pages/Support";
 import PlatformSettings from "./pages/PlatformSettings";
 import MessagingCenter from "./pages/MessagingCenter";
 import VersionManager from "./pages/VersionManager";
+import KYC from "./pages/KYC";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardLayout from "./components/layout/DashboardLayout";
@@ -114,6 +115,12 @@ const App = () => {
 
         {/* Version Management Routes */}
         <Route path="versions" element={<VersionManager />} />
+
+        {/* KYC Routes */}
+        <Route path="kyc" element={<KYC />} />
+        <Route path="kyc/pending" element={<KYC />} />
+        <Route path="kyc/approved" element={<KYC />} />
+        <Route path="kyc/rejected" element={<KYC />} />
 
         {/* Support Routes */}
         <Route path="support" element={<Support />} />

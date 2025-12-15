@@ -134,31 +134,45 @@ async function seedTemplates() {
     await mongoose.connect(MONGODB_URI);
     console.log("✅ Connected to MongoDB");
 
-    // Find an admin user to set as creator
+    // Find an admin user to set as creator - try multiple queries
     let adminUser = await User.findOne({ roles: "admin" });
 
     if (!adminUser) {
-      console.log("⚠️  No admin user found. Creating a system admin user...");
+      adminUser = await User.findOne({ roles: { $in: ["admin"] } });
+    }
 
-      // Create a system admin user for seeding purposes
+    if (!adminUser) {
+      adminUser = await User.findOne({ roles: /admin/i });
+    }
+
+    if (!adminUser) {
+      adminUser = await User.findOne();
+      if (adminUser) {
+        console.log(`⚠️  No admin found, using user: ${adminUser.email}`);
+      }
+    }
+
+    if (!adminUser) {
+      console.log("⚠️  No users found. Creating a system admin user...");
       adminUser = new User({
         email: "system@earn9ja.site",
         phoneNumber: "+2340000000000",
-        password: "$2a$10$dummyHashForSystemUser", // Dummy hash, this user can't login
+        password: "$2a$10$dummyHashForSystemUser",
         roles: ["admin"],
         profile: {
           firstName: "System",
           lastName: "Admin",
         },
-        isActive: false, // Inactive so it can't be used for login
+        isActive: false,
         emailVerified: true,
         phoneVerified: true,
       });
-
       await adminUser.save();
-      console.log("✅ Created system admin user for template seeding");
+      console.log("✅ Created system admin user");
     } else {
-      console.log(`✅ Found admin user: ${adminUser.email}`);
+      console.log(
+        `✅ Using user: ${adminUser.email} (roles: ${adminUser.roles})`
+      );
     }
 
     // Seed templates

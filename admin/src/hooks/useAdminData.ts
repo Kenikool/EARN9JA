@@ -240,3 +240,39 @@ export const useUpdateDisputeStatus = () => {
     },
   });
 };
+
+// KYC Hooks
+export const useKYCRequests = (
+  filters: {
+    status?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  } = {}
+) => {
+  return useQuery({
+    queryKey: ["admin", "kyc", filters],
+    queryFn: () => adminService.getKYCRequests(filters),
+  });
+};
+
+export const useApproveKYC = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (kycId: string) => adminService.approveKYC(kycId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "kyc"] });
+    },
+  });
+};
+
+export const useRejectKYC = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ kycId, reason }: { kycId: string; reason: string }) =>
+      adminService.rejectKYC(kycId, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "kyc"] });
+    },
+  });
+};

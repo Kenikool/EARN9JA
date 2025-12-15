@@ -751,6 +751,117 @@ class AdminService {
       };
     }
   }
+  // KYC Management
+  async getKYCRequests(
+    filters: any = {},
+    page: number = 1,
+    limit: number = 20
+  ) {
+    try {
+      const query: any = {};
+
+      if (filters.status) query.status = filters.status;
+      if (filters.search) {
+        const users = await User.find({
+          $or: [
+            { email: { $regex: filters.search, $options: "i" } },
+            { phoneNumber: { $regex: filters.search, $options: "i" } },
+            { "profile.firstName": { $regex: filters.search, $options: "i" } },
+            { "profile.lastName": { $regex: filters.search, $options: "i" } },
+          ],
+        }).select("_id");
+        query.user = { $in: users.map((u) => u._id) };
+      }
+
+      const skip = (page - 1) * limit;
+
+      // Note: You need to create a KYC model first
+      // For now, returning mock data
+      const requests: any[] = [];
+      const total = 0;
+
+      return {
+        success: true,
+        data: {
+          requests,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+          },
+        },
+      };
+    } catch (error) {
+      console.error("Get KYC requests error:", error);
+      return {
+        success: false,
+        message: "Failed to fetch KYC requests",
+      };
+    }
+  }
+
+  async approveKYC(kycId: string, adminId: string) {
+    try {
+      // Note: You need to create a KYC model first
+      // For now, just update user's isKYCVerified field
+      const user = await User.findOneAndUpdate(
+        { _id: kycId },
+        { isKYCVerified: true },
+        { new: true }
+      );
+
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+        };
+      }
+
+      return {
+        success: true,
+        message: "KYC approved successfully",
+        data: user,
+      };
+    } catch (error) {
+      console.error("Approve KYC error:", error);
+      return {
+        success: false,
+        message: "Failed to approve KYC",
+      };
+    }
+  }
+
+  async rejectKYC(kycId: string, reason: string, adminId: string) {
+    try {
+      // Note: You need to create a KYC model first
+      // For now, just update user's isKYCVerified field
+      const user = await User.findOneAndUpdate(
+        { _id: kycId },
+        { isKYCVerified: false },
+        { new: true }
+      );
+
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+        };
+      }
+
+      return {
+        success: true,
+        message: "KYC rejected successfully",
+        data: user,
+      };
+    } catch (error) {
+      console.error("Reject KYC error:", error);
+      return {
+        success: false,
+        message: "Failed to reject KYC",
+      };
+    }
+  }
 }
 
 export const adminService = new AdminService();

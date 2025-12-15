@@ -50,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
         { title: "All Users", path: "/dashboard/users" },
         { title: "Active Users", path: "/dashboard/users/active" },
         { title: "Suspended Users", path: "/dashboard/users/suspended" },
+        { title: "KYC Verification", path: "/dashboard/kyc" },
       ],
     },
     {

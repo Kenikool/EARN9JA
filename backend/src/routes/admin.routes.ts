@@ -301,4 +301,26 @@ router.post("/versions", appVersionController.updateVersionConfig);
  */
 router.get("/versions/analytics", appVersionController.getVersionAnalytics);
 
+// KYC Management
+/**
+ * @route   GET /api/v1/admin/kyc
+ * @desc    Get KYC requests
+ * @access  Admin
+ */
+router.get("/kyc", adminController.getKYCRequests);
+
+/**
+ * @route   POST /api/v1/admin/kyc/:kycId/approve
+ * @desc    Approve KYC request
+ * @access  Admin
+ */
+router.post("/kyc/:kycId/approve", adminController.approveKYC);
+
+/**
+ * @route   POST /api/v1/admin/kyc/:kycId/reject
+ * @desc    Reject KYC request
+ * @access  Admin
+ */
+router.post("/kyc/:kycId/reject", adminController.rejectKYC);
+
 export default router;

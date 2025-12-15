@@ -305,6 +305,40 @@ export const adminService = {
     );
     return response.data;
   },
+
+  // KYC Management
+  async getKYCRequests(
+    filters: {
+      status?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ): Promise<{ success: boolean; data: unknown }> {
+    const params = new URLSearchParams();
+    if (filters.status) params.append("status", filters.status);
+    if (filters.search) params.append("search", filters.search);
+    if (filters.page) params.append("page", filters.page.toString());
+    if (filters.limit) params.append("limit", filters.limit.toString());
+
+    const response = await api.get(`/admin/kyc?${params}`);
+    return response.data;
+  },
+
+  async approveKYC(
+    kycId: string
+  ): Promise<{ success: boolean; data: unknown }> {
+    const response = await api.post(`/admin/kyc/${kycId}/approve`);
+    return response.data;
+  },
+
+  async rejectKYC(
+    kycId: string,
+    reason: string
+  ): Promise<{ success: boolean; data: unknown }> {
+    const response = await api.post(`/admin/kyc/${kycId}/reject`, { reason });
+    return response.data;
+  },
 };
 
 export default adminService;
