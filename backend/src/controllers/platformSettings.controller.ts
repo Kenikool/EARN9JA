@@ -27,7 +27,7 @@ export const getSettings = async (req: Request, res: Response) => {
 export const updateSettings = async (req: Request, res: Response) => {
   try {
     const updates = req.body;
-    const adminId = (req as any).user?.id || (req as any).user?._id;
+    const adminId = (req as any).user?._id?.toString();
 
     if (!adminId) {
       res.status(401).json({
@@ -49,7 +49,7 @@ export const updateSettings = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: "Settings updated successfully",
+      message: "Settings updated successfully and users notified",
     });
   } catch (error: any) {
     console.error("Update settings error:", error);
@@ -74,7 +74,7 @@ export const resetSettings = async (req: Request, res: Response) => {
       });
     }
 
-    const adminId = (req as any).user?.id || (req as any).user?._id;
+    const adminId = (req as any).user?._id?.toString();
 
     if (!adminId) {
       res.status(401).json({
@@ -96,7 +96,7 @@ export const resetSettings = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
-      message: "Settings reset to defaults successfully",
+      message: "Settings reset to defaults successfully and users notified",
     });
   } catch (error: any) {
     console.error("Reset settings error:", error);

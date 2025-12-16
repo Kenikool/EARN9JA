@@ -12,10 +12,31 @@ const PlatformSettingsPage: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    // Auto-dismiss success message after 5 seconds
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    // Auto-dismiss error message after 8 seconds
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const loadSettings = async () => {
     try {
@@ -39,10 +60,16 @@ const PlatformSettingsPage: React.FC = () => {
       setSuccess(null);
 
       await platformSettingsService.updateSettings(settings);
-      setSuccess("Settings updated successfully");
+      setSuccess(
+        "✅ Settings updated successfully! Push notifications sent to all users."
+      );
+      setHasUnsavedChanges(false);
       await loadSettings();
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to update settings");
+      setError(
+        err.response?.data?.message ||
+          "❌ Failed to update settings. Please try again."
+      );
     } finally {
       setSaving(false);
     }
@@ -50,17 +77,26 @@ const PlatformSettingsPage: React.FC = () => {
 
   const handleReset = (settingKeys: string[]) => {
     setConfirmMessage(
-      `Are you sure you want to reset ${settingKeys.length} setting(s) to default values?`
+      `Are you sure you want to reset ${settingKeys.length} setting(s) to default values? This action cannot be undone.`
     );
     setConfirmAction(() => async () => {
       try {
         setSaving(true);
+        setError(null);
+        setSuccess(null);
         await platformSettingsService.resetSettings(settingKeys);
-        setSuccess("Settings reset to defaults");
+        setSuccess(
+          "✅ Settings reset to defaults successfully! Users have been notified."
+        );
+        setHasUnsavedChanges(false);
         await loadSettings();
         setShowConfirm(false);
       } catch (err: any) {
-        setError(err.response?.data?.message || "Failed to reset settings");
+        setError(
+          err.response?.data?.message ||
+            "❌ Failed to reset settings. Please try again."
+        );
+        setShowConfirm(false);
       } finally {
         setSaving(false);
       }
@@ -73,7 +109,7 @@ const PlatformSettingsPage: React.FC = () => {
 
     if (!settings.operational.maintenanceMode) {
       setConfirmMessage(
-        "Enabling maintenance mode will prevent all non-admin users from accessing the platform. Continue?"
+        "⚠️ Enabling maintenance mode will prevent all non-admin users from accessing the platform. All users will be notified. Continue?"
       );
       setConfirmAction(() => () => {
         setSettings({
@@ -83,6 +119,7 @@ const PlatformSettingsPage: React.FC = () => {
             maintenanceMode: true,
           },
         });
+        setHasUnsavedChanges(true);
         setShowConfirm(false);
       });
       setShowConfirm(true);
@@ -94,7 +131,19 @@ const PlatformSettingsPage: React.FC = () => {
           maintenanceMode: false,
         },
       });
+      setHasUnsavedChanges(true);
     }
+  };
+
+  const updateSetting = (
+    updater: (prev: PlatformSettings) => PlatformSettings
+  ) => {
+    setSettings((prev) => {
+      if (!prev) return prev;
+      const updated = updater(prev);
+      setHasUnsavedChanges(true);
+      return updated;
+    });
   };
 
   if (loading) {
@@ -123,6 +172,11 @@ const PlatformSettingsPage: React.FC = () => {
           <p className="text-base-content/70">
             Configure platform-wide settings and operational controls
           </p>
+          {hasUnsavedChanges && (
+            <div className="badge badge-warning badge-sm mt-2">
+              Unsaved changes
+            </div>
+          )}
         </div>
         <div className="flex gap-2">
           <button
@@ -145,34 +199,53 @@ const PlatformSettingsPage: React.FC = () => {
             }
             disabled={saving}
           >
-            <RotateCcw className="w-4 h-4" />
-            Reset All
-          </button>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleSave}
-            disabled={saving}
-          >
             {saving ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
-              <Save className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4" />
             )}
-            Save Changes
+            Reset All
+          </button>
+          <button
+            className={`btn btn-sm ${
+              hasUnsavedChanges ? "btn-primary" : "btn-outline"
+            }`}
+            onClick={handleSave}
+            disabled={saving || !hasUnsavedChanges}
+          >
+            {saving ? (
+              <>
+                <span className="loading loading-spinner loading-sm"></span>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save Changes</span>
+              </>
+            )}
           </button>
         </div>
       </div>
 
       {/* Alerts */}
       {error && (
-        <div className="alert alert-error">
+        <div className="alert alert-error shadow-lg animate-pulse">
           <AlertTriangle className="w-5 h-5" />
-          <span>{error}</span>
+          <div className="flex-1">
+            <span className="font-semibold">{error}</span>
+          </div>
+          <button
+            className="btn btn-sm btn-ghost"
+            onClick={() => setError(null)}
+          >
+            ✕
+          </button>
         </div>
       )}
 
       {success && (
-        <div className="alert alert-success">
+        <div className="alert alert-success shadow-lg">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="stroke-current shrink-0 h-6 w-6"
@@ -186,7 +259,26 @@ const PlatformSettingsPage: React.FC = () => {
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>{success}</span>
+          <div className="flex-1">
+            <span className="font-semibold">{success}</span>
+          </div>
+          <button
+            className="btn btn-sm btn-ghost"
+            onClick={() => setSuccess(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {saving && (
+        <div className="alert alert-info shadow-lg">
+          <span className="loading loading-spinner loading-md"></span>
+          <div className="flex-1">
+            <span className="font-semibold">
+              Saving settings and notifying users...
+            </span>
+          </div>
         </div>
       )}
 
@@ -203,15 +295,16 @@ const PlatformSettingsPage: React.FC = () => {
                 type="number"
                 className="input input-bordered"
                 value={settings.financial.minimumWithdrawal}
-                onChange={(e) =>
+                onChange={(e) => {
                   setSettings({
                     ...settings,
                     financial: {
                       ...settings.financial,
                       minimumWithdrawal: Number(e.target.value),
                     },
-                  })
-                }
+                  });
+                  setHasUnsavedChanges(true);
+                }}
                 min={100}
               />
               <label className="label">
@@ -228,13 +321,13 @@ const PlatformSettingsPage: React.FC = () => {
                 className="input input-bordered"
                 value={settings.financial.platformCommissionRate}
                 onChange={(e) =>
-                  setSettings({
-                    ...settings,
+                  updateSetting((prev) => ({
+                    ...prev,
                     financial: {
-                      ...settings.financial,
+                      ...prev.financial,
                       platformCommissionRate: Number(e.target.value),
                     },
-                  })
+                  }))
                 }
                 min={0}
                 max={50}
@@ -400,13 +493,13 @@ const PlatformSettingsPage: React.FC = () => {
                   className="toggle toggle-primary"
                   checked={settings.operational.registrationEnabled}
                   onChange={(e) =>
-                    setSettings({
-                      ...settings,
+                    updateSetting((prev) => ({
+                      ...prev,
                       operational: {
-                        ...settings.operational,
+                        ...prev.operational,
                         registrationEnabled: e.target.checked,
                       },
-                    })
+                    }))
                   }
                 />
                 <div>
@@ -429,13 +522,13 @@ const PlatformSettingsPage: React.FC = () => {
                   className="toggle toggle-primary"
                   checked={settings.operational.kycRequired}
                   onChange={(e) =>
-                    setSettings({
-                      ...settings,
+                    updateSetting((prev) => ({
+                      ...prev,
                       operational: {
-                        ...settings.operational,
+                        ...prev.operational,
                         kycRequired: e.target.checked,
                       },
-                    })
+                    }))
                   }
                 />
                 <div>

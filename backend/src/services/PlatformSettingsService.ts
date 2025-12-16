@@ -4,6 +4,7 @@ import {
 } from "../models/PlatformSettings.js";
 import { SettingsAuditLog } from "../models/SettingsAuditLog.js";
 import { User } from "../models/User.js";
+import { pushNotificationService } from "./PushNotificationService.js";
 import Redis from "redis";
 
 const CACHE_KEY = "platform:settings:v1";
@@ -263,6 +264,9 @@ class PlatformSettingsService {
       // Invalidate cache
       await this.invalidateCache();
 
+      // Send push notifications to all users about critical setting changes
+      await this.notifyUsersOfChanges(changes);
+
       console.log(
         `✅ Settings updated by ${adminName} (${changes.length} changes)`
       );
@@ -345,6 +349,15 @@ class PlatformSettingsService {
 
       // Invalidate cache
       await this.invalidateCache();
+
+      // Notify users of the reset
+      await this.notifyUsersOfChanges(
+        auditLogs.map((log: any) => ({
+          key: log.settingKey,
+          oldValue: log.oldValue,
+          newValue: log.newValue,
+        }))
+      );
 
       console.log(`✅ Reset ${settingKeys.length} settings to defaults`);
     } catch (error) {
@@ -544,6 +557,99 @@ class PlatformSettingsService {
       } catch (error) {
         console.error("Cache invalidation error:", error);
       }
+    }
+  }
+
+  /**
+   * Notify users of critical setting changes
+   */
+  private async notifyUsersOfChanges(
+    changes: Array<{ key: string; oldValue: any; newValue: any }>
+  ): Promise<void> {
+    try {
+      // Define which settings should trigger notifications
+      const criticalSettings = [
+        "operational.maintenanceMode",
+        "operational.registrationEnabled",
+        "operational.kycRequired",
+        "financial.minimumWithdrawal",
+        "financial.platformCommissionRate",
+      ];
+
+      // Check if any critical settings changed
+      const criticalChanges = changes.filter((change) =>
+        criticalSettings.includes(change.key)
+      );
+
+      if (criticalChanges.length === 0) {
+        console.log("No critical settings changed, skipping notifications");
+        return;
+      }
+
+      // Get all active users
+      const users = await User.find({ isActive: true }).select("_id");
+      const userIds = users.map((u) => u._id.toString());
+
+      if (userIds.length === 0) {
+        console.log("No active users to notify");
+        return;
+      }
+
+      // Build notification message based on changes
+      let notificationTitle = "Platform Settings Updated";
+      let notificationBody = "";
+
+      for (const change of criticalChanges) {
+        if (change.key === "operational.maintenanceMode") {
+          if (change.newValue === true) {
+            notificationTitle = "⚠️ Maintenance Mode Enabled";
+            notificationBody =
+              "The platform is entering maintenance mode. Service may be temporarily unavailable.";
+          } else {
+            notificationTitle = "✅ Maintenance Complete";
+            notificationBody =
+              "The platform is now back online. Thank you for your patience!";
+          }
+        } else if (change.key === "operational.registrationEnabled") {
+          if (change.newValue === false) {
+            notificationTitle = "Registration Temporarily Disabled";
+            notificationBody =
+              "New user registrations have been temporarily disabled.";
+          }
+        } else if (change.key === "financial.minimumWithdrawal") {
+          notificationTitle = "Withdrawal Limit Updated";
+          notificationBody = `Minimum withdrawal amount has been updated to ₦${change.newValue}`;
+        } else if (change.key === "financial.platformCommissionRate") {
+          notificationTitle = "Commission Rate Updated";
+          notificationBody = `Platform commission rate has been updated to ${change.newValue}%`;
+        } else if (change.key === "operational.kycRequired") {
+          if (change.newValue === true) {
+            notificationTitle = "KYC Verification Required";
+            notificationBody =
+              "KYC verification is now required for withdrawals. Please complete your verification.";
+          }
+        }
+      }
+
+      // Send bulk notification
+      await pushNotificationService.sendBulkPushNotifications(
+        {
+          title: notificationTitle,
+          body: notificationBody,
+          data: {
+            type: "settings_update",
+            changes: JSON.stringify(criticalChanges),
+          },
+        },
+        userIds
+      );
+
+      console.log(
+        `📢 Sent notifications to ${userIds.length} users about ${criticalChanges.length} critical changes`
+      );
+    } catch (error) {
+      console.error("Notify users of changes error:", error);
+      // Don't throw - notifications are not critical to the update process
     }
   }
 }
